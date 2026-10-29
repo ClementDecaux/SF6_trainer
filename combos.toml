@@ -1,0 +1,8 @@
+# Tes combos. Écris-les comme sur les forums, l'outil les comprend :
+# b/f/d/u/db/df = directions, qcf/qcb/hcf/hcb/dp = mouvements, xx ou > = cancel, "," = link.
+# Le premier combo de la liste est lancé (ou : cargo run -- 2 pour le deuxième).
+personnage = "Dhalsim"
+
+[[combo]]
+nom = "Drive Impact, Yoga Flame"
+inputs = "b+hp xx DI xx b+mk xx qcf+mk, b+mk xx hcb+mp"

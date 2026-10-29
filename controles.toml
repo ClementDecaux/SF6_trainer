@@ -1,0 +1,13 @@
+# Bouton lu par le programme = action dans SF6 (contrôles Classic).
+# Lance `cargo run`, appuie sur un bouton, et regarde le nom affiché pour savoir lequel modifier.
+# Actions possibles : LP, MP, HP, LK, MK, HK, DP (Drive Parry), DI (Drive Impact), Throw
+West = "LP"
+North = "MP"
+RightTrigger = "HP"
+South = "LK"
+East = "MK"
+RightTrigger2 = "HK"
+LeftTrigger = "DP"
+LeftTrigger2 = "DI"
+# LeftThumb = "Throw"
+# RightThumb = "?"

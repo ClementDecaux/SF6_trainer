@@ -1,0 +1,13 @@
+# Position et taille de l'overlay, en pixels depuis le coin haut gauche de l'écran.
+# SF6 doit être en « plein écran fenêtré » (borderless) pour que l'overlay passe par-dessus.
+x = 20
+y = 120
+largeur = 380
+hauteur = 720
+# Opacité du fond, de 0 (invisible) à 255 (noir opaque).
+opacite_fond = 170
+# Opacité de toute la fenêtre (texte compris), de 0 à 255. Sous Windows seulement.
+opacite_fenetre = 230
+# true = fenêtre transparente (on voit le jeu derrière le fond).
+# false = fond sombre opaque : moins joli, mais marche partout.
+transparence = false

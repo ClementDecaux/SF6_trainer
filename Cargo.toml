@@ -1,0 +1,19 @@
+[package]
+name = "sf6-trainer"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+colored = "3.1.1"
+# Fenêtre de l'overlay. Rendu OpenGL (glow) : la transparence y marche mieux sous Windows.
+eframe = { version = "0.37.0", default-features = false, features = ["default_fonts", "glow", "wayland", "x11"] }
+# Backend XInput : la manette reste lue même quand SF6 a le focus.
+# (Le backend par défaut, WGI, ne lit plus rien dès que la fenêtre perd le focus.)
+gilrs = { version = "0.11", default-features = false, features = ["xinput"] }
+serde = { version = "1.0.229", features = ["derive"] }
+toml = "1.1.8"
+
+# Windows uniquement : appels directs à l'API Windows pour régler la fenêtre de l'overlay.
+[target.'cfg(windows)'.dependencies]
+raw-window-handle = "0.6"
+windows-sys = { version = "0.61", features = ["Win32_Foundation", "Win32_UI_WindowsAndMessaging"] }
