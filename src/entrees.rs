@@ -130,7 +130,13 @@ pub fn boucle(
         for &action in &appuyes {
             juge.appui(temps, action);
         }
-        juge.lire_journal(temps);
+        if juge.lire_journal(temps)
+            && let Ok(mut p) = partage.lock()
+        {
+            p.historique_jeu = juge.visible;
+            juge.corriger(&mut p.lignes);
+            change = true;
+        }
         if let Some(fin) = juge.pret(temps) {
             a_confirmer = Some(conclure(&trial, &mut capture, fin, frame, &partage));
             change = true;
@@ -215,6 +221,8 @@ pub fn boucle(
                             .map(|b| (*b, nouveaux.contains(b)))
                             .collect(),
                         coups: coups.clone(),
+                        debut: debut_temps,
+                        exact: false,
                     });
                 }
             }
@@ -363,6 +371,7 @@ fn resultat_trial(
     };
     p.index = trial.index;
     p.ecarts = trial.ecarts.clone();
+    p.ecarts_exacts = false;
     if matches!(resultat, Resultat::Avance | Resultat::Reussi)
         && let Some(&ecart) = trial.ecarts.last()
     {
@@ -428,6 +437,7 @@ fn conclure(
     println!("{}", affichage::trial(trial));
     if let Ok(mut p) = partage.lock() {
         p.ecarts = fin.ecarts.clone();
+        p.ecarts_exacts = fin.exact;
         if fin.erreurs.is_empty() {
             p.reussites += 1;
             p.message("COMBO RÉUSSI !".to_string(), true);
@@ -497,7 +507,9 @@ impl Juge {
     }
 
     /// Ajoute les nouvelles lignes de l'historique du jeu et mesure la latence.
-    fn lire_journal(&mut self, temps: i64) {
+    /// Renvoie vrai s'il y a du nouveau (lignes du jeu, historique apparu ou disparu).
+    fn lire_journal(&mut self, temps: i64) -> bool {
+        let mut nouveau = false;
         let visible = ecran::historique_visible(temps);
         if visible != self.visible {
             self.visible = visible;
@@ -507,11 +519,13 @@ impl Juge {
                 "      ○ historique d'inputs de SF6 plus visible : frames estimées".yellow()
             };
             println!("{texte}");
+            nouveau = true;
         }
         let appuis: Vec<(i64, u8)> = self.nos_appuis.iter().copied().collect();
         for entree in ecran::nouvelles_entrees(&mut self.dernier) {
             self.latence.mesurer(&entree, &appuis);
             self.journal.push_back(entree);
+            nouveau = true;
         }
         while self
             .journal
@@ -519,6 +533,28 @@ impl Juge {
             .is_some_and(|e| temps - e.vu > Self::MEMOIRE)
         {
             self.journal.pop_front();
+        }
+        nouveau
+    }
+
+    /// Recale la durée des lignes de l'overlay sur celles du jeu : chaque ligne est
+    /// retrouvée dans l'historique du jeu (même direction, mêmes boutons, même moment).
+    fn corriger(&self, lignes: &mut VecDeque<Ligne>) {
+        let Some(latence) = self.latence.valeur() else {
+            return;
+        };
+        let journal: Vec<EntreeJeu> = self.journal.iter().copied().collect();
+        for ligne in lignes.iter_mut().filter(|l| !l.exact) {
+            let boutons = ligne
+                .boutons
+                .iter()
+                .fold(0, |b, (a, _)| b | ecran::boutons_etape(&a.to_string()));
+            if let Some(frames) =
+                ecran::duree_dans_le_jeu(&journal, ligne.debut + latence, ligne.direction, boutons)
+            {
+                ligne.frames = frames;
+                ligne.exact = true;
+            }
         }
     }
 

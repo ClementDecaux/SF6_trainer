@@ -526,6 +526,27 @@ pub fn ecarts_du_jeu(appuis: &[Appui], journal: &[EntreeJeu], latence: i64) -> O
         .collect()
 }
 
+/// La durée exacte (en frames) de la ligne du jeu qui a cette direction et ces boutons,
+/// et qui est apparue vers `attendu` (heure de la capture). `None` si elle n'est pas
+/// retrouvée ou pas encore finie.
+pub fn duree_dans_le_jeu(
+    journal: &[EntreeJeu],
+    attendu: i64,
+    direction: u8,
+    boutons: u8,
+) -> Option<u64> {
+    let (i, e) = journal
+        .iter()
+        .enumerate()
+        .filter(|(_, e)| e.direction == direction && e.boutons == boutons)
+        .min_by_key(|(_, e)| (e.vu - attendu).abs())?;
+    if (e.vu - attendu).abs() > 2 * FRAME {
+        return None;
+    }
+    let suivante = journal.get(i + 1)?;
+    (suivante.segment == e.segment).then(|| suivante.frame - e.frame)
+}
+
 /// Estime le délai entre nos appuis et leur apparition à l'écran.
 /// Chaque appui isolé (pas d'autre appui du même bouton autour) retrouvé dans le journal
 /// donne une mesure ; on garde la médiane des dernières.
@@ -759,7 +780,10 @@ mod tests {
         // Historique remis à zéro (reset de l'entraînement) : rien d'inventé.
         let apres_reset = [l(3, 5, 0), l(1, 6, 0), l(2, 5, 0), l(1, 4, 0)];
         assert!(s.image(&apres_reset, FRAME).is_empty());
-        let n = s.image(&[l(1, 5, LP), l(3, 5, 0), l(1, 6, 0), l(2, 5, 0)], 2 * FRAME);
+        let n = s.image(
+            &[l(1, 5, LP), l(3, 5, 0), l(1, 6, 0), l(2, 5, 0)],
+            2 * FRAME,
+        );
         assert_eq!(n.len(), 1);
         assert_ne!(n[0].segment, segment);
     }
@@ -808,6 +832,18 @@ mod tests {
             },
         ];
         assert_eq!(ecarts_du_jeu(&appuis_loin, &journal, latence), None);
+    }
+
+    #[test]
+    fn duree_d_une_ligne_du_jeu() {
+        let mut journal = vec![entree(1_000_000, 100, 0, 0), entree(1_700_000, 104, MK, MK)];
+        journal[0].direction = 4;
+        // La ligne « ← » est retrouvée, elle a duré 4 frames.
+        assert_eq!(duree_dans_le_jeu(&journal, 1_100_000, 4, 0), Some(4));
+        // La ligne MK n'est pas encore finie.
+        assert_eq!(duree_dans_le_jeu(&journal, 1_700_000, 5, MK), None);
+        // Trop loin dans le temps : ce n'est pas la même.
+        assert_eq!(duree_dans_le_jeu(&journal, 9_000_000, 4, 0), None);
     }
 
     #[test]

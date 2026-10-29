@@ -210,6 +210,13 @@ fn entete(ui: &mut egui::Ui, p: &Partage) {
             if p.enregistrement {
                 ui.label(RichText::new("● REC").color(ROUGE).size(15.0).strong());
             }
+            // D'où viennent les frames : l'historique du jeu (exact) ou notre estimation.
+            let (texte, couleur) = if p.historique_jeu {
+                ("frames du jeu", VERT)
+            } else {
+                ("frames estimées", JAUNE)
+            };
+            ui.label(RichText::new(texte).color(couleur).size(13.0));
         });
     });
 }
@@ -271,8 +278,10 @@ fn timing(ui: &mut egui::Ui, p: &Partage, i: usize) {
         if let Some(ecart) = ecart {
             let hors = fenetre.is_some_and(|f| verifier(ecart, f).is_some());
             let couleur = if hors { ROUGE } else { CYAN };
+            // « ~ » : écart estimé, pas encore vérifié sur l'historique du jeu.
+            let approche = if p.ecarts_exacts { "" } else { "~" };
             ui.label(
-                RichText::new(format!("+{ecart} f"))
+                RichText::new(format!("{approche}+{ecart} f"))
                     .color(couleur)
                     .size(15.0)
                     .monospace(),
@@ -304,7 +313,9 @@ fn historique(ui: &mut egui::Ui, lignes: &std::collections::VecDeque<Ligne>) {
             } else {
                 format!("{:>3}", ligne.frames)
             };
-            ui.label(RichText::new(duree).color(CYAN).size(16.0).monospace());
+            // En cyan : durée du jeu. En gris : notre estimation (pas retrouvée dans le jeu).
+            let couleur = if ligne.exact { CYAN } else { GRIS };
+            ui.label(RichText::new(duree).color(couleur).size(16.0).monospace());
 
             let couleur_dir = if ligne.direction == 5 {
                 GRIS

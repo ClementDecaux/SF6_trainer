@@ -21,6 +21,10 @@ pub struct Ligne {
     /// Boutons tenus, avec `true` s'ils viennent d'être appuyés.
     pub boutons: Vec<(Action, bool)>,
     pub coups: Vec<String>,
+    /// Heure du début de l'état (horloge de la capture), pour le retrouver dans le jeu.
+    pub debut: i64,
+    /// Durée recalée sur l'historique du jeu (sinon : estimée avec notre horloge).
+    pub exact: bool,
 }
 
 /// Le dernier événement du trial, affiché quelques instants.
@@ -50,6 +54,10 @@ pub struct Partage {
     pub deplacement: bool,
     /// Les vidéos des combos réussis sont gardées (F9).
     pub enregistrement: bool,
+    /// L'historique d'inputs de SF6 est lu à l'écran (frames exactes).
+    pub historique_jeu: bool,
+    /// Les écarts affichés viennent de l'historique du jeu.
+    pub ecarts_exacts: bool,
 }
 
 impl Partage {
@@ -65,6 +73,8 @@ impl Partage {
             fenetres: None,
             deplacement: false,
             enregistrement: false,
+            historique_jeu: false,
+            ecarts_exacts: false,
         }
     }
 
