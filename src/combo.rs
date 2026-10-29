@@ -10,6 +10,7 @@
 //! Chaque étape est ramenée à une forme unique (« 4HP », « 236MK », « DI »)
 //! pour la comparer aux coups reconnus par l'outil.
 
+use crate::timings::{TOLERANCE, verifier};
 use serde::Deserialize;
 
 /// Comment une étape s'enchaîne avec la précédente.
@@ -188,6 +189,14 @@ pub struct Trial {
     /// Index de l'étape attendue.
     pub index: usize,
     derniere_frame: u64,
+    /// Fenêtres de timing apprises (`timings.toml`), pour les étapes 2 à N.
+    pub fenetres: Option<Vec<(u64, u64)>>,
+    /// Essai en cours (ou dernier essai) : écart en frames de chaque étape avec la précédente.
+    pub ecarts: Vec<u64>,
+    /// Étapes faites hors de leur fenêtre : « 4MK trop tard de 3 f ».
+    pub erreurs_timing: Vec<String>,
+    /// Appuis ignorés car faits pendant la récupération (coups intercalés, mash).
+    pub intercales: u32,
 }
 
 impl Trial {
@@ -197,7 +206,26 @@ impl Trial {
             etapes,
             index: 0,
             derniere_frame: 0,
+            fenetres: None,
+            ecarts: Vec::new(),
+            erreurs_timing: Vec::new(),
+            intercales: 0,
         }
+    }
+
+    /// Un nouvel essai commence (1re étape validée).
+    fn nouvel_essai(&mut self) {
+        self.ecarts.clear();
+        self.erreurs_timing.clear();
+        self.intercales = 0;
+    }
+
+    /// La fenêtre de l'étape attendue, si elle a été apprise.
+    fn fenetre(&self) -> Option<(u64, u64)> {
+        if self.index == 0 {
+            return None;
+        }
+        self.fenetres.as_ref()?.get(self.index - 1).copied()
     }
 
     pub fn attendu(&self) -> &str {
@@ -207,7 +235,26 @@ impl Trial {
     /// Un coup vient d'être fait. `candidats` = toutes les lectures possibles
     /// (ex. « 236MK » et « 41236MK » pour le même input).
     pub fn coup(&mut self, candidats: &[String], frame: u64) -> Resultat {
+        let ecart = frame.saturating_sub(self.derniere_frame);
+        let fenetre = self.fenetre();
+
+        // Avant l'ouverture de la fenêtre, le coup d'avant est encore en récupération :
+        // le jeu ignore les appuis (double tap, coup intercalé pour le rythme). Nous aussi.
+        if fenetre.is_some_and(|(min, _)| ecart + TOLERANCE < min) {
+            self.intercales += 1;
+            return Resultat::Ignore;
+        }
+
         if candidats.iter().any(|c| c == self.attendu()) {
+            if self.index == 0 {
+                self.nouvel_essai();
+            } else {
+                self.ecarts.push(ecart);
+                if let Some(erreur) = fenetre.and_then(|f| verifier(ecart, f)) {
+                    let erreur = format!("{} {erreur}", self.attendu());
+                    self.erreurs_timing.push(erreur);
+                }
+            }
             self.index += 1;
             self.derniere_frame = frame;
             if self.index == self.etapes.len() {
@@ -240,12 +287,14 @@ impl Trial {
         // La direction ne compte pas : en mashant, le stick revient souvent au neutre (5MK).
         let bouton_avant = bouton(&self.etapes[self.index - 1].notation);
         if candidats.iter().any(|c| bouton(c) == bouton_avant) {
+            self.intercales += 1;
             return Resultat::Ignore;
         }
         let attendu = self.attendu().to_string();
         self.index = 0;
         // Ce coup raté est peut-être le début d'un nouvel essai.
         if candidats.iter().any(|c| c == self.attendu()) {
+            self.nouvel_essai();
             self.index = 1;
             self.derniere_frame = frame;
         }
@@ -359,6 +408,52 @@ mod tests {
         t.coup(&c("236MK"), 10);
         t.coup(&c("4MK"), 30);
         assert!(matches!(t.coup(&c("5LP"), 40), Resultat::Rate { .. }));
+    }
+
+    /// « 4HP xx 236MK, 4MK » avec des fenêtres apprises : 236MK à 10-12 f, 4MK à 30-32 f.
+    fn trial_avec_fenetres() -> Trial {
+        let mut t = Trial::new("test", parser("4HP xx 236MK, 4MK").unwrap());
+        t.fenetres = Some(vec![(10, 12), (30, 32)]);
+        t
+    }
+
+    #[test]
+    fn dans_la_fenetre_c_est_reussi() {
+        let mut t = trial_avec_fenetres();
+        t.coup(&c("4HP"), 100);
+        assert_eq!(t.coup(&c("236MK"), 111), Resultat::Avance);
+        assert_eq!(t.coup(&c("4MK"), 142), Resultat::Reussi);
+        assert_eq!(t.ecarts, vec![11, 31]);
+        assert!(t.erreurs_timing.is_empty());
+    }
+
+    #[test]
+    fn un_coup_intercale_avant_la_fenetre_est_ignore() {
+        let mut t = trial_avec_fenetres();
+        t.coup(&c("4HP"), 100);
+        t.coup(&c("236MK"), 111);
+        // LP pendant la récupération du 236MK, puis le 4MK trop tôt : le jeu les ignore.
+        assert_eq!(t.coup(&c("5LP"), 120), Resultat::Ignore);
+        assert_eq!(t.coup(&c("4MK"), 125), Resultat::Ignore);
+        assert_eq!(t.coup(&c("4MK"), 141), Resultat::Reussi);
+        assert_eq!(t.intercales, 2);
+    }
+
+    #[test]
+    fn trop_tard_est_signale() {
+        let mut t = trial_avec_fenetres();
+        t.coup(&c("4HP"), 100);
+        t.coup(&c("236MK"), 111);
+        assert_eq!(t.coup(&c("4MK"), 146), Resultat::Reussi);
+        assert_eq!(t.erreurs_timing, vec!["4MK trop tard de 3 f".to_string()]);
+    }
+
+    #[test]
+    fn un_autre_coup_dans_la_fenetre_est_un_rate() {
+        let mut t = trial_avec_fenetres();
+        t.coup(&c("4HP"), 100);
+        t.coup(&c("236MK"), 111);
+        assert!(matches!(t.coup(&c("5LP"), 140), Resultat::Rate { .. }));
     }
 
     #[test]

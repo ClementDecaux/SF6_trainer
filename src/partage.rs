@@ -42,6 +42,10 @@ pub struct Partage {
     pub lignes: VecDeque<Ligne>,
     /// Nombre de combos réussis depuis le lancement.
     pub reussites: u32,
+    /// Écart en frames de chaque étape avec la précédente (essai en cours ou dernier essai).
+    pub ecarts: Vec<u64>,
+    /// Fenêtres de timing apprises, pour les étapes 2 à N.
+    pub fenetres: Option<Vec<(u64, u64)>>,
 }
 
 impl Partage {
@@ -53,6 +57,8 @@ impl Partage {
             message: None,
             lignes: VecDeque::new(),
             reussites: 0,
+            ecarts: Vec::new(),
+            fenetres: None,
         }
     }
 

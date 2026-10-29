@@ -10,6 +10,7 @@ use crate::controles::{Action, Controles};
 use crate::motion::Historique;
 use crate::notation::Directions;
 use crate::partage::{Ligne, Partage};
+use crate::timings::{ESSAIS_MIN, Timings};
 use colored::Colorize;
 use eframe::egui;
 use gilrs::{Axis, Button, EventType, Gilrs};
@@ -26,6 +27,7 @@ const SIMULTANE_FRAMES: u64 = 3;
 pub fn boucle(
     controles: Controles,
     mut trial: Trial,
+    mut timings: Timings,
     mut capture: Capture,
     partage: Arc<Mutex<Partage>>,
     ctx: egui::Context,
@@ -43,7 +45,14 @@ pub fn boucle(
         println!("  [{id}] {}", gamepad.name());
     }
     println!("Ctrl+C pour quitter. Joueur à gauche de l'écran (b = 4 = vers la gauche).\n");
-    println!("{}  {}\n", trial.nom.bold(), affichage::trial(&trial));
+    println!("{}  {}", trial.nom.bold(), affichage::trial(&trial));
+    match &trial.fenetres {
+        Some(_) => println!("Timing : fenêtres apprises dans timings.toml."),
+        None => println!(
+            "Timing : pas encore appris. Appuie sur Select après un vrai combo ({ESSAIS_MIN} fois)."
+        ),
+    }
+    println!();
 
     let start = Instant::now();
     let mut dirs = Directions::default();
@@ -60,6 +69,9 @@ pub fn boucle(
     let mut debut = 0;
     let mut nouveaux: Vec<Action> = Vec::new();
     let mut coups: Vec<String> = Vec::new();
+    // Dernier essai complet, en attente d'un Select (« c'était un vrai combo ») : frame, écarts.
+    let mut a_confirmer: Option<(u64, Vec<u64>)> = None;
+    let mut select_appuye = false;
 
     loop {
         // 1. On lit TOUS les événements en attente avant de calculer quoi que ce soit :
@@ -67,6 +79,7 @@ pub fn boucle(
         let mut appuyes: Vec<Action> = Vec::new();
         while let Some(event) = gilrs.next_event() {
             match event.event {
+                EventType::ButtonPressed(Button::Select, _) => select_appuye = true,
                 EventType::ButtonPressed(button, _) => {
                     if !changer_direction(&mut dirs, button, true) {
                         match controles.get(&format!("{button:?}")) {
@@ -106,20 +119,29 @@ pub fn boucle(
         }
 
         let frame = (start.elapsed().as_secs_f64() * 1000.0 / FRAME_MS) as u64;
-        let direction = dirs.numpad();
         let mut change = false;
+        if select_appuye {
+            select_appuye = false;
+            confirmer(&mut trial, &mut timings, &mut a_confirmer, frame, &partage);
+            change = true;
+        }
+        let direction = dirs.numpad();
         if direction != etat.direction {
             historique.ajouter(frame, direction);
             // Drive Rush par dash (66) : seulement si c'est ce que le trial attend.
-            if direction == 6 && trial.attendu() == "DR" && historique.dash(frame) {
-                resultat_trial(
+            if direction == 6
+                && trial.attendu() == "DR"
+                && historique.dash(frame)
+                && resultat_trial(
                     &mut trial,
                     &mut capture,
                     &["DR".to_string()],
                     "66 (DR)",
                     frame,
                     &partage,
-                );
+                )
+            {
+                a_confirmer = Some((frame, trial.ecarts.clone()));
             }
         }
 
@@ -167,7 +189,9 @@ pub fn boucle(
                     .find(|c| c.as_str() == trial.attendu())
                     .unwrap_or(&candidats[0])
                     .clone();
-                resultat_trial(&mut trial, &mut capture, &candidats, &coup, frame, &partage);
+                if resultat_trial(&mut trial, &mut capture, &candidats, &coup, frame, &partage) {
+                    a_confirmer = Some((frame, trial.ecarts.clone()));
+                }
                 coups.push(coup);
             }
 
@@ -238,7 +262,7 @@ fn lectures(
 }
 
 /// Donne un coup au trial, l'affiche dans le terminal, met l'overlay à jour
-/// et dit à la capture vidéo quand filmer.
+/// et dit à la capture vidéo quand filmer. Renvoie `true` si toutes les étapes sont faites.
 fn resultat_trial(
     trial: &mut Trial,
     capture: &mut Capture,
@@ -246,21 +270,35 @@ fn resultat_trial(
     coup: &str,
     frame: u64,
     partage: &Mutex<Partage>,
-) {
+) -> bool {
     let resultat = trial.coup(candidats, frame);
     suivre_video(trial, capture, &resultat, frame);
     let Ok(mut p) = partage.lock() else {
-        return;
+        return false;
     };
     p.index = trial.index;
+    p.ecarts = trial.ecarts.clone();
+    if matches!(resultat, Resultat::Avance | Resultat::Reussi)
+        && let Some(&ecart) = trial.ecarts.last()
+    {
+        println!("{}", format!("      +{ecart} f").dimmed());
+    }
     match resultat {
         Resultat::Avance => println!("{}", affichage::trial(trial)),
-        Resultat::Reussi => {
+        Resultat::Reussi if trial.erreurs_timing.is_empty() => {
             println!("{}", "      ★ COMBO RÉUSSI ★".bright_green().bold());
             println!("{}", affichage::trial(trial));
             crate::son::reussi();
             p.reussites += 1;
             p.message("COMBO RÉUSSI !".to_string(), true);
+            return true;
+        }
+        Resultat::Reussi => {
+            let erreurs = trial.erreurs_timing.join(", ");
+            println!("{}", format!("      ✗ inputs bons, mais {erreurs}").red());
+            println!("{}", affichage::trial(trial));
+            p.message(format!("Timing : {erreurs}"), false);
+            return true;
         }
         Resultat::Rate { attendu } => {
             println!(
@@ -271,6 +309,42 @@ fn resultat_trial(
             p.message(format!("Raté : attendu {attendu}, reçu {coup}"), false);
         }
         Resultat::Ignore => {}
+    }
+    false
+}
+
+/// Select après un combo : « c'était un vrai combo ». Ses écarts sont ajoutés aux
+/// fenêtres de timing (`timings.toml`).
+fn confirmer(
+    trial: &mut Trial,
+    timings: &mut Timings,
+    a_confirmer: &mut Option<(u64, Vec<u64>)>,
+    frame: u64,
+    partage: &Mutex<Partage>,
+) {
+    // 10 secondes pour confirmer, après, on ne sait plus de quel essai on parle.
+    const DELAI_CONFIRMATION: u64 = 600;
+    let texte = match a_confirmer.take() {
+        Some((fin, ecarts)) if frame.saturating_sub(fin) <= DELAI_CONFIRMATION => {
+            let n = timings.apprendre(&trial.nom, &ecarts);
+            if let Err(e) = timings.enregistrer() {
+                eprintln!("{e}");
+            }
+            trial.fenetres = timings.fenetres(&trial.nom, trial.etapes.len());
+            if let Ok(mut p) = partage.lock() {
+                p.fenetres = trial.fenetres.clone();
+            }
+            if n < ESSAIS_MIN {
+                format!("Timing : {n}/{ESSAIS_MIN} vrais combos confirmés")
+            } else {
+                format!("Timing appris ({n} vrais combos)")
+            }
+        }
+        _ => "Select : rien à confirmer, finis d'abord le combo".to_string(),
+    };
+    println!("{}", format!("      ◆ {texte}").cyan());
+    if let Ok(mut p) = partage.lock() {
+        p.message(texte, true);
     }
 }
 
@@ -287,7 +361,12 @@ fn suivre_video(trial: &Trial, capture: &mut Capture, resultat: &Resultat, frame
             if let Some(derniere) = trial.etapes.last() {
                 capture.etape(&derniere.notation, frame);
             }
-            capture.reussi();
+            // Hors timing : le combo n'est sûrement pas passé, on ne garde pas la vidéo.
+            if trial.erreurs_timing.is_empty() {
+                capture.reussi();
+            } else {
+                capture.annuler();
+            }
         }
         Resultat::Rate { .. } => {
             // Le coup raté peut être le début d'un nouvel essai (index revenu à 1).

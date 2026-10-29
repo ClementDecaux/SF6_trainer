@@ -19,6 +19,7 @@ mod notation;
 mod overlay;
 mod partage;
 mod son;
+mod timings;
 
 use combo::Trial;
 use eframe::egui;
@@ -37,12 +38,16 @@ fn main() {
 
 fn lancer() -> Result<(), String> {
     let controles = controles::charger()?;
-    let (trial, personnage, inputs) = choisir_trial()?;
+    let (mut trial, personnage, inputs) = choisir_trial()?;
+    let timings = timings::charger()?;
+    trial.fenetres = timings.fenetres(&trial.nom, trial.etapes.len());
     let config = overlay::charger()?;
     son::activer(config.son);
     let capture = capture::lancer(capture::charger()?, &personnage, &trial.nom, &inputs);
 
-    let partage = Arc::new(Mutex::new(Partage::new(&trial.nom, trial.etapes.clone())));
+    let mut etat = Partage::new(&trial.nom, trial.etapes.clone());
+    etat.fenetres = trial.fenetres.clone();
+    let partage = Arc::new(Mutex::new(etat));
 
     // La fenêtre : sans bordure, au premier plan, les clics passent au travers,
     // et transparente si `transparence = true` dans overlay.toml.
@@ -67,7 +72,7 @@ fn lancer() -> Result<(), String> {
             let ctx = cc.egui_ctx.clone();
             let partage_manette = Arc::clone(&partage);
             std::thread::spawn(move || {
-                entrees::boucle(controles, trial, capture, partage_manette, ctx)
+                entrees::boucle(controles, trial, timings, capture, partage_manette, ctx)
             });
             Ok(Box::new(overlay::Overlay::new(partage, &config)))
         }),

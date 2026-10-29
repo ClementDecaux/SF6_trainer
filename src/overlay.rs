@@ -10,6 +10,7 @@
 use crate::combo::Liaison;
 use crate::controles::Action;
 use crate::partage::{Ligne, Partage};
+use crate::timings::verifier;
 use eframe::egui::{self, Color32, RichText};
 use serde::Deserialize;
 use std::sync::{Arc, Mutex};
@@ -196,9 +197,40 @@ fn etapes(ui: &mut egui::Ui, p: &Partage) {
                             .size(24.0)
                             .strong(),
                     );
+                    timing(ui, p, i);
                 });
             });
     }
+}
+
+/// À droite d'une étape : son écart avec la précédente (« +14 f »), en rouge s'il sort
+/// de la fenêtre apprise, et la fenêtre elle-même en petit.
+fn timing(ui: &mut egui::Ui, p: &Partage, i: usize) {
+    if i == 0 {
+        return;
+    }
+    let fenetre = p.fenetres.as_ref().and_then(|f| f.get(i - 1).copied());
+    let ecart = p.ecarts.get(i - 1).copied();
+    ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
+        if let Some((min, max)) = fenetre {
+            let texte = if min == max {
+                format!("{min}")
+            } else {
+                format!("{min}-{max}")
+            };
+            ui.label(RichText::new(texte).color(GRIS).size(13.0).monospace());
+        }
+        if let Some(ecart) = ecart {
+            let hors = fenetre.is_some_and(|f| verifier(ecart, f).is_some());
+            let couleur = if hors { ROUGE } else { CYAN };
+            ui.label(
+                RichText::new(format!("+{ecart} f"))
+                    .color(couleur)
+                    .size(15.0)
+                    .monospace(),
+            );
+        }
+    });
 }
 
 /// « COMBO RÉUSSI » ou « attendu X, reçu Y », pendant 2 secondes.

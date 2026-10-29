@@ -28,7 +28,22 @@ cargo test         # lance les tests
 | `combos.toml` | Tes combos, en notation forum : `b+hp xx DI xx b+mk xx qcf+mk, b+mk xx hcb+mp` |
 | `controles.toml` | Quel bouton physique fait quoi dans SF6 (LP, MP, HP...) |
 | `overlay.toml` | Position, taille et opacité de l'overlay, son du combo réussi |
+| `timings.toml` | Fenêtres de timing apprises (créé au premier Select) |
 | `capture.toml` | Vidéo des combos réussis : on/off, dossier, durée filmée avant et après le combo, qualité |
+
+## Timing des étapes
+
+L'outil lit seulement la manette : il ne voit pas si un coup touche. Il mesure donc l'écart en
+frames entre chaque étape et la précédente (affiché `+14 f` dans l'overlay et le terminal).
+
+Quand tu vois dans le jeu qu'un combo est vraiment passé, appuie sur **Select** dans les
+10 secondes : ses écarts sont ajoutés à `timings.toml`. Après 3 combos confirmés,
+l'outil connaît la fenêtre de chaque étape (1 frame de tolérance) :
+- avant la fenêtre, les appuis sont ignorés, comme dans le jeu (double tap, coup intercalé) ;
+- dans la fenêtre, le bon coup valide l'étape, un autre coup est un raté ;
+- après la fenêtre : « 4MK trop tard de 3 f », pas de son et pas de vidéo.
+
+Si un vrai combo est marqué « trop tard », appuie quand même sur Select : la fenêtre s'élargit.
 
 ## Vidéos des combos réussis
 
@@ -59,6 +74,7 @@ Notation reconnue : directions `b f d u db df cr. st.` ou chiffres numpad, mouve
 | `src/overlay.rs` | Fenêtre de l'overlay (egui) |
 | `src/affichage.rs` | Historique d'inputs coloré dans le terminal |
 | `src/capture.rs` | Vidéo des combos réussis (thread de capture Windows) |
+| `src/timings.rs` | Fenêtres de timing apprises sur tes vrais combos |
 | `src/son.rs` | Petit son du combo réussi, fabriqué par le programme |
 
 ## Apprendre Rust avec ce projet
