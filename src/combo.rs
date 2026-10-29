@@ -235,12 +235,11 @@ impl Trial {
             return Resultat::Ignore;
         }
 
-        // Le même coup que l'étape d'avant, appuyé une 2e fois : c'est le « double tap »
+        // Le même bouton que l'étape d'avant, ré-appuyé : c'est le « double tap » (ou le mash)
         // qu'on fait pour assurer un link. Le jeu l'ignore pendant la récupération, nous aussi.
-        if candidats
-            .iter()
-            .any(|c| *c == self.etapes[self.index - 1].notation)
-        {
+        // La direction ne compte pas : en mashant, le stick revient souvent au neutre (5MK).
+        let bouton_avant = bouton(&self.etapes[self.index - 1].notation);
+        if candidats.iter().any(|c| bouton(c) == bouton_avant) {
             return Resultat::Ignore;
         }
         let attendu = self.attendu().to_string();
@@ -261,6 +260,11 @@ impl Trial {
         }
         false
     }
+}
+
+/// Le bouton d'une notation, sans la direction ni le mouvement : « 236MK » -> « MK ».
+fn bouton(notation: &str) -> &str {
+    notation.trim_start_matches(|c: char| c.is_ascii_digit())
 }
 
 #[cfg(test)]
@@ -337,6 +341,24 @@ mod tests {
         assert_eq!(t.coup(&c("4MK"), 34), Resultat::Ignore);
         assert_eq!(t.coup(&c("4MK"), 40), Resultat::Ignore);
         assert_eq!(t.coup(&c("63214MP"), 50), Resultat::Reussi);
+    }
+
+    #[test]
+    fn mash_qui_revient_au_neutre() {
+        // Ton log : en mashant MK après le 4MK, le dernier appui sort en 5MK (stick au neutre).
+        let mut t = Trial::new("test", parser("236MK, 4MK xx 63214MP").unwrap());
+        t.coup(&c("236MK"), 10);
+        assert_eq!(t.coup(&c("4MK"), 30), Resultat::Avance);
+        assert_eq!(t.coup(&c("5MK"), 40), Resultat::Ignore);
+        assert_eq!(t.coup(&c("63214MP"), 50), Resultat::Reussi);
+    }
+
+    #[test]
+    fn un_autre_bouton_reste_un_rate() {
+        let mut t = Trial::new("test", parser("236MK, 4MK xx 63214MP").unwrap());
+        t.coup(&c("236MK"), 10);
+        t.coup(&c("4MK"), 30);
+        assert!(matches!(t.coup(&c("5LP"), 40), Resultat::Rate { .. }));
     }
 
     #[test]
