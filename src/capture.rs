@@ -5,7 +5,8 @@
 //! Rien à installer : l'encodage H.264 est fait par Windows lui-même.
 //!
 //! Le principe :
-//! - 1re étape du trial validée : on commence à filmer ;
+//! - on garde toujours en mémoire les dernières images (`avant_ms`) ;
+//! - 1re étape du trial validée : la vidéo commence par ces images, puis on filme ;
 //! - raté ou trop lent : on jette la vidéo ;
 //! - combo réussi : on filme encore un peu (`apres_ms`), puis on garde la vidéo dans
 //!   `clips/`, avec un fichier `.json` à côté (combo, personnage, frame de chaque étape).
@@ -29,6 +30,9 @@ processus = "StreetFighter6.exe"
 fenetre = "Street Fighter 6"
 # Dossier où les vidéos sont rangées.
 dossier = "clips"
+# Combien de temps on filme avant la 1re étape, en millisecondes.
+# Ces images sont gardées en mémoire : environ 350 Mo pour 700 ms en 1080p. 0 = rien avant.
+avant_ms = 700
 # Combien de temps on filme encore après la dernière étape, en millisecondes.
 apres_ms = 1500
 # Qualité de la vidéo, en mégabits par seconde (20 = très bon en 1080p).
@@ -43,9 +47,16 @@ pub struct Config {
     pub processus: String,
     pub fenetre: String,
     pub dossier: String,
+    /// Absent des anciens fichiers : 700 par défaut.
+    #[serde(default = "avant_ms_par_defaut")]
+    pub avant_ms: u64,
     pub apres_ms: u64,
     pub debit_mbps: u32,
     pub duree_max_s: u64,
+}
+
+fn avant_ms_par_defaut() -> u64 {
+    700
 }
 
 pub fn charger() -> Result<Config, String> {
@@ -198,10 +209,107 @@ fn nettoyer(texte: &str) -> String {
     sortie.trim_end_matches('-').to_string()
 }
 
+/// Une image du jeu gardée en mémoire (pixels BGRA, lignes du bas vers le haut).
+pub struct Image {
+    /// Heure de l'image, en unités de 100 ns (horloge de Windows).
+    pub temps: i64,
+    pub largeur: u32,
+    pub hauteur: u32,
+    pub pixels: Vec<u8>,
+}
+
+/// Les dernières images du jeu (`avant_ms`), pour que la vidéo commence
+/// un peu avant la 1re étape au lieu de couper le début du combo.
+pub struct Tampon {
+    images: std::collections::VecDeque<Image>,
+    /// Mémoire des images jetées, réutilisée pour les suivantes (évite d'en redemander).
+    libres: Vec<Vec<u8>>,
+    /// Durée gardée, en unités de 100 ns.
+    duree: i64,
+    octets_max: usize,
+}
+
+/// Au-delà, on garde moins d'images (utile en 4K).
+const OCTETS_MAX_TAMPON: usize = 1_000_000_000;
+
+impl Tampon {
+    pub fn new(avant_ms: u64, octets_max: usize) -> Tampon {
+        Tampon {
+            images: std::collections::VecDeque::new(),
+            libres: Vec::new(),
+            duree: avant_ms as i64 * 10_000,
+            octets_max,
+        }
+    }
+
+    pub fn actif(&self) -> bool {
+        self.duree > 0
+    }
+
+    /// De la mémoire pour une nouvelle image (réutilisée si possible).
+    pub fn place(&mut self) -> Vec<u8> {
+        self.libres.pop().unwrap_or_default()
+    }
+
+    pub fn ajouter(&mut self, image: Image) {
+        let temps = image.temps;
+        self.images.push_back(image);
+        let mut octets: usize = self.images.iter().map(|i| i.pixels.len()).sum();
+        while let Some(plus_vieille) = self.images.front() {
+            if temps - plus_vieille.temps <= self.duree && octets <= self.octets_max {
+                break;
+            }
+            octets -= plus_vieille.pixels.len();
+            if let Some(image) = self.images.pop_front() {
+                self.recycler(image.pixels);
+            }
+        }
+    }
+
+    /// Toutes les images gardées, de la plus vieille à la plus récente. Le tampon est vidé.
+    pub fn prendre(&mut self) -> Vec<Image> {
+        self.images.drain(..).collect()
+    }
+
+    pub fn recycler(&mut self, pixels: Vec<u8>) {
+        // Deux suffisent : on en reprend une à chaque image.
+        if self.libres.len() < 2 {
+            self.libres.push(pixels);
+        }
+    }
+
+    #[cfg(test)]
+    pub fn len(&self) -> usize {
+        self.images.len()
+    }
+}
+
+/// Copie une image en retournant ses lignes : Windows encode les pixels donnés « à la main »
+/// en commençant par la ligne du bas. `pas` = octets par ligne dans `source` (parfois plus
+/// que la largeur, la carte graphique ajoute du remplissage).
+pub fn retourner_lignes(
+    source: &[u8],
+    pas: usize,
+    octets_par_ligne: usize,
+    hauteur: usize,
+    destination: &mut Vec<u8>,
+) {
+    destination.resize(octets_par_ligne * hauteur, 0);
+    for y in 0..hauteur {
+        let Some(ligne) = source.get(y * pas..y * pas + octets_par_ligne) else {
+            break;
+        };
+        let cible = (hauteur - 1 - y) * octets_par_ligne;
+        destination[cible..cible + octets_par_ligne].copy_from_slice(ligne);
+    }
+}
+
 /// La partie propre à Windows : la capture elle-même.
 #[cfg(windows)]
 mod capture_windows {
-    use super::{Config, InfosClip, Ordre, nom_fichier};
+    use super::{
+        Config, Image, InfosClip, OCTETS_MAX_TAMPON, Ordre, Tampon, nom_fichier, retourner_lignes,
+    };
     use std::path::{Path, PathBuf};
     use std::sync::mpsc::Receiver;
     use std::sync::{Arc, Mutex};
@@ -232,6 +340,7 @@ mod capture_windows {
             if let Ok(reception) = ordres.lock() {
                 reception.try_iter().for_each(drop);
             }
+            nettoyer_dossier(&config.dossier);
             match trouver_fenetre(&config) {
                 Some(fenetre) => {
                     println!("Vidéo : fenêtre de SF6 trouvée, prêt à filmer.");
@@ -285,6 +394,22 @@ mod capture_windows {
         }
     }
 
+    /// Supprime les vidéos `en_cours_*` laissées par un arrêt brutal.
+    fn nettoyer_dossier(dossier: &str) {
+        let Ok(fichiers) = std::fs::read_dir(dossier) else {
+            return;
+        };
+        for fichier in fichiers.flatten() {
+            if fichier
+                .file_name()
+                .to_string_lossy()
+                .starts_with("en_cours")
+            {
+                let _ = std::fs::remove_file(fichier.path());
+            }
+        }
+    }
+
     /// La fenêtre du programme SF6, sinon une fenêtre au titre exact.
     fn trouver_fenetre(config: &Config) -> Option<Window> {
         let fenetres = Window::enumerate().ok()?;
@@ -308,13 +433,23 @@ mod capture_windows {
         ordres: Arc<Mutex<Receiver<Ordre>>>,
     }
 
+    /// Un encodeur créé à l'avance : le créer prend un moment, et pendant ce temps
+    /// aucune image n'arrive. Préparé avant la 1re étape, il démarre tout de suite.
+    struct Pret {
+        encodeur: VideoEncoder,
+        chemin: PathBuf,
+        largeur: u32,
+        hauteur: u32,
+    }
+
     enum Etat {
         Attente,
-        /// On a reçu `Demarrer` : l'encodeur sera créé à la prochaine image (il faut sa taille).
+        /// On a reçu `Demarrer` : on commence à la prochaine image.
         Demande,
         Filme {
             // `Box` : l'encodeur est gros, on le range à part en mémoire.
             encodeur: Box<VideoEncoder>,
+            chemin: PathBuf,
             debut: Instant,
             /// Combo réussi : quand arrêter, et ce qu'on écrira dans le `.json`.
             fin: Option<(Instant, InfosClip)>,
@@ -325,13 +460,15 @@ mod capture_windows {
         config: Config,
         ordres: Arc<Mutex<Receiver<Ordre>>>,
         etat: Etat,
+        pret: Option<Box<Pret>>,
+        /// Si la préparation a échoué, on ne réessaie qu'au prochain essai (pas à chaque image).
+        echec_preparation: bool,
+        tampon: Tampon,
+        /// Pour donner un nom différent à chaque vidéo en cours.
+        numero: u32,
     }
 
     impl Enregistreur {
-        fn fichier_en_cours(&self) -> PathBuf {
-            Path::new(&self.config.dossier).join("en_cours.mp4")
-        }
-
         fn traiter(&mut self, ordre: Ordre) {
             match ordre {
                 Ordre::Demarrer => {
@@ -355,19 +492,24 @@ mod capture_windows {
         /// Termine la vidéo en cours : gardée si le combo a été réussi, jetée sinon.
         fn arreter(&mut self) {
             let etat = std::mem::replace(&mut self.etat, Etat::Attente);
-            let Etat::Filme { encodeur, fin, .. } = etat else {
+            let Etat::Filme {
+                encodeur,
+                chemin,
+                fin,
+                ..
+            } = etat
+            else {
                 return;
             };
-            let en_cours = self.fichier_en_cours();
             if let Err(e) = encodeur.finish() {
                 eprintln!("Vidéo : erreur à la fin de l'encodage ({e}).");
-                let _ = std::fs::remove_file(&en_cours);
+                let _ = std::fs::remove_file(&chemin);
                 return;
             }
             match fin {
-                Some((_, infos)) => self.ranger(&en_cours, &infos),
+                Some((_, infos)) => self.ranger(&chemin, &infos),
                 None => {
-                    let _ = std::fs::remove_file(&en_cours);
+                    let _ = std::fs::remove_file(&chemin);
                 }
             }
         }
@@ -391,8 +533,11 @@ mod capture_windows {
             println!("      🎬 clip enregistré : {}", video.display());
         }
 
-        fn creer_encodeur(&self, largeur: u32, hauteur: u32) -> Result<VideoEncoder, Erreur> {
+        fn creer_encodeur(&mut self, largeur: u32, hauteur: u32) -> Result<Pret, Erreur> {
             std::fs::create_dir_all(&self.config.dossier)?;
+            self.numero += 1;
+            let chemin =
+                Path::new(&self.config.dossier).join(format!("en_cours_{}.mp4", self.numero));
             let video = VideoSettingsBuilder::new(largeur, hauteur)
                 .sub_type(VideoSettingsSubType::H264)
                 .frame_rate(60)
@@ -401,10 +546,92 @@ mod capture_windows {
                 video,
                 AudioSettingsBuilder::default().disabled(true),
                 ContainerSettingsBuilder::default(),
-                self.fichier_en_cours(),
+                &chemin,
             )?;
-            Ok(encodeur)
+            Ok(Pret {
+                encodeur,
+                chemin,
+                largeur,
+                hauteur,
+            })
         }
+
+        /// Un encodeur à la bonne taille : celui préparé à l'avance, sinon un nouveau.
+        fn prendre_encodeur(&mut self, largeur: u32, hauteur: u32) -> Result<Pret, Erreur> {
+            match self.pret.take() {
+                Some(pret) if pret.largeur == largeur && pret.hauteur == hauteur => Ok(*pret),
+                autre => {
+                    if let Some(pret) = autre {
+                        jeter(*pret);
+                    }
+                    self.creer_encodeur(largeur, hauteur)
+                }
+            }
+        }
+
+        /// Copie l'image dans le tampon (pour filmer un peu avant la 1re étape).
+        fn garder_image(&mut self, frame: &mut Frame, temps: i64) -> Result<(), Erreur> {
+            let (largeur, hauteur) = (frame.width(), frame.height());
+            let mut pixels = self.tampon.place();
+            let mut image = frame.buffer()?;
+            let pas = image.row_pitch() as usize;
+            retourner_lignes(
+                image.as_raw_buffer(),
+                pas,
+                largeur as usize * 4,
+                hauteur as usize,
+                &mut pixels,
+            );
+            self.tampon.ajouter(Image {
+                temps,
+                largeur,
+                hauteur,
+                pixels,
+            });
+            Ok(())
+        }
+
+        /// Démarre la vidéo : d'abord les images du tampon, puis l'image actuelle.
+        fn commencer(&mut self, frame: &Frame, temps: i64) {
+            let (largeur, hauteur) = (frame.width(), frame.height());
+            let Pret {
+                mut encodeur,
+                chemin,
+                ..
+            } = match self.prendre_encodeur(largeur, hauteur) {
+                Ok(pret) => pret,
+                Err(e) => {
+                    eprintln!("Vidéo : impossible de démarrer l'encodage ({e}).");
+                    self.etat = Etat::Attente;
+                    return;
+                }
+            };
+            let mut image_actuelle_envoyee = false;
+            for image in self.tampon.prendre() {
+                if image.largeur == largeur && image.hauteur == hauteur {
+                    if let Err(e) = encodeur.send_frame_buffer(&image.pixels, image.temps) {
+                        eprintln!("Vidéo : image perdue ({e}).");
+                    }
+                    image_actuelle_envoyee |= image.temps == temps;
+                }
+                self.tampon.recycler(image.pixels);
+            }
+            if !image_actuelle_envoyee && let Err(e) = encodeur.send_frame(frame) {
+                eprintln!("Vidéo : image perdue ({e}).");
+            }
+            self.etat = Etat::Filme {
+                encodeur: Box::new(encodeur),
+                chemin,
+                debut: Instant::now(),
+                fin: None,
+            };
+        }
+    }
+
+    /// Ferme un encodeur qui n'a pas servi et supprime son fichier.
+    fn jeter(pret: Pret) {
+        let _ = pret.encodeur.finish();
+        let _ = std::fs::remove_file(&pret.chemin);
     }
 
     impl GraphicsCaptureApiHandler for Enregistreur {
@@ -412,10 +639,15 @@ mod capture_windows {
         type Error = Erreur;
 
         fn new(ctx: Context<Self::Flags>) -> Result<Self, Self::Error> {
+            let tampon = Tampon::new(ctx.flags.config.avant_ms, OCTETS_MAX_TAMPON);
             Ok(Enregistreur {
                 config: ctx.flags.config,
                 ordres: ctx.flags.ordres,
                 etat: Etat::Attente,
+                pret: None,
+                echec_preparation: false,
+                tampon,
+                numero: 0,
             })
         }
 
@@ -431,44 +663,54 @@ mod capture_windows {
                 Err(_) => Vec::new(),
             };
             for ordre in ordres {
+                if matches!(ordre, Ordre::Demarrer) {
+                    self.echec_preparation = false;
+                }
                 self.traiter(ordre);
             }
 
-            // 2. Un essai commence : on crée l'encodeur à la taille de la fenêtre.
-            if matches!(self.etat, Etat::Demande) {
-                self.etat = match self.creer_encodeur(frame.width(), frame.height()) {
-                    Ok(encodeur) => Etat::Filme {
-                        encodeur: Box::new(encodeur),
-                        debut: Instant::now(),
-                        fin: None,
-                    },
-                    Err(e) => {
-                        eprintln!("Vidéo : impossible de démarrer l'encodage ({e}).");
-                        Etat::Attente
-                    }
-                };
+            // 2. L'image va toujours dans le tampon des dernières images.
+            let temps = frame.timestamp()?.Duration;
+            if self.tampon.actif()
+                && let Err(e) = self.garder_image(frame, temps)
+            {
+                eprintln!("Vidéo : image non gardée ({e}).");
             }
 
-            // 3. On ajoute l'image à la vidéo, et on regarde s'il est temps d'arrêter.
+            // 3. Selon l'état : préparer, commencer, ou continuer à filmer.
             let mut terminer = false;
-            if let Etat::Filme {
-                encodeur,
-                debut,
-                fin,
-            } = &mut self.etat
-            {
-                if let Err(e) = encodeur.send_frame(frame) {
-                    eprintln!("Vidéo : image perdue ({e}).");
-                }
-                let maintenant = Instant::now();
-                match fin {
-                    Some((quand, _)) => terminer = maintenant >= *quand,
-                    None => {
-                        if debut.elapsed() > Duration::from_secs(self.config.duree_max_s) {
-                            // Rien de réussi depuis trop longtemps : on jette.
-                            terminer = true;
+            match &mut self.etat {
+                Etat::Attente => {
+                    let (largeur, hauteur) = (frame.width(), frame.height());
+                    let a_jour = self
+                        .pret
+                        .as_ref()
+                        .is_some_and(|p| p.largeur == largeur && p.hauteur == hauteur);
+                    if !a_jour && !self.echec_preparation {
+                        match self.prendre_encodeur(largeur, hauteur) {
+                            Ok(pret) => self.pret = Some(Box::new(pret)),
+                            Err(e) => {
+                                eprintln!("Vidéo : impossible de préparer l'encodage ({e}).");
+                                self.echec_preparation = true;
+                            }
                         }
                     }
+                }
+                Etat::Demande => self.commencer(frame, temps),
+                Etat::Filme {
+                    encodeur,
+                    debut,
+                    fin,
+                    ..
+                } => {
+                    if let Err(e) = encodeur.send_frame(frame) {
+                        eprintln!("Vidéo : image perdue ({e}).");
+                    }
+                    terminer = match fin {
+                        Some((quand, _)) => Instant::now() >= *quand,
+                        // Rien de réussi depuis trop longtemps : on jette.
+                        None => debut.elapsed() > Duration::from_secs(self.config.duree_max_s),
+                    };
                 }
             }
             if terminer {
@@ -480,6 +722,9 @@ mod capture_windows {
         /// SF6 a été fermé : la vidéo en cours est terminée (gardée si réussie).
         fn on_closed(&mut self) -> Result<(), Self::Error> {
             self.arreter();
+            if let Some(pret) = self.pret.take() {
+                jeter(*pret);
+            }
             println!("Vidéo : fenêtre de SF6 fermée.");
             Ok(())
         }
@@ -558,9 +803,65 @@ mod tests {
     }
 
     #[test]
+    fn le_tampon_garde_seulement_les_dernieres_images() {
+        // 100 ms gardées ; une image toutes les 16 ms (160 000 unités de 100 ns).
+        let mut tampon = Tampon::new(100, usize::MAX);
+        for i in 0..20 {
+            let pixels = tampon.place();
+            tampon.ajouter(Image {
+                temps: i * 160_000,
+                largeur: 1,
+                hauteur: 1,
+                pixels,
+            });
+        }
+        // 6 intervalles de 16 ms = 96 ms : les images 13 à 19.
+        let images = tampon.prendre();
+        assert_eq!(images.len(), 7);
+        assert_eq!(images[0].temps, 13 * 160_000);
+        assert_eq!(tampon.len(), 0);
+    }
+
+    #[test]
+    fn le_tampon_respecte_la_limite_de_memoire() {
+        let mut tampon = Tampon::new(10_000, 300);
+        for i in 0..10 {
+            tampon.ajouter(Image {
+                temps: i,
+                largeur: 10,
+                hauteur: 10,
+                pixels: vec![0; 100],
+            });
+        }
+        assert_eq!(tampon.len(), 3);
+    }
+
+    #[test]
+    fn tampon_coupe_si_avant_ms_vaut_zero() {
+        assert!(!Tampon::new(0, usize::MAX).actif());
+    }
+
+    #[test]
+    fn les_lignes_sont_retournees_sans_le_remplissage() {
+        // 2 lignes de 2 octets, avec 1 octet de remplissage par ligne (pas = 3).
+        let source = [1, 2, 0, 3, 4, 0];
+        let mut destination = Vec::new();
+        retourner_lignes(&source, 3, 2, 2, &mut destination);
+        assert_eq!(destination, vec![3, 4, 1, 2]);
+    }
+
+    #[test]
     fn config_par_defaut_valide() {
         let config: Config = toml::from_str(CONFIG_PAR_DEFAUT).unwrap();
         assert!(config.actif);
         assert_eq!(config.processus, "StreetFighter6.exe");
+        assert_eq!(config.avant_ms, 700);
+    }
+
+    #[test]
+    fn ancien_capture_toml_sans_avant_ms() {
+        let ancien = CONFIG_PAR_DEFAUT.replace("avant_ms = 700\n", "");
+        let config: Config = toml::from_str(&ancien).unwrap();
+        assert_eq!(config.avant_ms, 700);
     }
 }

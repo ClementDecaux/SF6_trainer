@@ -18,6 +18,7 @@ mod motion;
 mod notation;
 mod overlay;
 mod partage;
+mod son;
 
 use combo::Trial;
 use eframe::egui;
@@ -38,6 +39,7 @@ fn lancer() -> Result<(), String> {
     let controles = controles::charger()?;
     let (trial, personnage, inputs) = choisir_trial()?;
     let config = overlay::charger()?;
+    son::activer(config.son);
     let capture = capture::lancer(capture::charger()?, &personnage, &trial.nom, &inputs);
 
     let partage = Arc::new(Mutex::new(Partage::new(&trial.nom, trial.etapes.clone())));

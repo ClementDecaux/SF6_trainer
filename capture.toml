@@ -6,6 +6,9 @@ processus = "StreetFighter6.exe"
 fenetre = "Street Fighter 6"
 # Dossier où les vidéos sont rangées.
 dossier = "clips"
+# Combien de temps on filme avant la 1re étape, en millisecondes.
+# Ces images sont gardées en mémoire : environ 350 Mo pour 700 ms en 1080p. 0 = rien avant.
+avant_ms = 700
 # Combien de temps on filme encore après la dernière étape, en millisecondes.
 apres_ms = 1500
 # Qualité de la vidéo, en mégabits par seconde (20 = très bon en 1080p).

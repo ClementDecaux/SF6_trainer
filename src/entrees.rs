@@ -258,6 +258,7 @@ fn resultat_trial(
         Resultat::Reussi => {
             println!("{}", "      ★ COMBO RÉUSSI ★".bright_green().bold());
             println!("{}", affichage::trial(trial));
+            crate::son::reussi();
             p.reussites += 1;
             p.message("COMBO RÉUSSI !".to_string(), true);
         }

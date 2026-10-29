@@ -11,3 +11,5 @@ opacite_fenetre = 230
 # true = fenêtre transparente (on voit le jeu derrière le fond).
 # false = fond sombre opaque : moins joli, mais marche partout.
 transparence = false
+# Petit son quand un combo est réussi.
+son = true

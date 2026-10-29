@@ -30,6 +30,8 @@ opacite_fenetre = 230
 # true = fenêtre transparente (on voit le jeu derrière le fond).
 # false = fond sombre opaque : moins joli, mais marche partout.
 transparence = false
+# Petit son quand un combo est réussi.
+son = true
 "#;
 
 #[derive(Debug, Deserialize)]
@@ -45,6 +47,13 @@ pub struct Config {
     /// Absent des anciens fichiers : 230 par défaut.
     #[serde(default = "opacite_fenetre_par_defaut")]
     pub opacite_fenetre: u8,
+    /// Absent des anciens fichiers : `true` par défaut.
+    #[serde(default = "vrai")]
+    pub son: bool,
+}
+
+fn vrai() -> bool {
+    true
 }
 
 fn opacite_fenetre_par_defaut() -> u8 {
@@ -348,5 +357,6 @@ mod tests {
             toml::from_str("x = 20\ny = 120\nlargeur = 380\nhauteur = 720\nopacite_fond = 170\n")
                 .unwrap();
         assert!(!c.transparence);
+        assert!(c.son);
     }
 }
