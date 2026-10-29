@@ -1,6 +1,8 @@
 # Enregistrement vidéo des combos réussis (Windows 10 ou 11).
-# false = pas de vidéo.
+# false = pas de capture du jeu (ni vidéo, ni frames calées sur le jeu).
 actif = true
+# Garder les vidéos dès le lancement ? Sinon, F9 en jeu pour les activer ou les couper.
+enregistrer = false
 # Le programme de SF6, et le titre de sa fenêtre si le programme n'est pas trouvé.
 processus = "StreetFighter6.exe"
 fenetre = "Street Fighter 6"

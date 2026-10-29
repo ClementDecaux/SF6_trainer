@@ -5,7 +5,7 @@
 
 use crate::affichage::{self, Etat};
 use crate::capture::Capture;
-use crate::clavier::ToucheDeplacement;
+use crate::clavier::Touche;
 use crate::combo::{Resultat, Trial};
 use crate::controles::{Action, Controles};
 use crate::horloge;
@@ -49,6 +49,7 @@ pub fn boucle(
             "Timing : pas encore appris. Appuie sur Select après un vrai combo ({ESSAIS_MIN} fois)."
         ),
     }
+    println!("F8 : déplacer l'overlay. F9 : garder ou non les vidéos des combos réussis.");
     println!();
 
     let mut dirs = Directions::default();
@@ -68,7 +69,8 @@ pub fn boucle(
     // Dernier essai complet, en attente d'un Select (« c'était un vrai combo ») : frame, écarts.
     let mut a_confirmer: Option<(u64, Vec<u64>)> = None;
     let mut select_appuye = false;
-    let mut f8 = ToucheDeplacement::new();
+    let mut f8 = Touche::f8();
+    let mut f9 = Touche::f9();
 
     loop {
         // 1. On lit TOUS les événements en attente avant de calculer quoi que ce soit :
@@ -122,6 +124,19 @@ pub fn boucle(
                 };
                 println!("{}", texte.cyan());
             }
+            change = true;
+        }
+        if f9.appuyee() {
+            capture.enregistre = !capture.enregistre;
+            if let Ok(mut p) = partage.lock() {
+                p.enregistrement = capture.enregistre;
+            }
+            let texte = if capture.enregistre {
+                "      ● vidéos activées (F9 pour couper)"
+            } else {
+                "      ○ vidéos coupées (F9 pour réactiver)"
+            };
+            println!("{}", texte.cyan());
             change = true;
         }
         if select_appuye {

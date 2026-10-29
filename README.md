@@ -21,6 +21,8 @@ cargo test         # lance les tests
 - Ctrl+C dans le terminal pour fermer l'overlay.
 - **F8** pour déplacer l'overlay : glisse-le à la souris, puis F8 à nouveau. La position est
   enregistrée dans `overlay.toml`. Reclique ensuite dans le jeu pour lui rendre le focus.
+- **F9** pour garder ou non les vidéos des combos réussis (`● REC` dans l'overlay). Coupé au
+  lancement, sauf si `enregistrer = true` dans `capture.toml`.
 - L'outil suppose que tu joues à gauche de l'écran (b = 4 = vers la gauche).
 
 ## Fichiers de config

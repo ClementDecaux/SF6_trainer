@@ -207,6 +207,9 @@ fn entete(ui: &mut egui::Ui, p: &Partage) {
                     .color(VERT)
                     .size(15.0),
             );
+            if p.enregistrement {
+                ui.label(RichText::new("● REC").color(ROUGE).size(15.0).strong());
+            }
         });
     });
 }

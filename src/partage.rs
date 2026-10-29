@@ -48,6 +48,8 @@ pub struct Partage {
     pub fenetres: Option<Vec<(u64, u64)>>,
     /// Mode déplacement (F8) : l'overlay peut être glissé à la souris.
     pub deplacement: bool,
+    /// Les vidéos des combos réussis sont gardées (F9).
+    pub enregistrement: bool,
 }
 
 impl Partage {
@@ -62,6 +64,7 @@ impl Partage {
             ecarts: Vec::new(),
             fenetres: None,
             deplacement: false,
+            enregistrement: false,
         }
     }
 

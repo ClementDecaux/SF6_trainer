@@ -50,6 +50,7 @@ fn lancer() -> Result<(), String> {
 
     let mut etat = Partage::new(&trial.nom, trial.etapes.clone());
     etat.fenetres = trial.fenetres.clone();
+    etat.enregistrement = capture.enregistre;
     let partage = Arc::new(Mutex::new(etat));
 
     // La fenêtre : sans bordure, au premier plan, les clics passent au travers,

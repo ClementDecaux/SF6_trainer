@@ -23,8 +23,10 @@ use std::sync::mpsc::Sender;
 const FICHIER: &str = "capture.toml";
 
 const CONFIG_PAR_DEFAUT: &str = r#"# Enregistrement vidéo des combos réussis (Windows 10 ou 11).
-# false = pas de vidéo.
+# false = pas de capture du jeu (ni vidéo, ni frames calées sur le jeu).
 actif = true
+# Garder les vidéos dès le lancement ? Sinon, F9 en jeu pour les activer ou les couper.
+enregistrer = false
 # Le programme de SF6, et le titre de sa fenêtre si le programme n'est pas trouvé.
 processus = "StreetFighter6.exe"
 fenetre = "Street Fighter 6"
@@ -44,6 +46,9 @@ duree_max_s = 30
 #[derive(Debug, Clone, Deserialize)]
 pub struct Config {
     pub actif: bool,
+    /// Absent des anciens fichiers : `false` (F9 pour activer).
+    #[serde(default)]
+    pub enregistrer: bool,
     pub processus: String,
     pub fenetre: String,
     pub dossier: String,
@@ -112,6 +117,8 @@ pub struct Capture {
     inputs: String,
     debut: u64,
     etapes: Vec<EtapeClip>,
+    /// Vidéos gardées ou non (F9). Coupé, le jeu reste capté pour caler les frames.
+    pub enregistre: bool,
 }
 
 impl Capture {
@@ -123,6 +130,7 @@ impl Capture {
             inputs: inputs.to_string(),
             debut: 0,
             etapes: Vec::new(),
+            enregistre: false,
         }
     }
 
@@ -130,7 +138,9 @@ impl Capture {
     pub fn debut_essai(&mut self, frame: u64) {
         self.debut = frame;
         self.etapes.clear();
-        self.envoyer(Ordre::Demarrer);
+        if self.enregistre {
+            self.envoyer(Ordre::Demarrer);
+        }
     }
 
     /// Une étape vient d'être validée.
@@ -175,8 +185,11 @@ pub fn lancer(config: Config, personnage: &str, combo: &str, inputs: &str) -> Ca
     #[cfg(windows)]
     {
         let (envoi, reception) = std::sync::mpsc::channel();
+        let enregistre = config.enregistrer;
         std::thread::spawn(move || capture_windows::boucle(config, reception));
-        Capture::new(Some(envoi), personnage, combo, inputs)
+        let mut capture = Capture::new(Some(envoi), personnage, combo, inputs);
+        capture.enregistre = enregistre;
+        capture
     }
     #[cfg(not(windows))]
     {
@@ -740,13 +753,22 @@ mod tests {
 
     fn capture_de_test() -> (Capture, mpsc::Receiver<Ordre>) {
         let (envoi, reception) = mpsc::channel();
-        let capture = Capture::new(
+        let mut capture = Capture::new(
             Some(envoi),
             "Dhalsim",
             "Drive Impact, Yoga Flame",
             "b+hp xx DI",
         );
+        capture.enregistre = true;
         (capture, reception)
+    }
+
+    #[test]
+    fn sans_enregistrement_aucune_video() {
+        let (mut capture, reception) = capture_de_test();
+        capture.enregistre = false;
+        capture.debut_essai(10);
+        assert!(reception.try_recv().is_err());
     }
 
     #[test]
@@ -858,6 +880,7 @@ mod tests {
         assert!(config.actif);
         assert_eq!(config.processus, "StreetFighter6.exe");
         assert_eq!(config.avant_ms, 700);
+        assert!(!config.enregistrer);
     }
 
     #[test]
