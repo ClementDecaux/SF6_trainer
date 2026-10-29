@@ -19,6 +19,31 @@ const FRAME: f64 = 10_000_000.0 / 60.0;
 /// Début d'une frame du jeu, ramené dans [0, FRAME), en unités de 100 ns. -1 = inconnu.
 static PHASE: AtomicI64 = AtomicI64::new(-1);
 
+/// Réglage fin (`decalage_ms` dans capture.toml), en unités de 100 ns : le jeu lit la
+/// manette un peu avant d'afficher l'image, on décale nos limites de frames d'autant.
+static DECALAGE: AtomicI64 = AtomicI64::new(0);
+
+pub fn regler_decalage(ms: f64) {
+    DECALAGE.store((ms * 10_000.0) as i64, Ordering::Relaxed);
+}
+
+/// Vrai dès que les images du jeu arrivent (frames calées sur SF6).
+pub fn synchro_active() -> bool {
+    PHASE.load(Ordering::Relaxed) >= 0
+}
+
+/// Où tombe un instant dans sa frame, en millisecondes (0 = tout début, 16,6 = toute fin).
+/// Affiché dans le terminal pour trouver le bon `decalage_ms`.
+pub fn position_ms(temps: i64) -> f64 {
+    (temps as f64 - debut_des_frames()).rem_euclid(FRAME) / 10_000.0
+}
+
+/// Le début des frames (phase du jeu + réglage fin), en unités de 100 ns.
+fn debut_des_frames() -> f64 {
+    let phase = PHASE.load(Ordering::Relaxed).max(0);
+    (phase + DECALAGE.load(Ordering::Relaxed)) as f64
+}
+
 /// Nouvelle image du jeu, montrée à l'écran à `temps` (unités de 100 ns, horloge Windows).
 /// Appelé par le thread de capture à chaque image.
 pub fn image_du_jeu(temps: i64) {
@@ -47,8 +72,9 @@ fn lisser(ancienne: f64, mesure: f64) -> f64 {
 
 /// Le numéro de frame d'un instant (unités de 100 ns), calé sur le jeu si possible.
 pub fn frame(temps: i64) -> u64 {
-    let phase = PHASE.load(Ordering::Relaxed).max(0) as f64;
-    ((temps as f64 - phase) / FRAME).floor().max(0.0) as u64
+    ((temps as f64 - debut_des_frames()) / FRAME)
+        .floor()
+        .max(0.0) as u64
 }
 
 /// L'heure actuelle, sur la même horloge que les images de la capture.

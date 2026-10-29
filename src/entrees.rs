@@ -63,7 +63,9 @@ pub fn boucle(
         direction: 5,
         boutons: vec![],
     };
-    let mut debut = horloge::frame(horloge::maintenant());
+    let mut debut_temps = horloge::maintenant();
+    let mut debut = horloge::frame(debut_temps);
+    let mut synchro_annoncee = false;
     let mut nouveaux: Vec<Action> = Vec::new();
     let mut coups: Vec<String> = Vec::new();
     // Dernier essai complet, en attente d'un Select (« c'était un vrai combo ») : frame, écarts.
@@ -112,7 +114,12 @@ pub fn boucle(
         }
 
         // Le numéro de frame, calé sur les images du jeu (voir horloge.rs).
-        let frame = horloge::frame(horloge::maintenant());
+        let temps = horloge::maintenant();
+        let frame = horloge::frame(temps);
+        if !synchro_annoncee && horloge::synchro_active() {
+            synchro_annoncee = true;
+            println!("{}", "      ✓ frames calées sur les images de SF6".green());
+        }
         let mut change = false;
         if f8.appuyee() {
             if let Ok(mut p) = partage.lock() {
@@ -172,9 +179,12 @@ pub fn boucle(
         };
         if nouvel_etat != etat || !appuyes.is_empty() {
             if frame > debut || !nouveaux.is_empty() {
+                // En gris : où l'état a commencé dans sa frame (en ms), pour régler
+                // `decalage_ms` si une durée diffère d'une frame avec le jeu.
                 println!(
-                    "{}",
-                    affichage::ligne(&etat, frame - debut, &nouveaux, &coups)
+                    "{}  {}",
+                    affichage::ligne(&etat, frame - debut, &nouveaux, &coups),
+                    format!("@{:.1}", horloge::position_ms(debut_temps)).dimmed()
                 );
                 if let Ok(mut p) = partage.lock() {
                     p.ajouter_ligne(Ligne {
@@ -216,6 +226,7 @@ pub fn boucle(
 
             etat = nouvel_etat;
             debut = frame;
+            debut_temps = temps;
             nouveaux = appuyes;
             change = true;
         }

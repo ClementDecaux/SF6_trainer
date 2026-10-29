@@ -27,6 +27,9 @@ const CONFIG_PAR_DEFAUT: &str = r#"# Enregistrement vidéo des combos réussis (
 actif = true
 # Garder les vidéos dès le lancement ? Sinon, F9 en jeu pour les activer ou les couper.
 enregistrer = false
+# Réglage fin des frames, en millisecondes (de -16 à 16). Si l'outil compte encore une
+# frame de trop ou de moins par rapport à l'historique du jeu, on le règle ici.
+decalage_ms = 0.0
 # Le programme de SF6, et le titre de sa fenêtre si le programme n'est pas trouvé.
 processus = "StreetFighter6.exe"
 fenetre = "Street Fighter 6"
@@ -49,6 +52,9 @@ pub struct Config {
     /// Absent des anciens fichiers : `false` (F9 pour activer).
     #[serde(default)]
     pub enregistrer: bool,
+    /// Absent des anciens fichiers : 0.
+    #[serde(default)]
+    pub decalage_ms: f64,
     pub processus: String,
     pub fenetre: String,
     pub dossier: String,
@@ -178,6 +184,7 @@ impl Capture {
 
 /// Démarre le thread de capture (si `actif = true` et sous Windows).
 pub fn lancer(config: Config, personnage: &str, combo: &str, inputs: &str) -> Capture {
+    crate::horloge::regler_decalage(config.decalage_ms);
     if !config.actif {
         println!("Vidéo : coupée dans {FICHIER}.");
         return Capture::new(None, personnage, combo, inputs);

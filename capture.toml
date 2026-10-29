@@ -3,6 +3,9 @@
 actif = true
 # Garder les vidéos dès le lancement ? Sinon, F9 en jeu pour les activer ou les couper.
 enregistrer = false
+# Réglage fin des frames, en millisecondes (de -16 à 16). Si l'outil compte encore une
+# frame de trop ou de moins par rapport à l'historique du jeu, on le règle ici.
+decalage_ms = 0.0
 # Le programme de SF6, et le titre de sa fenêtre si le programme n'est pas trouvé.
 processus = "StreetFighter6.exe"
 fenetre = "Street Fighter 6"
