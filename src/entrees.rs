@@ -4,6 +4,7 @@
 //! Elle écrit ce qu'elle voit dans le terminal et dans le `Partage` lu par l'overlay.
 
 use crate::affichage::{self, Etat};
+use crate::capture::Capture;
 use crate::combo::{Resultat, Trial};
 use crate::controles::{Action, Controles};
 use crate::motion::Historique;
@@ -25,6 +26,7 @@ const SIMULTANE_FRAMES: u64 = 3;
 pub fn boucle(
     controles: Controles,
     mut trial: Trial,
+    mut capture: Capture,
     partage: Arc<Mutex<Partage>>,
     ctx: egui::Context,
 ) {
@@ -110,7 +112,14 @@ pub fn boucle(
             historique.ajouter(frame, direction);
             // Drive Rush par dash (66) : seulement si c'est ce que le trial attend.
             if direction == 6 && trial.attendu() == "DR" && historique.dash(frame) {
-                resultat_trial(&mut trial, &["DR".to_string()], "66 (DR)", frame, &partage);
+                resultat_trial(
+                    &mut trial,
+                    &mut capture,
+                    &["DR".to_string()],
+                    "66 (DR)",
+                    frame,
+                    &partage,
+                );
             }
         }
 
@@ -158,7 +167,7 @@ pub fn boucle(
                     .find(|c| c.as_str() == trial.attendu())
                     .unwrap_or(&candidats[0])
                     .clone();
-                resultat_trial(&mut trial, &candidats, &coup, frame, &partage);
+                resultat_trial(&mut trial, &mut capture, &candidats, &coup, frame, &partage);
                 coups.push(coup);
             }
 
@@ -171,6 +180,7 @@ pub fn boucle(
         if trial.temps_depasse(frame) {
             println!("{}", "      ⏱ trop lent, on recommence".red());
             println!("{}", affichage::trial(&trial));
+            capture.annuler();
             if let Ok(mut p) = partage.lock() {
                 p.index = 0;
                 p.message("Trop lent, on recommence".to_string(), false);
@@ -227,15 +237,18 @@ fn lectures(
     candidats
 }
 
-/// Donne un coup au trial, l'affiche dans le terminal et met l'overlay à jour.
+/// Donne un coup au trial, l'affiche dans le terminal, met l'overlay à jour
+/// et dit à la capture vidéo quand filmer.
 fn resultat_trial(
     trial: &mut Trial,
+    capture: &mut Capture,
     candidats: &[String],
     coup: &str,
     frame: u64,
     partage: &Mutex<Partage>,
 ) {
     let resultat = trial.coup(candidats, frame);
+    suivre_video(trial, capture, &resultat, frame);
     let Ok(mut p) = partage.lock() else {
         return;
     };
@@ -255,6 +268,34 @@ fn resultat_trial(
             );
             println!("{}", affichage::trial(trial));
             p.message(format!("Raté : attendu {attendu}, reçu {coup}"), false);
+        }
+        Resultat::Ignore => {}
+    }
+}
+
+/// La vidéo suit le trial : on filme dès la 1re étape, on garde si c'est réussi.
+fn suivre_video(trial: &Trial, capture: &mut Capture, resultat: &Resultat, frame: u64) {
+    match resultat {
+        Resultat::Avance => {
+            if trial.index == 1 {
+                capture.debut_essai(frame);
+            }
+            capture.etape(&trial.etapes[trial.index - 1].notation, frame);
+        }
+        Resultat::Reussi => {
+            if let Some(derniere) = trial.etapes.last() {
+                capture.etape(&derniere.notation, frame);
+            }
+            capture.reussi();
+        }
+        Resultat::Rate { .. } => {
+            // Le coup raté peut être le début d'un nouvel essai (index revenu à 1).
+            if trial.index == 1 {
+                capture.debut_essai(frame);
+                capture.etape(&trial.etapes[0].notation, frame);
+            } else {
+                capture.annuler();
+            }
         }
         Resultat::Ignore => {}
     }

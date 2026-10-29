@@ -6,9 +6,11 @@
 //! - le thread principal dessine l'overlay (`overlay.rs`).
 //!
 //! Ils partagent l'état du trial à travers un `Arc<Mutex<Partage>>` (`partage.rs`).
-//! Fichiers de config : `controles.toml`, `combos.toml`, `overlay.toml`.
+//! Un troisième thread (`capture.rs`, Windows) filme SF6 et garde les combos réussis.
+//! Fichiers de config : `controles.toml`, `combos.toml`, `overlay.toml`, `capture.toml`.
 
 mod affichage;
+mod capture;
 mod combo;
 mod controles;
 mod entrees;
@@ -34,8 +36,9 @@ fn main() {
 
 fn lancer() -> Result<(), String> {
     let controles = controles::charger()?;
-    let trial = choisir_trial()?;
+    let (trial, personnage, inputs) = choisir_trial()?;
     let config = overlay::charger()?;
+    let capture = capture::lancer(capture::charger()?, &personnage, &trial.nom, &inputs);
 
     let partage = Arc::new(Mutex::new(Partage::new(&trial.nom, trial.etapes.clone())));
 
@@ -61,7 +64,9 @@ fn lancer() -> Result<(), String> {
             // à l'overlay de se redessiner quand quelque chose change.
             let ctx = cc.egui_ctx.clone();
             let partage_manette = Arc::clone(&partage);
-            std::thread::spawn(move || entrees::boucle(controles, trial, partage_manette, ctx));
+            std::thread::spawn(move || {
+                entrees::boucle(controles, trial, capture, partage_manette, ctx)
+            });
             Ok(Box::new(overlay::Overlay::new(partage, &config)))
         }),
     )
@@ -69,7 +74,8 @@ fn lancer() -> Result<(), String> {
 }
 
 /// Charge `combos.toml` et prend le combo demandé (`cargo run -- 2`), le premier par défaut.
-fn choisir_trial() -> Result<Trial, String> {
+/// Renvoie aussi le personnage et le combo tel qu'il est écrit (pour le `.json` des vidéos).
+fn choisir_trial() -> Result<(Trial, String, String), String> {
     let fichier = combo::charger()?;
     let numero: usize = match std::env::args().nth(1) {
         Some(arg) => arg
@@ -87,5 +93,9 @@ fn choisir_trial() -> Result<Trial, String> {
         fichier.personnage,
         fichier.combo.len()
     );
-    Ok(Trial::new(&choisi.nom, etapes))
+    Ok((
+        Trial::new(&choisi.nom, etapes),
+        fichier.personnage.clone(),
+        choisi.inputs.clone(),
+    ))
 }

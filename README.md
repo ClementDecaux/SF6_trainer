@@ -2,6 +2,7 @@
 
 Overlay de trials pour Street Fighter 6, en Rust. Il s'affiche par-dessus le jeu, passe à l'étape
 suivante quand tu fais le bon coup, et montre ton historique d'inputs à la frame près.
+Chaque combo réussi est enregistré en vidéo MP4 (60 fps) dans `clips/`.
 
 L'outil ne touche jamais au jeu : il lit seulement ta manette (aucun risque avec l'anti-cheat).
 
@@ -27,6 +28,17 @@ cargo test         # lance les tests
 | `combos.toml` | Tes combos, en notation forum : `b+hp xx DI xx b+mk xx qcf+mk, b+mk xx hcb+mp` |
 | `controles.toml` | Quel bouton physique fait quoi dans SF6 (LP, MP, HP...) |
 | `overlay.toml` | Position, taille et opacité de l'overlay |
+| `capture.toml` | Vidéo des combos réussis : on/off, dossier, durée filmée après le combo, qualité |
+
+## Vidéos des combos réussis
+
+Rien à installer (pas d'OBS) : l'outil filme la fenêtre de SF6 avec l'API de capture de Windows.
+Il commence à filmer quand la 1re étape est validée, jette la vidéo si le combo est raté,
+et la garde dans `clips/` s'il est réussi. L'overlay n'apparaît pas dans la vidéo.
+
+À côté de chaque vidéo, un `.json` donne le combo, le personnage, la date et la frame de chaque
+étape (comptée depuis la 1re étape). Les vidéos sont en H.264 à 60 fps : on peut les avancer image
+par image, par exemple dans VLC (touche `E`) ou mpv (touche `.`).
 
 Notation reconnue : directions `b f d u db df cr. st.` ou chiffres numpad, mouvements
 `qcf qcb hcf hcb dp` ou `236 214 41236 63214 623 421`, `DI` (HP+HK), `DP` (MP+MK),
@@ -45,6 +57,7 @@ Notation reconnue : directions `b f d u db df cr. st.` ou chiffres numpad, mouve
 | `src/partage.rs` | État partagé entre le thread de la manette et l'overlay |
 | `src/overlay.rs` | Fenêtre de l'overlay (egui) |
 | `src/affichage.rs` | Historique d'inputs coloré dans le terminal |
+| `src/capture.rs` | Vidéo des combos réussis (thread de capture Windows) |
 
 ## Apprendre Rust avec ce projet
 
@@ -53,3 +66,4 @@ Notation reconnue : directions `b f d u db df cr. st.` ou chiffres numpad, mouve
 - Erreurs avec `Result` : `combo.rs` (`parser`, `normaliser`)
 - Tests : les blocs `#[cfg(test)]` en bas de chaque fichier
 - Threads et `Arc<Mutex<_>>` : `main.rs`, `partage.rs`
+- Canal entre threads (`mpsc`) et code pour Windows seulement (`#[cfg(windows)]`) : `capture.rs`

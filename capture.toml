@@ -1,0 +1,14 @@
+# Enregistrement vidéo des combos réussis (Windows 10 ou 11).
+# false = pas de vidéo.
+actif = true
+# Le programme de SF6, et le titre de sa fenêtre si le programme n'est pas trouvé.
+processus = "StreetFighter6.exe"
+fenetre = "Street Fighter 6"
+# Dossier où les vidéos sont rangées.
+dossier = "clips"
+# Combien de temps on filme encore après la dernière étape, en millisecondes.
+apres_ms = 1500
+# Qualité de la vidéo, en mégabits par seconde (20 = très bon en 1080p).
+debit_mbps = 20
+# Au-delà de cette durée (en secondes), on arrête de filmer et on jette la vidéo.
+duree_max_s = 30
