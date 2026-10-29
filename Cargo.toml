@@ -15,9 +15,9 @@ serde = { version = "1.0.229", features = ["derive"] }
 serde_json = "1.0.154"
 toml = "1.1.8"
 
-# Windows uniquement : appels directs à l'API Windows (fenêtre de l'overlay, son).
+# Windows uniquement : appels directs à l'API Windows (fenêtre de l'overlay, son, touche F8).
 [target.'cfg(windows)'.dependencies]
 raw-window-handle = "0.6"
-windows-sys = { version = "0.61", features = ["Win32_Foundation", "Win32_Media_Audio", "Win32_UI_WindowsAndMessaging"] }
+windows-sys = { version = "0.61", features = ["Win32_Foundation", "Win32_Media_Audio", "Win32_UI_Input_KeyboardAndMouse", "Win32_UI_WindowsAndMessaging"] }
 # Capture vidéo de la fenêtre de SF6 et encodage MP4 par Windows (étape 7).
 windows-capture = "2.0"

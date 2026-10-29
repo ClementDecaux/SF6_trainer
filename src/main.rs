@@ -11,6 +11,7 @@
 
 mod affichage;
 mod capture;
+mod clavier;
 mod combo;
 mod controles;
 mod entrees;

@@ -19,6 +19,8 @@ cargo test         # lance les tests
 - SF6 doit être en **plein écran fenêtré** (borderless), sinon rien ne peut s'afficher par-dessus.
 - Le contrôleur doit être en mode **XInput** (mode manette Xbox).
 - Ctrl+C dans le terminal pour fermer l'overlay.
+- **F8** pour déplacer l'overlay : glisse-le à la souris, puis F8 à nouveau. La position est
+  enregistrée dans `overlay.toml`. Reclique ensuite dans le jeu pour lui rendre le focus.
 - L'outil suppose que tu joues à gauche de l'écran (b = 4 = vers la gauche).
 
 ## Fichiers de config
@@ -75,6 +77,7 @@ Notation reconnue : directions `b f d u db df cr. st.` ou chiffres numpad, mouve
 | `src/affichage.rs` | Historique d'inputs coloré dans le terminal |
 | `src/capture.rs` | Vidéo des combos réussis (thread de capture Windows) |
 | `src/timings.rs` | Fenêtres de timing apprises sur tes vrais combos |
+| `src/clavier.rs` | Touche F8 (déplacer l'overlay), lue même quand le jeu a le focus |
 | `src/son.rs` | Petit son du combo réussi, fabriqué par le programme |
 
 ## Apprendre Rust avec ce projet

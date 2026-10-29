@@ -46,6 +46,8 @@ pub struct Partage {
     pub ecarts: Vec<u64>,
     /// Fenêtres de timing apprises, pour les étapes 2 à N.
     pub fenetres: Option<Vec<(u64, u64)>>,
+    /// Mode déplacement (F8) : l'overlay peut être glissé à la souris.
+    pub deplacement: bool,
 }
 
 impl Partage {
@@ -59,6 +61,7 @@ impl Partage {
             reussites: 0,
             ecarts: Vec::new(),
             fenetres: None,
+            deplacement: false,
         }
     }
 

@@ -5,6 +5,7 @@
 
 use crate::affichage::{self, Etat};
 use crate::capture::Capture;
+use crate::clavier::ToucheDeplacement;
 use crate::combo::{Resultat, Trial};
 use crate::controles::{Action, Controles};
 use crate::motion::Historique;
@@ -72,6 +73,7 @@ pub fn boucle(
     // Dernier essai complet, en attente d'un Select (« c'était un vrai combo ») : frame, écarts.
     let mut a_confirmer: Option<(u64, Vec<u64>)> = None;
     let mut select_appuye = false;
+    let mut f8 = ToucheDeplacement::new();
 
     loop {
         // 1. On lit TOUS les événements en attente avant de calculer quoi que ce soit :
@@ -120,6 +122,18 @@ pub fn boucle(
 
         let frame = (start.elapsed().as_secs_f64() * 1000.0 / FRAME_MS) as u64;
         let mut change = false;
+        if f8.appuyee() {
+            if let Ok(mut p) = partage.lock() {
+                p.deplacement = !p.deplacement;
+                let texte = if p.deplacement {
+                    "      ✥ déplacement : glisse l'overlay à la souris, F8 pour finir"
+                } else {
+                    "      ✥ position enregistrée dans overlay.toml"
+                };
+                println!("{}", texte.cyan());
+            }
+            change = true;
+        }
         if select_appuye {
             select_appuye = false;
             confirmer(&mut trial, &mut timings, &mut a_confirmer, frame, &partage);

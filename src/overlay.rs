@@ -89,8 +89,11 @@ pub struct Overlay {
     opacite_fond: u8,
     transparence: bool,
     opacite_fenetre: u8,
-    /// Vrai une fois la fenêtre réglée côté Windows (au premier affichage).
-    fenetre_reglee: bool,
+    /// Dans combien d'images régler la fenêtre côté Windows (0 = rien à faire).
+    /// Au démarrage, et juste après chaque changement du mode déplacement.
+    regler_dans: u8,
+    /// Mode déplacement actuellement appliqué à la fenêtre.
+    deplacement: bool,
 }
 
 impl Overlay {
@@ -100,7 +103,8 @@ impl Overlay {
             opacite_fond: config.opacite_fond,
             transparence: config.transparence,
             opacite_fenetre: config.opacite_fenetre,
-            fenetre_reglee: false,
+            regler_dans: 1,
+            deplacement: false,
         }
     }
 }
@@ -117,26 +121,55 @@ impl eframe::App for Overlay {
     }
 
     fn ui(&mut self, ui: &mut egui::Ui, frame: &mut eframe::Frame) {
-        if !self.fenetre_reglee {
-            #[cfg(windows)]
-            regler_fenetre_windows(frame, self.opacite_fenetre);
-            #[cfg(not(windows))]
-            let _ = (frame, self.opacite_fenetre);
-            self.fenetre_reglee = true;
-        }
-
         // On verrouille le partage le temps de dessiner (quelques microsecondes).
         let partage = match self.partage.lock() {
             Ok(p) => p,
             Err(_) => return,
         };
 
+        // F8 : on rend la fenêtre cliquable (pour la glisser), ou de nouveau traversable.
+        if partage.deplacement != self.deplacement {
+            self.deplacement = partage.deplacement;
+            let ctx = ui.ctx().clone();
+            ctx.send_viewport_cmd(egui::ViewportCommand::MousePassthrough(!self.deplacement));
+            if !self.deplacement {
+                enregistrer_position(&ctx);
+            }
+            // Le changement est appliqué après cette image : on règle Windows deux images plus tard.
+            self.regler_dans = 2;
+        }
+        if self.regler_dans > 0 {
+            self.regler_dans -= 1;
+            if self.regler_dans == 0 {
+                #[cfg(windows)]
+                regler_fenetre_windows(frame, self.opacite_fenetre, !self.deplacement);
+                #[cfg(not(windows))]
+                let _ = (frame, self.opacite_fenetre);
+            } else {
+                ui.ctx().request_repaint();
+            }
+        }
+
+        let bordure = if self.deplacement {
+            egui::Stroke::new(3.0, JAUNE)
+        } else {
+            egui::Stroke::NONE
+        };
         egui::Frame::new()
             .fill(Color32::from_rgba_unmultiplied(0, 0, 0, self.opacite_fond))
+            .stroke(bordure)
             .corner_radius(10)
             .inner_margin(14)
             .show(ui, |ui| {
                 ui.set_width(ui.available_width());
+                if self.deplacement {
+                    ui.label(
+                        RichText::new("Glisse-moi à la souris, F8 pour finir")
+                            .color(JAUNE)
+                            .size(16.0)
+                            .strong(),
+                    );
+                }
                 entete(ui, &partage);
                 ui.add_space(8.0);
                 etapes(ui, &partage);
@@ -145,6 +178,18 @@ impl eframe::App for Overlay {
                 ui.separator();
                 historique(ui, &partage.lignes);
             });
+
+        // Mode déplacement : cliquer-glisser n'importe où déplace la fenêtre.
+        if self.deplacement {
+            let zone = ui.interact(
+                ui.max_rect(),
+                egui::Id::unique("deplacer"),
+                egui::Sense::click_and_drag(),
+            );
+            if zone.drag_started() {
+                ui.ctx().send_viewport_cmd(egui::ViewportCommand::StartDrag);
+            }
+        }
 
         // Redessiner un peu plus tard pour faire disparaître le message à temps.
         if partage.message.is_some() {
@@ -333,8 +378,40 @@ fn dessiner_coche(ui: &mut egui::Ui, visible: bool) {
 ///
 /// `unsafe` : on appelle directement des fonctions C de Windows, Rust ne peut pas
 /// vérifier lui-même qu'on les utilise correctement.
+/// Écrit la position actuelle de la fenêtre dans `overlay.toml` (lignes `x =` et `y =`),
+/// sans toucher au reste du fichier.
+fn enregistrer_position(ctx: &egui::Context) {
+    let Some(rect) = ctx.input(|i| i.viewport().outer_rect) else {
+        return;
+    };
+    let Ok(texte) = std::fs::read_to_string(FICHIER) else {
+        return;
+    };
+    let nouveau = remplacer_position(&texte, rect.min.x.round(), rect.min.y.round());
+    if let Err(e) = std::fs::write(FICHIER, nouveau) {
+        eprintln!("impossible d'écrire {FICHIER} : {e}");
+    }
+}
+
+fn remplacer_position(texte: &str, x: f32, y: f32) -> String {
+    let mut sortie = String::new();
+    for ligne in texte.lines() {
+        let debut = ligne.trim_start();
+        if debut.starts_with("x =") || debut.starts_with("x=") {
+            sortie.push_str(&format!("x = {x}"));
+        } else if debut.starts_with("y =") || debut.starts_with("y=") {
+            sortie.push_str(&format!("y = {y}"));
+        } else {
+            sortie.push_str(ligne);
+        }
+        sortie.push('\n');
+    }
+    sortie
+}
+
+/// `traversant` : les clics passent au travers de la fenêtre (sauf en mode déplacement).
 #[cfg(windows)]
-fn regler_fenetre_windows(frame: &eframe::Frame, opacite: u8) {
+fn regler_fenetre_windows(frame: &eframe::Frame, opacite: u8, traversant: bool) {
     use raw_window_handle::{HasWindowHandle, RawWindowHandle};
     use windows_sys::Win32::Foundation::HWND;
     use windows_sys::Win32::UI::WindowsAndMessaging::{
@@ -350,12 +427,13 @@ fn regler_fenetre_windows(frame: &eframe::Frame, opacite: u8) {
     };
     let hwnd = win32.hwnd.get() as HWND;
     unsafe {
-        let style = GetWindowLongPtrW(hwnd, GWL_EXSTYLE);
-        SetWindowLongPtrW(
-            hwnd,
-            GWL_EXSTYLE,
-            style | (WS_EX_LAYERED | WS_EX_TRANSPARENT) as isize,
-        );
+        let mut style = GetWindowLongPtrW(hwnd, GWL_EXSTYLE) | WS_EX_LAYERED as isize;
+        if traversant {
+            style |= WS_EX_TRANSPARENT as isize;
+        } else {
+            style &= !(WS_EX_TRANSPARENT as isize);
+        }
+        SetWindowLongPtrW(hwnd, GWL_EXSTYLE, style);
         SetLayeredWindowAttributes(hwnd, 0, opacite, LWA_ALPHA);
     }
 }
@@ -374,6 +452,15 @@ fn couleur_bouton(action: Action) -> Color32 {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn la_position_est_remplacee_sans_toucher_au_reste() {
+        let nouveau = remplacer_position(CONFIG_PAR_DEFAUT, 640.0, 75.0);
+        let c: Config = toml::from_str(&nouveau).unwrap();
+        assert_eq!((c.x, c.y), (640.0, 75.0));
+        assert_eq!(c.largeur, 380.0);
+        assert!(nouveau.contains("# Position et taille"));
+    }
 
     #[test]
     fn la_config_par_defaut_se_lit() {
