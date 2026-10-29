@@ -49,6 +49,18 @@ l'outil connaît la fenêtre de chaque étape (1 frame de tolérance) :
 
 Si un vrai combo est marqué « trop tard », appuie quand même sur Select : la fenêtre s'élargit.
 
+### Frames exactes : l'historique d'inputs du jeu
+
+Active l'affichage des inputs dans le mode entraînement de SF6. L'outil lit alors l'historique
+à gauche de l'écran sur les images capturées (chiffres, flèches, boutons, comparés à des modèles
+pris sur des photos du jeu). Quand un combo est fini, il retrouve chaque étape dans cet
+historique : les écarts sont ceux du jeu, à la frame près (`frames exactes du jeu` dans le
+terminal). Le verdict arrive donc environ 0,1 s après le dernier coup.
+
+Si l'historique n'est pas visible ou mal lu (autre affichage par-dessus, stage trop clair...),
+l'outil revient à son estimation (`frames estimées`, à une frame près).
+`historique = false` dans `capture.toml` coupe cette lecture.
+
 ## Vidéos des combos réussis
 
 Rien à installer (pas d'OBS) : l'outil filme la fenêtre de SF6 avec l'API de capture de Windows.
@@ -71,6 +83,8 @@ Notation reconnue : directions `b f d u db df cr. st.` ou chiffres numpad, mouve
 | `src/main.rs` | Lancement : charge les configs, ouvre l'overlay, démarre le thread de la manette |
 | `src/entrees.rs` | Thread de la manette : lit les inputs, reconnaît les coups, fait avancer le trial |
 | `src/manette.rs` | Lecture de la manette : XInput toutes les millisecondes sous Windows |
+| `src/ecran.rs` | Lecture de l'historique d'inputs affiché par SF6 (frames exactes) |
+| `src/ecran_modeles.rs` | Modèles des chiffres, flèches et boutons de SF6 (fichier généré) |
 | `src/horloge.rs` | Numéros de frame calés sur les images de SF6 (reçues par la capture) |
 | `src/notation.rs` | Directions -> notation numpad (1 à 9) |
 | `src/motion.rs` | Reconnaissance des mouvements spéciaux (236, 63214, 66...) |

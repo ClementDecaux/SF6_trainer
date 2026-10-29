@@ -30,6 +30,9 @@ enregistrer = false
 # Réglage fin des frames, en millisecondes (de -16 à 16). Si l'outil compte encore une
 # frame de trop ou de moins par rapport à l'historique du jeu, on le règle ici.
 decalage_ms = 0.0
+# Lire l'historique d'inputs affiché par SF6 (à gauche de l'écran) pour avoir les durées
+# exactes du jeu. Active l'affichage des inputs dans le mode entraînement.
+historique = true
 # Le programme de SF6, et le titre de sa fenêtre si le programme n'est pas trouvé.
 processus = "StreetFighter6.exe"
 fenetre = "Street Fighter 6"
@@ -55,6 +58,9 @@ pub struct Config {
     /// Absent des anciens fichiers : 0.
     #[serde(default)]
     pub decalage_ms: f64,
+    /// Absent des anciens fichiers : `true`.
+    #[serde(default = "vrai")]
+    pub historique: bool,
     pub processus: String,
     pub fenetre: String,
     pub dossier: String,
@@ -64,6 +70,10 @@ pub struct Config {
     pub apres_ms: u64,
     pub debit_mbps: u32,
     pub duree_max_s: u64,
+}
+
+fn vrai() -> bool {
+    true
 }
 
 fn avant_ms_par_defaut() -> u64 {
@@ -495,6 +505,8 @@ mod capture_windows {
         numero: u32,
         /// F10 appuyée : la prochaine image est enregistrée en PNG.
         photo: bool,
+        /// Lecture de l'historique d'inputs du jeu.
+        suivi: crate::ecran::Suivi,
     }
 
     impl Enregistreur {
@@ -599,14 +611,23 @@ mod capture_windows {
             }
         }
 
-        /// Copie l'image dans le tampon (pour filmer un peu avant la 1re étape).
-        fn garder_image(&mut self, frame: &mut Frame, temps: i64) -> Result<(), Erreur> {
+        /// Lit l'historique d'inputs du jeu sur l'image, et la copie dans le tampon
+        /// (pour filmer un peu avant la 1re étape).
+        fn lire_image(&mut self, frame: &mut Frame, temps: i64) -> Result<(), Erreur> {
             let (largeur, hauteur) = (frame.width(), frame.height());
-            let mut pixels = self.tampon.place();
             let mut image = frame.buffer()?;
             let pas = image.row_pitch() as usize;
+            let brut = image.as_raw_buffer();
+            if self.config.historique {
+                let vue = crate::ecran::Vue::jeu(brut, largeur as usize, hauteur as usize, pas);
+                crate::ecran::lire_image(&mut self.suivi, &vue, temps);
+            }
+            if !self.tampon.actif() {
+                return Ok(());
+            }
+            let mut pixels = self.tampon.place();
             retourner_lignes(
-                image.as_raw_buffer(),
+                brut,
                 pas,
                 largeur as usize * 4,
                 hauteur as usize,
@@ -679,6 +700,7 @@ mod capture_windows {
                 tampon,
                 numero: 0,
                 photo: false,
+                suivi: crate::ecran::Suivi::default(),
             })
         }
 
@@ -714,14 +736,14 @@ mod capture_windows {
                 }
             }
 
-            // 2. L'image va toujours dans le tampon des dernières images.
+            // 2. L'image est lue (historique du jeu) et va dans le tampon des dernières images.
             let temps = frame.timestamp()?.Duration;
             // L'heure de chaque image sert aussi à caler nos frames sur celles du jeu.
             crate::horloge::image_du_jeu(temps);
-            if self.tampon.actif()
-                && let Err(e) = self.garder_image(frame, temps)
+            if (self.tampon.actif() || self.config.historique)
+                && let Err(e) = self.lire_image(frame, temps)
             {
-                eprintln!("Vidéo : image non gardée ({e}).");
+                eprintln!("Vidéo : image non lue ({e}).");
             }
 
             // 3. Selon l'état : préparer, commencer, ou continuer à filmer.

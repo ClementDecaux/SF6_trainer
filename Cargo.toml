@@ -23,3 +23,6 @@ windows-capture = "2.0"
 # Hors Windows (Linux, pour développer) : la manette est lue par gilrs.
 [target.'cfg(not(windows))'.dependencies]
 gilrs = "0.11"
+
+[dev-dependencies]
+png = "0.18"

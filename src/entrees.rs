@@ -8,15 +8,16 @@ use crate::capture::Capture;
 use crate::clavier::Touche;
 use crate::combo::{Resultat, Trial};
 use crate::controles::{Action, Controles};
+use crate::ecran::{self, Appui, EntreeJeu};
 use crate::horloge;
 use crate::manette::{Evenement, Manette};
 use crate::motion::Historique;
 use crate::notation::Directions;
 use crate::partage::{Ligne, Partage};
-use crate::timings::{ESSAIS_MIN, Timings};
+use crate::timings::{ESSAIS_MIN, Timings, verifier};
 use colored::Colorize;
 use eframe::egui;
-use std::collections::{BTreeSet, HashMap};
+use std::collections::{BTreeSet, HashMap, VecDeque};
 use std::sync::{Arc, Mutex};
 use std::time::Duration;
 
@@ -74,6 +75,7 @@ pub fn boucle(
     let mut f8 = Touche::f8();
     let mut f9 = Touche::f9();
     let mut f10 = Touche::f10();
+    let mut juge = Juge::default();
 
     loop {
         // 1. On lit TOUS les événements en attente avant de calculer quoi que ce soit :
@@ -122,6 +124,17 @@ pub fn boucle(
             println!("{}", "      ✓ frames calées sur les images de SF6".green());
         }
         let mut change = false;
+
+        // L'historique du jeu lu à l'écran : nos appuis, ses nouvelles lignes, et le verdict
+        // d'un combo fini s'il attendait les frames exactes.
+        for &action in &appuyes {
+            juge.appui(temps, action);
+        }
+        juge.lire_journal(temps);
+        if let Some(fin) = juge.pret(temps) {
+            a_confirmer = Some(conclure(&trial, &mut capture, fin, frame, &partage));
+            change = true;
+        }
         if f8.appuyee() {
             if let Ok(mut p) = partage.lock() {
                 p.deplacement = !p.deplacement;
@@ -159,19 +172,21 @@ pub fn boucle(
         if direction != etat.direction {
             historique.ajouter(frame, direction);
             // Drive Rush par dash (66) : seulement si c'est ce que le trial attend.
-            if direction == 6
-                && trial.attendu() == "DR"
-                && historique.dash(frame)
-                && resultat_trial(
+            if direction == 6 && trial.attendu() == "DR" && historique.dash(frame) {
+                let fin = resultat_trial(
                     &mut trial,
                     &mut capture,
+                    &mut juge,
                     &["DR".to_string()],
                     "66 (DR)",
-                    frame,
+                    (frame, temps),
                     &partage,
-                )
-            {
-                a_confirmer = Some((frame, trial.ecarts.clone()));
+                );
+                if let Some(fin) = fin {
+                    a_confirmer = juge
+                        .finir(fin, temps, &trial)
+                        .map(|fin| conclure(&trial, &mut capture, fin, frame, &partage));
+                }
             }
         }
 
@@ -222,8 +237,25 @@ pub fn boucle(
                     .find(|c| c.as_str() == trial.attendu())
                     .unwrap_or(&candidats[0])
                     .clone();
-                if resultat_trial(&mut trial, &mut capture, &candidats, &coup, frame, &partage) {
-                    a_confirmer = Some((frame, trial.ecarts.clone()));
+                // Un nouvel essai commence : le verdict du précédent ne peut plus attendre.
+                let nouvel_essai =
+                    trial.index == 0 && candidats.iter().any(|c| *c == trial.etapes[0].notation);
+                if nouvel_essai && let Some(fin) = juge.forcer() {
+                    a_confirmer = Some(conclure(&trial, &mut capture, fin, frame, &partage));
+                }
+                let fin = resultat_trial(
+                    &mut trial,
+                    &mut capture,
+                    &mut juge,
+                    &candidats,
+                    &coup,
+                    (frame, temps),
+                    &partage,
+                );
+                if let Some(fin) = fin {
+                    a_confirmer = juge
+                        .finir(fin, temps, &trial)
+                        .map(|fin| conclure(&trial, &mut capture, fin, frame, &partage));
                 }
                 coups.push(coup);
             }
@@ -296,19 +328,38 @@ fn lectures(
 }
 
 /// Donne un coup au trial, l'affiche dans le terminal, met l'overlay à jour
-/// et dit à la capture vidéo quand filmer. Renvoie `true` si toutes les étapes sont faites.
+/// et dit à la capture vidéo quand filmer. Renvoie le combo fini si c'était la dernière étape
+/// (le verdict est donné par `conclure`, éventuellement après lecture de l'historique du jeu).
 fn resultat_trial(
     trial: &mut Trial,
     capture: &mut Capture,
+    juge: &mut Juge,
     candidats: &[String],
     coup: &str,
-    frame: u64,
+    (frame, temps): (u64, i64),
     partage: &Mutex<Partage>,
-) -> bool {
+) -> Option<Fin> {
     let resultat = trial.coup(candidats, frame);
     suivre_video(trial, capture, &resultat, frame);
+    // Les appuis des étapes, pour les retrouver ensuite dans l'historique du jeu.
+    match resultat {
+        Resultat::Avance | Resultat::Rate { .. } if trial.index == 1 => {
+            juge.etapes.clear();
+            juge.etape(temps, &trial.etapes[0].notation);
+        }
+        Resultat::Avance => juge.etape(temps, &trial.etapes[trial.index - 1].notation),
+        Resultat::Reussi => {
+            if trial.etapes.len() == 1 {
+                juge.etapes.clear();
+            }
+            if let Some(derniere) = trial.etapes.last() {
+                juge.etape(temps, &derniere.notation);
+            }
+        }
+        _ => {}
+    }
     let Ok(mut p) = partage.lock() else {
-        return false;
+        return None;
     };
     p.index = trial.index;
     p.ecarts = trial.ecarts.clone();
@@ -319,20 +370,12 @@ fn resultat_trial(
     }
     match resultat {
         Resultat::Avance => println!("{}", affichage::trial(trial)),
-        Resultat::Reussi if trial.erreurs_timing.is_empty() => {
-            println!("{}", "      ★ COMBO RÉUSSI ★".bright_green().bold());
-            println!("{}", affichage::trial(trial));
-            crate::son::reussi();
-            p.reussites += 1;
-            p.message("COMBO RÉUSSI !".to_string(), true);
-            return true;
-        }
         Resultat::Reussi => {
-            let erreurs = trial.erreurs_timing.join(", ");
-            println!("{}", format!("      ✗ inputs bons, mais {erreurs}").red());
-            println!("{}", affichage::trial(trial));
-            p.message(format!("Timing : {erreurs}"), false);
-            return true;
+            return Some(Fin {
+                ecarts: trial.ecarts.clone(),
+                erreurs: trial.erreurs_timing.clone(),
+                exact: false,
+            });
         }
         Resultat::Rate { attendu } => {
             println!(
@@ -344,7 +387,204 @@ fn resultat_trial(
         }
         Resultat::Ignore => {}
     }
-    false
+    None
+}
+
+/// Un combo fini : écarts entre les étapes et erreurs de timing.
+#[derive(Debug, Clone)]
+struct Fin {
+    ecarts: Vec<u64>,
+    erreurs: Vec<String>,
+    /// Écarts lus dans l'historique du jeu (sinon : estimés avec notre horloge).
+    exact: bool,
+}
+
+/// Donne le verdict d'un combo fini : son, message, vidéo gardée ou non.
+/// Renvoie ce que Select pourra confirmer (frame, écarts).
+fn conclure(
+    trial: &Trial,
+    capture: &mut Capture,
+    fin: Fin,
+    frame: u64,
+    partage: &Mutex<Partage>,
+) -> (u64, Vec<u64>) {
+    let ecarts: Vec<String> = fin.ecarts.iter().map(|e| format!("+{e}")).collect();
+    let source = if fin.exact {
+        "frames exactes du jeu".green()
+    } else {
+        "frames estimées".yellow()
+    };
+    println!("      écarts : {} f  ({source})", ecarts.join(" "));
+    if fin.erreurs.is_empty() {
+        println!("{}", "      ★ COMBO RÉUSSI ★".bright_green().bold());
+        crate::son::reussi();
+        capture.reussi();
+    } else {
+        let erreurs = fin.erreurs.join(", ");
+        println!("{}", format!("      ✗ inputs bons, mais {erreurs}").red());
+        // Hors timing : le combo n'est sûrement pas passé, on ne garde pas la vidéo.
+        capture.annuler();
+    }
+    println!("{}", affichage::trial(trial));
+    if let Ok(mut p) = partage.lock() {
+        p.ecarts = fin.ecarts.clone();
+        if fin.erreurs.is_empty() {
+            p.reussites += 1;
+            p.message("COMBO RÉUSSI !".to_string(), true);
+        } else {
+            p.message(format!("Timing : {}", fin.erreurs.join(", ")), false);
+        }
+    }
+    (frame, fin.ecarts)
+}
+
+/// Combien de temps on attend l'historique du jeu avant de donner le verdict sans lui.
+const ATTENTE_MAX: i64 = 4_000_000; // 400 ms
+
+/// Vérifie les combos avec l'historique d'inputs du jeu (frames exactes).
+#[derive(Default)]
+struct Juge {
+    latence: ecran::Latence,
+    /// Dernier numéro lu dans le journal du jeu.
+    dernier: u64,
+    /// Les lignes récentes de l'historique du jeu.
+    journal: VecDeque<EntreeJeu>,
+    /// Nos appuis récents (heure, bouton), pour mesurer la latence.
+    nos_appuis: VecDeque<(i64, u8)>,
+    /// Les appuis des étapes de l'essai en cours.
+    etapes: Vec<Appui>,
+    /// Combo fini qui attend l'historique du jeu.
+    attente: Option<Attente>,
+    /// L'historique du jeu était lu à la dernière vérification.
+    visible: bool,
+}
+
+struct Attente {
+    fin: Fin,
+    appuis: Vec<Appui>,
+    fenetres: Option<Vec<(u64, u64)>>,
+    notations: Vec<String>,
+    /// Heure du dernier appui du combo.
+    quand: i64,
+    latence: i64,
+}
+
+impl Juge {
+    /// Durée gardée pour nos appuis et les lignes du jeu (unités de 100 ns).
+    const MEMOIRE: i64 = 50_000_000; // 5 s
+
+    fn appui(&mut self, temps: i64, action: Action) {
+        let boutons = ecran::boutons_etape(&action.to_string());
+        for i in 0..6 {
+            if boutons & (1 << i) != 0 {
+                self.nos_appuis.push_back((temps, 1 << i));
+            }
+        }
+        while self
+            .nos_appuis
+            .front()
+            .is_some_and(|(t, _)| temps - t > Self::MEMOIRE)
+        {
+            self.nos_appuis.pop_front();
+        }
+    }
+
+    fn etape(&mut self, temps: i64, notation: &str) {
+        self.etapes.push(Appui {
+            temps,
+            boutons: ecran::boutons_etape(notation),
+        });
+    }
+
+    /// Ajoute les nouvelles lignes de l'historique du jeu et mesure la latence.
+    fn lire_journal(&mut self, temps: i64) {
+        let visible = ecran::historique_visible(temps);
+        if visible != self.visible {
+            self.visible = visible;
+            let texte = if visible {
+                "      ✓ historique d'inputs de SF6 lu à l'écran : frames exactes".green()
+            } else {
+                "      ○ historique d'inputs de SF6 plus visible : frames estimées".yellow()
+            };
+            println!("{texte}");
+        }
+        let appuis: Vec<(i64, u8)> = self.nos_appuis.iter().copied().collect();
+        for entree in ecran::nouvelles_entrees(&mut self.dernier) {
+            self.latence.mesurer(&entree, &appuis);
+            self.journal.push_back(entree);
+        }
+        while self
+            .journal
+            .front()
+            .is_some_and(|e| temps - e.vu > Self::MEMOIRE)
+        {
+            self.journal.pop_front();
+        }
+    }
+
+    /// Le combo vient de finir. Si l'historique du jeu est lu, on attend ses frames exactes
+    /// (`None`, le verdict viendra de `pret`). Sinon, verdict tout de suite avec notre estimation.
+    fn finir(&mut self, fin: Fin, temps: i64, trial: &Trial) -> Option<Fin> {
+        let latence = self.latence.valeur();
+        let verifiable = self.visible && self.etapes.iter().all(|a| a.boutons != 0);
+        match latence {
+            Some(latence) if verifiable => {
+                self.attente = Some(Attente {
+                    fin,
+                    appuis: std::mem::take(&mut self.etapes),
+                    fenetres: trial.fenetres.clone(),
+                    notations: trial.etapes.iter().map(|e| e.notation.clone()).collect(),
+                    quand: temps,
+                    latence,
+                });
+                None
+            }
+            _ => Some(fin),
+        }
+    }
+
+    /// Le verdict d'un combo en attente, quand l'historique du jeu l'a rattrapé
+    /// (ou quand on a assez attendu).
+    fn pret(&mut self, temps: i64) -> Option<Fin> {
+        let attente = self.attente.as_ref()?;
+        let affiche = temps > attente.quand + attente.latence + 4 * ecran::FRAME;
+        if !affiche {
+            return None;
+        }
+        let exact = self.verifier();
+        if exact.is_none() && temps < attente.quand + attente.latence + ATTENTE_MAX {
+            return None;
+        }
+        let attente = self.attente.take()?;
+        Some(exact.unwrap_or(attente.fin))
+    }
+
+    /// Verdict immédiat (un nouvel essai commence) : exact si l'historique est déjà là.
+    fn forcer(&mut self) -> Option<Fin> {
+        let exact = self.verifier();
+        let attente = self.attente.take()?;
+        Some(exact.unwrap_or(attente.fin))
+    }
+
+    /// Les écarts exacts du combo en attente, avec ses erreurs de timing.
+    fn verifier(&self) -> Option<Fin> {
+        let attente = self.attente.as_ref()?;
+        let journal: Vec<EntreeJeu> = self.journal.iter().copied().collect();
+        let ecarts = ecran::ecarts_du_jeu(&attente.appuis, &journal, attente.latence)?;
+        let mut erreurs = Vec::new();
+        if let Some(fenetres) = &attente.fenetres {
+            for (i, (&ecart, &fenetre)) in ecarts.iter().zip(fenetres).enumerate() {
+                if let Some(e) = verifier(ecart, fenetre) {
+                    erreurs.push(format!("{} {e}", attente.notations[i + 1]));
+                }
+            }
+        }
+        Some(Fin {
+            ecarts,
+            erreurs,
+            exact: true,
+        })
+    }
 }
 
 /// Select après un combo : « c'était un vrai combo ». Ses écarts sont ajoutés aux
@@ -391,15 +631,10 @@ fn suivre_video(trial: &Trial, capture: &mut Capture, resultat: &Resultat, frame
             }
             capture.etape(&trial.etapes[trial.index - 1].notation, frame);
         }
+        // Gardée ou non : décidé par `conclure`, une fois les frames du jeu connues.
         Resultat::Reussi => {
             if let Some(derniere) = trial.etapes.last() {
                 capture.etape(&derniere.notation, frame);
-            }
-            // Hors timing : le combo n'est sûrement pas passé, on ne garde pas la vidéo.
-            if trial.erreurs_timing.is_empty() {
-                capture.reussi();
-            } else {
-                capture.annuler();
             }
         }
         Resultat::Rate { .. } => {

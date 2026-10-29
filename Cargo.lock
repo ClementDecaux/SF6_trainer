@@ -2185,6 +2185,7 @@ dependencies = [
  "colored",
  "eframe",
  "gilrs",
+ "png",
  "raw-window-handle",
  "serde",
  "serde_json",

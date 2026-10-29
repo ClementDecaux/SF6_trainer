@@ -14,6 +14,8 @@ mod capture;
 mod clavier;
 mod combo;
 mod controles;
+mod ecran;
+mod ecran_modeles;
 mod entrees;
 mod horloge;
 mod manette;
