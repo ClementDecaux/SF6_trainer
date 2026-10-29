@@ -671,6 +671,8 @@ mod capture_windows {
 
             // 2. L'image va toujours dans le tampon des dernières images.
             let temps = frame.timestamp()?.Duration;
+            // L'heure de chaque image sert aussi à caler nos frames sur celles du jeu.
+            crate::horloge::image_du_jeu(temps);
             if self.tampon.actif()
                 && let Err(e) = self.garder_image(frame, temps)
             {

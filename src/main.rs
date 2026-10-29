@@ -15,6 +15,8 @@ mod clavier;
 mod combo;
 mod controles;
 mod entrees;
+mod horloge;
+mod manette;
 mod motion;
 mod notation;
 mod overlay;

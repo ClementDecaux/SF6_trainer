@@ -68,6 +68,8 @@ Notation reconnue : directions `b f d u db df cr. st.` ou chiffres numpad, mouve
 | --- | --- |
 | `src/main.rs` | Lancement : charge les configs, ouvre l'overlay, démarre le thread de la manette |
 | `src/entrees.rs` | Thread de la manette : lit les inputs, reconnaît les coups, fait avancer le trial |
+| `src/manette.rs` | Lecture de la manette : XInput toutes les millisecondes sous Windows |
+| `src/horloge.rs` | Numéros de frame calés sur les images de SF6 (reçues par la capture) |
 | `src/notation.rs` | Directions -> notation numpad (1 à 9) |
 | `src/motion.rs` | Reconnaissance des mouvements spéciaux (236, 63214, 66...) |
 | `src/combo.rs` | Lecture des combos écrits en notation forum, moteur de trial |

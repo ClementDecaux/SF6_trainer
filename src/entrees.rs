@@ -8,19 +8,17 @@ use crate::capture::Capture;
 use crate::clavier::ToucheDeplacement;
 use crate::combo::{Resultat, Trial};
 use crate::controles::{Action, Controles};
+use crate::horloge;
+use crate::manette::{Evenement, Manette};
 use crate::motion::Historique;
 use crate::notation::Directions;
 use crate::partage::{Ligne, Partage};
 use crate::timings::{ESSAIS_MIN, Timings};
 use colored::Colorize;
 use eframe::egui;
-use gilrs::{Axis, Button, EventType, Gilrs};
 use std::collections::{BTreeSet, HashMap};
 use std::sync::{Arc, Mutex};
-use std::time::{Duration, Instant};
-
-/// Durée d'une frame de SF6 (60 images par seconde), en millisecondes.
-const FRAME_MS: f64 = 1000.0 / 60.0;
+use std::time::Duration;
 
 /// Deux boutons appuyés à moins de 3 frames d'écart comptent comme simultanés (HP+HK).
 const SIMULTANE_FRAMES: u64 = 3;
@@ -33,17 +31,15 @@ pub fn boucle(
     partage: Arc<Mutex<Partage>>,
     ctx: egui::Context,
 ) {
-    let mut gilrs = match Gilrs::new() {
-        Ok(g) => g,
+    let mut manette = match Manette::new() {
+        Ok(m) => m,
         Err(e) => {
-            eprintln!("Impossible d'initialiser la lecture des manettes : {e}");
+            eprintln!("{e}");
             return;
         }
     };
-
-    println!("Manettes détectées :");
-    for (id, gamepad) in gilrs.gamepads() {
-        println!("  [{id}] {}", gamepad.name());
+    for nom in manette.noms() {
+        println!("Manette détectée : {nom}");
     }
     println!("Ctrl+C pour quitter. Joueur à gauche de l'écran (b = 4 = vers la gauche).\n");
     println!("{}  {}", trial.nom.bold(), affichage::trial(&trial));
@@ -55,7 +51,6 @@ pub fn boucle(
     }
     println!();
 
-    let start = Instant::now();
     let mut dirs = Directions::default();
     let mut historique = Historique::default();
     let mut tenus: BTreeSet<Action> = BTreeSet::new();
@@ -67,7 +62,7 @@ pub fn boucle(
         direction: 5,
         boutons: vec![],
     };
-    let mut debut = 0;
+    let mut debut = horloge::frame(horloge::maintenant());
     let mut nouveaux: Vec<Action> = Vec::new();
     let mut coups: Vec<String> = Vec::new();
     // Dernier essai complet, en attente d'un Select (« c'était un vrai combo ») : frame, écarts.
@@ -79,48 +74,43 @@ pub fn boucle(
         // 1. On lit TOUS les événements en attente avant de calculer quoi que ce soit :
         //    une manette envoie souvent plusieurs changements en même temps.
         let mut appuyes: Vec<Action> = Vec::new();
-        while let Some(event) = gilrs.next_event() {
-            match event.event {
-                EventType::ButtonPressed(Button::Select, _) => select_appuye = true,
-                EventType::ButtonPressed(button, _) => {
-                    if !changer_direction(&mut dirs, button, true) {
-                        match controles.get(&format!("{button:?}")) {
+        for evenement in manette.lire() {
+            match evenement {
+                Evenement::Appui("Select") => select_appuye = true,
+                Evenement::Appui(bouton) => {
+                    if !changer_direction(&mut dirs, bouton, true) {
+                        match controles.get(bouton) {
                             Some(&action) => {
                                 tenus.insert(action);
                                 appuyes.push(action);
                             }
-                            None => println!("     bouton {button:?} (pas dans controles.toml)"),
+                            None => println!("     bouton {bouton} (pas dans controles.toml)"),
                         }
                     }
                 }
-                EventType::ButtonReleased(button, _) => {
-                    if !changer_direction(&mut dirs, button, false)
-                        && let Some(action) = controles.get(&format!("{button:?}"))
+                Evenement::Relache(bouton) => {
+                    if !changer_direction(&mut dirs, bouton, false)
+                        && let Some(action) = controles.get(bouton)
                     {
                         tenus.remove(action);
                     }
                 }
-                EventType::AxisChanged(axis, value, _) => match axis {
-                    // Stick analogique : transformé en directions avec une zone morte.
-                    Axis::LeftStickX => {
-                        dirs.left = value < -0.5;
-                        dirs.right = value > 0.5;
-                    }
-                    Axis::LeftStickY => {
-                        dirs.down = value < -0.5;
-                        dirs.up = value > 0.5;
-                    }
-                    _ => {}
-                },
-                EventType::Connected => {
-                    println!("Manette connectée : {}", gilrs.gamepad(event.id).name())
+                // Stick analogique : transformé en directions avec une zone morte.
+                Evenement::StickX(valeur) => {
+                    dirs.left = valeur < -0.5;
+                    dirs.right = valeur > 0.5;
                 }
-                EventType::Disconnected => println!("Manette déconnectée"),
-                _ => {}
+                Evenement::StickY(valeur) => {
+                    dirs.down = valeur < -0.5;
+                    dirs.up = valeur > 0.5;
+                }
+                Evenement::Connectee(nom) => println!("Manette connectée : {nom}"),
+                Evenement::Deconnectee => println!("Manette déconnectée"),
             }
         }
 
-        let frame = (start.elapsed().as_secs_f64() * 1000.0 / FRAME_MS) as u64;
+        // Le numéro de frame, calé sur les images du jeu (voir horloge.rs).
+        let frame = horloge::frame(horloge::maintenant());
         let mut change = false;
         if f8.appuyee() {
             if let Ok(mut p) = partage.lock() {
@@ -398,12 +388,12 @@ fn suivre_video(trial: &Trial, capture: &mut Capture, resultat: &Resultat, frame
 /// Met à jour les directions si le bouton est une flèche de la croix (D-pad).
 /// Les leverless en mode XInput envoient leurs directions comme une croix.
 /// Renvoie `true` si le bouton était une direction.
-fn changer_direction(dirs: &mut Directions, button: Button, pressed: bool) -> bool {
-    match button {
-        Button::DPadUp => dirs.up = pressed,
-        Button::DPadDown => dirs.down = pressed,
-        Button::DPadLeft => dirs.left = pressed,
-        Button::DPadRight => dirs.right = pressed,
+fn changer_direction(dirs: &mut Directions, bouton: &str, pressed: bool) -> bool {
+    match bouton {
+        "DPadUp" => dirs.up = pressed,
+        "DPadDown" => dirs.down = pressed,
+        "DPadLeft" => dirs.left = pressed,
+        "DPadRight" => dirs.right = pressed,
         _ => return false,
     }
     true
