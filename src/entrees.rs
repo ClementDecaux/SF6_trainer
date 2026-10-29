@@ -49,7 +49,7 @@ pub fn boucle(
             "Timing : pas encore appris. Appuie sur Select après un vrai combo ({ESSAIS_MIN} fois)."
         ),
     }
-    println!("F8 : déplacer l'overlay. F9 : garder ou non les vidéos des combos réussis.");
+    println!("F8 : déplacer l'overlay. F9 : garder ou non les vidéos. F10 : photo du jeu (PNG).");
     println!();
 
     let mut dirs = Directions::default();
@@ -73,6 +73,7 @@ pub fn boucle(
     let mut select_appuye = false;
     let mut f8 = Touche::f8();
     let mut f9 = Touche::f9();
+    let mut f10 = Touche::f10();
 
     loop {
         // 1. On lit TOUS les événements en attente avant de calculer quoi que ce soit :
@@ -145,6 +146,9 @@ pub fn boucle(
             };
             println!("{}", texte.cyan());
             change = true;
+        }
+        if f10.appuyee() {
+            capture.photo();
         }
         if select_appuye {
             select_appuye = false;

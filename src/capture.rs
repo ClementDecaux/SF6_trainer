@@ -111,6 +111,8 @@ pub enum Ordre {
     Garder(InfosClip),
     /// Essai raté : on jette la vidéo.
     Annuler,
+    /// F10 : enregistre la prochaine image du jeu en PNG (pleine résolution).
+    Photo,
 }
 
 /// La télécommande du thread de capture, utilisée par le thread de la manette.
@@ -172,6 +174,11 @@ impl Capture {
     pub fn annuler(&mut self) {
         self.etapes.clear();
         self.envoyer(Ordre::Annuler);
+    }
+
+    /// Une capture d'écran du jeu (PNG) dans le dossier des clips.
+    pub fn photo(&mut self) {
+        self.envoyer(Ordre::Photo);
     }
 
     fn envoyer(&self, ordre: Ordre) {
@@ -336,8 +343,8 @@ mod capture_windows {
     use std::time::{Duration, Instant};
     use windows_capture::capture::{Context, GraphicsCaptureApiHandler};
     use windows_capture::encoder::{
-        AudioSettingsBuilder, ContainerSettingsBuilder, VideoEncoder, VideoSettingsBuilder,
-        VideoSettingsSubType,
+        AudioSettingsBuilder, ContainerSettingsBuilder, ImageFormat, VideoEncoder,
+        VideoSettingsBuilder, VideoSettingsSubType,
     };
     use windows_capture::frame::Frame;
     use windows_capture::graphics_capture_api::InternalCaptureControl;
@@ -486,6 +493,8 @@ mod capture_windows {
         tampon: Tampon,
         /// Pour donner un nom différent à chaque vidéo en cours.
         numero: u32,
+        /// F10 appuyée : la prochaine image est enregistrée en PNG.
+        photo: bool,
     }
 
     impl Enregistreur {
@@ -506,6 +515,7 @@ mod capture_windows {
                     _ => {}
                 },
                 Ordre::Annuler => self.arreter(),
+                Ordre::Photo => self.photo = true,
             }
         }
 
@@ -668,6 +678,7 @@ mod capture_windows {
                 echec_preparation: false,
                 tampon,
                 numero: 0,
+                photo: false,
             })
         }
 
@@ -687,6 +698,20 @@ mod capture_windows {
                     self.echec_preparation = false;
                 }
                 self.traiter(ordre);
+            }
+
+            if self.photo {
+                self.photo = false;
+                let nom = format!(
+                    "photo_{}.png",
+                    chrono::Local::now().format("%Y-%m-%d_%H-%M-%S")
+                );
+                let chemin = Path::new(&self.config.dossier).join(nom);
+                let _ = std::fs::create_dir_all(&self.config.dossier);
+                match frame.save_as_image(&chemin, ImageFormat::Png) {
+                    Ok(()) => println!("      📷 photo du jeu : {}", chemin.display()),
+                    Err(e) => eprintln!("Vidéo : photo impossible ({e})."),
+                }
             }
 
             // 2. L'image va toujours dans le tampon des dernières images.

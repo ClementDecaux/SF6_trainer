@@ -1,5 +1,6 @@
 //! Les touches du clavier lues même quand SF6 a le focus :
-//! F8 active ou coupe le déplacement de l'overlay, F9 l'enregistrement des vidéos.
+//! F8 active ou coupe le déplacement de l'overlay, F9 l'enregistrement des vidéos,
+//! F10 prend une photo du jeu.
 
 pub struct Touche {
     /// Code Windows de la touche (VK_F8...).
@@ -18,6 +19,13 @@ impl Touche {
     pub fn f9() -> Touche {
         Touche {
             code: 0x78,
+            avant: false,
+        }
+    }
+
+    pub fn f10() -> Touche {
+        Touche {
+            code: 0x79,
             avant: false,
         }
     }
