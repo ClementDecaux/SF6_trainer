@@ -372,6 +372,7 @@ fn resultat_trial(
     p.index = trial.index;
     p.ecarts = trial.ecarts.clone();
     p.ecarts_exacts = false;
+    p.raison_estimee = None;
     if matches!(resultat, Resultat::Avance | Resultat::Reussi)
         && let Some(&ecart) = trial.ecarts.last()
     {
@@ -384,6 +385,7 @@ fn resultat_trial(
                 ecarts: trial.ecarts.clone(),
                 erreurs: trial.erreurs_timing.clone(),
                 exact: false,
+                raison: None,
             });
         }
         Resultat::Rate { attendu } => {
@@ -406,6 +408,8 @@ struct Fin {
     erreurs: Vec<String>,
     /// Écarts lus dans l'historique du jeu (sinon : estimés avec notre horloge).
     exact: bool,
+    /// Pourquoi les écarts n'ont pas pu être lus dans le jeu.
+    raison: Option<String>,
 }
 
 /// Donne le verdict d'un combo fini : son, message, vidéo gardée ou non.
@@ -424,6 +428,9 @@ fn conclure(
         "frames estimées".yellow()
     };
     println!("      écarts : {} f  ({source})", ecarts.join(" "));
+    if let Some(raison) = &fin.raison {
+        println!("{}", format!("      frames estimées : {raison}").yellow());
+    }
     if fin.erreurs.is_empty() {
         println!("{}", "      ★ COMBO RÉUSSI ★".bright_green().bold());
         crate::son::reussi();
@@ -438,6 +445,7 @@ fn conclure(
     if let Ok(mut p) = partage.lock() {
         p.ecarts = fin.ecarts.clone();
         p.ecarts_exacts = fin.exact;
+        p.raison_estimee = fin.raison.clone();
         if fin.erreurs.is_empty() {
             p.reussites += 1;
             p.message("COMBO RÉUSSI !".to_string(), true);
@@ -561,10 +569,19 @@ impl Juge {
     /// Le combo vient de finir. Si l'historique du jeu est lu, on attend ses frames exactes
     /// (`None`, le verdict viendra de `pret`). Sinon, verdict tout de suite avec notre estimation.
     fn finir(&mut self, fin: Fin, temps: i64, trial: &Trial) -> Option<Fin> {
-        let latence = self.latence.valeur();
-        let verifiable = self.visible && self.etapes.iter().all(|a| a.boutons != 0);
-        match latence {
-            Some(latence) if verifiable => {
+        let raison = if !self.visible {
+            Some("historique du jeu pas visible")
+        } else if self.etapes.len() != trial.etapes.len() {
+            Some("étapes mal suivies")
+        } else if self.etapes.iter().any(|a| a.boutons == 0) {
+            Some("étape sans bouton (DR)")
+        } else if self.latence.valeur().is_none() {
+            Some("délai du jeu pas encore mesuré (fais quelques appuis isolés)")
+        } else {
+            None
+        };
+        match (raison, self.latence.valeur()) {
+            (None, Some(latence)) => {
                 self.attente = Some(Attente {
                     fin,
                     appuis: std::mem::take(&mut self.etapes),
@@ -575,7 +592,10 @@ impl Juge {
                 });
                 None
             }
-            _ => Some(fin),
+            (raison, _) => Some(Fin {
+                raison: raison.map(str::to_string),
+                ..fin
+            }),
         }
     }
 
@@ -588,25 +608,42 @@ impl Juge {
             return None;
         }
         let exact = self.verifier();
-        if exact.is_none() && temps < attente.quand + attente.latence + ATTENTE_MAX {
+        if exact.is_err() && temps < attente.quand + attente.latence + ATTENTE_MAX {
             return None;
         }
-        let attente = self.attente.take()?;
-        Some(exact.unwrap_or(attente.fin))
+        self.resultat(exact)
     }
 
     /// Verdict immédiat (un nouvel essai commence) : exact si l'historique est déjà là.
     fn forcer(&mut self) -> Option<Fin> {
         let exact = self.verifier();
+        self.resultat(exact)
+    }
+
+    /// Le verdict : exact si possible, sinon notre estimation avec la raison
+    /// (et un fichier de diagnostic pour comprendre).
+    fn resultat(&mut self, exact: Result<Fin, String>) -> Option<Fin> {
         let attente = self.attente.take()?;
-        Some(exact.unwrap_or(attente.fin))
+        match exact {
+            Ok(fin) => Some(fin),
+            Err(raison) => {
+                self.diagnostic(&attente, &raison);
+                Some(Fin {
+                    raison: Some(raison),
+                    ..attente.fin
+                })
+            }
+        }
     }
 
     /// Les écarts exacts du combo en attente, avec ses erreurs de timing.
-    fn verifier(&self) -> Option<Fin> {
-        let attente = self.attente.as_ref()?;
+    fn verifier(&self) -> Result<Fin, String> {
+        let Some(attente) = self.attente.as_ref() else {
+            return Err("aucun combo en attente".to_string());
+        };
         let journal: Vec<EntreeJeu> = self.journal.iter().copied().collect();
-        let ecarts = ecran::ecarts_du_jeu(&attente.appuis, &journal, attente.latence)?;
+        let ecarts = ecran::ecarts_du_jeu(&attente.appuis, &journal, attente.latence)
+            .map_err(|(i, raison)| format!("{} {raison}", attente.notations[i]))?;
         let mut erreurs = Vec::new();
         if let Some(fenetres) = &attente.fenetres {
             for (i, (&ecart, &fenetre)) in ecarts.iter().zip(fenetres).enumerate() {
@@ -615,11 +652,56 @@ impl Juge {
                 }
             }
         }
-        Some(Fin {
+        Ok(Fin {
             ecarts,
             erreurs,
             exact: true,
+            raison: None,
         })
+    }
+
+    /// Écrit dans `diagnostic_historique.txt` nos appuis et ce qui a été lu dans le jeu.
+    fn diagnostic(&self, attente: &Attente, raison: &str) {
+        use std::fmt::Write;
+        let debut = attente.appuis.first().map_or(0, |a| a.temps) - 5_000_000;
+        let ms = |t: i64| (t - debut) / 10_000;
+        let mut t = String::new();
+        let _ = writeln!(t, "Combo non vérifié : {raison}");
+        let _ = writeln!(t, "Latence mesurée : {} ms", attente.latence / 10_000);
+        let _ = writeln!(
+            t,
+            "\nNos étapes (ms, + latence = moment attendu dans le jeu) :"
+        );
+        for (a, n) in attente.appuis.iter().zip(&attente.notations) {
+            let _ = writeln!(
+                t,
+                "  {:>6} -> {:>6}  {n} ({})",
+                ms(a.temps),
+                ms(a.temps + attente.latence),
+                ecran::noms_boutons(a.boutons)
+            );
+        }
+        let _ = writeln!(
+            t,
+            "\nLignes lues dans le jeu (ms, frame, segment, direction, boutons, nouveaux) :"
+        );
+        for e in self.journal.iter().filter(|e| e.vu >= debut) {
+            let _ = writeln!(
+                t,
+                "  {:>6}  f{:<6} s{:<3} {}  {:<10} {}",
+                ms(e.vu),
+                e.frame,
+                e.segment,
+                e.direction,
+                ecran::noms_boutons(e.boutons),
+                ecran::noms_boutons(e.nouveaux)
+            );
+        }
+        let _ = writeln!(t, "\nNos appuis récents (ms, bouton) :");
+        for (temps, b) in self.nos_appuis.iter().filter(|(temps, _)| *temps >= debut) {
+            let _ = writeln!(t, "  {:>6}  {}", ms(*temps), ecran::noms_boutons(*b));
+        }
+        let _ = std::fs::write("diagnostic_historique.txt", t);
     }
 }
 

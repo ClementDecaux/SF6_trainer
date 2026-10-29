@@ -502,10 +502,14 @@ pub struct Appui {
 
 /// Retrouve chaque appui dans le journal du jeu et renvoie les écarts exacts (en frames
 /// du jeu) entre appuis successifs. `latence` = délai entre un appui et son affichage.
-/// `None` si un appui n'est pas retrouvé ou si le fil a été perdu entre deux appuis.
-pub fn ecarts_du_jeu(appuis: &[Appui], journal: &[EntreeJeu], latence: i64) -> Option<Vec<u64>> {
+/// Sinon, la raison : `Err((index de l'appui, explication))`.
+pub fn ecarts_du_jeu(
+    appuis: &[Appui],
+    journal: &[EntreeJeu],
+    latence: i64,
+) -> Result<Vec<u64>, (usize, String)> {
     let mut trouvees: Vec<&EntreeJeu> = Vec::new();
-    for appui in appuis {
+    for (i, appui) in appuis.iter().enumerate() {
         let attendu = appui.temps + latence;
         let entree = journal
             .iter()
@@ -514,16 +518,44 @@ pub fn ecarts_du_jeu(appuis: &[Appui], journal: &[EntreeJeu], latence: i64) -> O
                 e.boutons & appui.boutons == appui.boutons && e.nouveaux & appui.boutons != 0
             })
             .filter(|e| trouvees.last().is_none_or(|t| e.frame > t.frame))
-            .min_by_key(|e| (e.vu - attendu).abs())?;
+            .min_by_key(|e| (e.vu - attendu).abs())
+            .ok_or((i, "pas dans l'historique lu".to_string()))?;
+        let ecart_ms = (entree.vu - attendu) / 10_000;
         if (entree.vu - attendu).abs() > 2 * FRAME {
-            return None;
+            return Err((i, format!("pas au bon moment ({ecart_ms:+} ms)")));
+        }
+        if let Some(avant) = trouvees.last()
+            && avant.segment != entree.segment
+        {
+            return Err((i, "historique perdu de vue juste avant".to_string()));
         }
         trouvees.push(entree);
     }
-    trouvees
+    Ok(trouvees
         .windows(2)
-        .map(|p| (p[0].segment == p[1].segment).then(|| p[1].frame - p[0].frame))
-        .collect()
+        .map(|p| p[1].frame - p[0].frame)
+        .collect())
+}
+
+/// Les boutons en texte : « HP+HK », « - » si aucun.
+pub fn noms_boutons(boutons: u8) -> String {
+    let noms: Vec<&str> = [
+        (LP, "LP"),
+        (MP, "MP"),
+        (HP, "HP"),
+        (LK, "LK"),
+        (MK, "MK"),
+        (HK, "HK"),
+    ]
+    .iter()
+    .filter(|(b, _)| boutons & b != 0)
+    .map(|(_, n)| *n)
+    .collect();
+    if noms.is_empty() {
+        "-".to_string()
+    } else {
+        noms.join("+")
+    }
 }
 
 /// La durée exacte (en frames) de la ligne du jeu qui a cette direction et ces boutons,
@@ -822,7 +854,7 @@ mod tests {
                 boutons: MK,
             },
         ];
-        assert_eq!(ecarts_du_jeu(&appuis, &journal, latence), Some(vec![3, 18]));
+        assert_eq!(ecarts_du_jeu(&appuis, &journal, latence), Ok(vec![3, 18]));
         // Un appui introuvable : pas d'écarts inventés.
         let appuis_loin = [
             appuis[0],
@@ -831,7 +863,7 @@ mod tests {
                 boutons: MK,
             },
         ];
-        assert_eq!(ecarts_du_jeu(&appuis_loin, &journal, latence), None);
+        assert!(ecarts_du_jeu(&appuis_loin, &journal, latence).is_err());
     }
 
     #[test]

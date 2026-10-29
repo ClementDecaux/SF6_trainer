@@ -58,6 +58,8 @@ pub struct Partage {
     pub historique_jeu: bool,
     /// Les écarts affichés viennent de l'historique du jeu.
     pub ecarts_exacts: bool,
+    /// Pourquoi le dernier combo n'a pas pu être vérifié sur l'historique du jeu.
+    pub raison_estimee: Option<String>,
 }
 
 impl Partage {
@@ -75,6 +77,7 @@ impl Partage {
             enregistrement: false,
             historique_jeu: false,
             ecarts_exacts: false,
+            raison_estimee: None,
         }
     }
 

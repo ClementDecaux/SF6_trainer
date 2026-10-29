@@ -173,6 +173,13 @@ impl eframe::App for Overlay {
                 entete(ui, &partage);
                 ui.add_space(8.0);
                 etapes(ui, &partage);
+                if let Some(raison) = &partage.raison_estimee {
+                    ui.label(
+                        RichText::new(format!("frames estimées : {raison}"))
+                            .color(JAUNE)
+                            .size(13.0),
+                    );
+                }
                 ui.add_space(8.0);
                 message(ui, &partage);
                 ui.separator();
