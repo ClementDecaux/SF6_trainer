@@ -85,6 +85,11 @@ pub struct Partage {
     pub ligne_jeu_en_cours: Option<Ligne>,
     /// Nombre de lignes du jeu ajoutées depuis le lancement.
     pub lignes_jeu_total: u64,
+    /// Les coups sont lus dans l'historique du jeu (sinon : sur la manette).
+    pub source_jeu: bool,
+    /// Coups lus dans le jeu : heures des appuis où le combo a cassé, à reporter sur
+    /// les lignes du jeu.
+    pub cassees_jeu: Vec<i64>,
 }
 
 impl Partage {
@@ -113,6 +118,8 @@ impl Partage {
             lignes_jeu: VecDeque::new(),
             ligne_jeu_en_cours: None,
             lignes_jeu_total: 0,
+            source_jeu: false,
+            cassees_jeu: Vec::new(),
         }
     }
 
@@ -124,11 +131,14 @@ impl Partage {
     }
 
     pub fn ajouter_ligne(&mut self, mut ligne: Ligne) {
-        if std::mem::take(&mut self.ligne_cassee_a_venir) {
-            ligne.cassee = true;
-        }
-        if let Some(etape) = self.etape_a_venir.take() {
-            ligne.etape = Some(etape);
+        // Coups lus dans le jeu : les marques vont sur les lignes du jeu, pas les nôtres.
+        if !self.source_jeu {
+            if std::mem::take(&mut self.ligne_cassee_a_venir) {
+                ligne.cassee = true;
+            }
+            if let Some(etape) = self.etape_a_venir.take() {
+                ligne.etape = Some(etape);
+            }
         }
         self.lignes.push_front(ligne);
         self.lignes_total += 1;
@@ -153,7 +163,18 @@ impl Partage {
             ligne.cassee = true;
             trouvee = true;
         }
-        if !trouvee {
+        if self.source_jeu {
+            // Coups lus dans le jeu : la ligne en cours est refaite à chaque nouvelle ligne,
+            // la marque est gardée à part (voir `cassees_jeu`).
+            self.cassees_jeu.push(temps);
+            if let Some(l) = self
+                .ligne_jeu_en_cours
+                .as_mut()
+                .filter(|l| (l.debut - temps).abs() <= MARGE)
+            {
+                l.cassee = true;
+            }
+        } else if !trouvee {
             self.ligne_cassee_a_venir = true;
         }
     }

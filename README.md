@@ -45,6 +45,14 @@ C'est le panneau des dégâts du jeu (voir plus bas) qui dit si le combo est pas
 coups attendus doivent avoir touché. L'écart en frames entre chaque étape et la précédente
 reste affiché (`+14 f`), pour information.
 
+### Coups lus dans le jeu
+
+Quand l'historique d'inputs du jeu est visible (voir ci-dessous), les coups du trial sont lus
+dans ses lignes : boutons appuyés, et mouvements (236, 63214...) reconnus dans les directions
+affichées par le jeu. C'est donc ce que le jeu a vraiment pris en compte, avec quelques frames
+de retard (le son d'étape arrive un peu après l'appui). Sans historique visible, l'outil lit
+la manette.
+
 ### Frames exactes : l'historique d'inputs du jeu
 
 Active l'affichage des inputs dans le mode entraînement de SF6. L'outil lit alors l'historique

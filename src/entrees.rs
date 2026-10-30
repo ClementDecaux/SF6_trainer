@@ -117,7 +117,11 @@ pub fn boucle(
             if direction != etat.direction {
                 historique.ajouter(frame, direction);
                 // Drive Rush par dash (66) : seulement si c'est ce que le trial attend.
-                if direction == 6 && trial.attendu() == "DR" && historique.dash(frame) {
+                if direction == 6
+                    && trial.attendu() == "DR"
+                    && historique.dash(frame)
+                    && !juge.source_jeu()
+                {
                     let fin = resultat_trial(
                         &mut trial,
                         &mut capture,
@@ -163,35 +167,22 @@ pub fn boucle(
                     }
                 }
                 derniers_appuis.insert(action, frame_appui);
-                // On affiche la lecture attendue par le trial si elle y est, sinon la première.
-                // Le bouton Drive Parry utilisé pour un Drive Rush attendu s'affiche « DR ».
-                let coup = match candidats.iter().find(|c| trial.accepte(c, trial.attendu())) {
-                    Some(c) if c == "DP" && trial.attendu() == "DR" => "DR".to_string(),
-                    Some(c) => c.clone(),
-                    None => candidats[0].clone(),
+                // Historique du jeu visible : c'est lui qui donne les coups au trial (plus bas).
+                // Ici, la lecture de la manette ne sert plus qu'au terminal.
+                let coup = if juge.source_jeu() {
+                    candidats[0].clone()
+                } else {
+                    jouer(
+                        &mut trial,
+                        &mut capture,
+                        &mut juge,
+                        &partage,
+                        &mut a_confirmer,
+                        &candidats,
+                        (frame_appui, quand),
+                        (frame, temps),
+                    )
                 };
-                // Un nouvel essai commence : le verdict du précédent ne peut plus attendre.
-                let nouvel_essai = trial.index == 0
-                    && candidats
-                        .iter()
-                        .any(|c| trial.accepte(c, &trial.etapes[0].notation));
-                if nouvel_essai && let Some(fin) = juge.forcer() {
-                    a_confirmer = Some(conclure(&trial, &mut capture, fin, frame, &partage));
-                }
-                let fin = resultat_trial(
-                    &mut trial,
-                    &mut capture,
-                    &mut juge,
-                    &candidats,
-                    &coup,
-                    (frame_appui, quand),
-                    &partage,
-                );
-                if let Some(fin) = fin {
-                    a_confirmer = juge
-                        .finir(fin, temps, &trial)
-                        .map(|fin| conclure(&trial, &mut capture, fin, frame, &partage));
-                }
                 coups.push(coup);
                 change = true;
             }
@@ -296,9 +287,38 @@ pub fn boucle(
 
         // L'historique du jeu lu à l'écran : ses nouvelles lignes, et le verdict
         // d'un combo fini s'il attendait les frames exactes.
-        if juge.lire_journal(temps)
-            && let Ok(mut p) = partage.lock()
-        {
+        let nouveau_jeu = juge.lire_journal(temps);
+        // Historique du jeu visible : les coups sont lus dans ses lignes (ce que le jeu a
+        // vraiment pris en compte), et donnés au trial.
+        for coup_jeu in juge.coups_du_jeu() {
+            if coup_jeu.dash && trial.attendu() != "DR" {
+                continue;
+            }
+            let frame_appui = horloge::frame(coup_jeu.temps);
+            let coup = jouer(
+                &mut trial,
+                &mut capture,
+                &mut juge,
+                &partage,
+                &mut a_confirmer,
+                &coup_jeu.candidats,
+                (frame_appui, coup_jeu.temps),
+                (frame, temps),
+            );
+            println!("{}", format!("      jeu : {coup}").dimmed());
+            // Ce qui est arrivé sur ce coup (étape validée, break) va sur sa ligne du jeu.
+            if let Ok(mut p) = partage.lock() {
+                let marque = Marque {
+                    coups: vec![coup],
+                    etape: p.etape_a_venir.take(),
+                    cassee: std::mem::take(&mut p.ligne_cassee_a_venir),
+                };
+                juge.marquer(coup_jeu.vu, marque);
+            }
+            change = true;
+        }
+        if nouveau_jeu && let Ok(mut p) = partage.lock() {
+            p.source_jeu = juge.source_jeu();
             p.historique_jeu = juge.visible;
             p.degats_visibles = juge.degats_visibles;
             p.hits_direct = juge.hits_combo;
@@ -378,6 +398,71 @@ pub fn boucle(
         // On regarde la manette toutes les millisecondes (largement plus vite qu'une frame).
         std::thread::sleep(Duration::from_millis(1));
     }
+}
+
+/// Donne un coup (toutes ses lectures possibles) au trial, et le verdict si le combo est fini.
+/// Renvoie la lecture affichée.
+#[allow(clippy::too_many_arguments)]
+fn jouer(
+    trial: &mut Trial,
+    capture: &mut Capture,
+    juge: &mut Juge,
+    partage: &Mutex<Partage>,
+    a_confirmer: &mut Option<AConfirmer>,
+    candidats: &[String],
+    (frame_appui, quand): (u64, i64),
+    (frame, temps): (u64, i64),
+) -> String {
+    // On affiche la lecture attendue par le trial si elle y est, sinon la première.
+    // Le bouton Drive Parry utilisé pour un Drive Rush attendu s'affiche « DR ».
+    let coup = match candidats.iter().find(|c| trial.accepte(c, trial.attendu())) {
+        Some(c) if c == "DP" && trial.attendu() == "DR" => "DR".to_string(),
+        Some(c) => c.clone(),
+        None => candidats[0].clone(),
+    };
+    // Un nouvel essai commence : le verdict du précédent ne peut plus attendre.
+    let nouvel_essai = trial.index == 0
+        && candidats
+            .iter()
+            .any(|c| trial.accepte(c, &trial.etapes[0].notation));
+    if nouvel_essai && let Some(fin) = juge.forcer() {
+        *a_confirmer = Some(conclure(trial, capture, fin, frame, partage));
+    }
+    let fin = resultat_trial(
+        trial,
+        capture,
+        juge,
+        candidats,
+        &coup,
+        (frame_appui, quand),
+        partage,
+    );
+    if let Some(fin) = fin {
+        *a_confirmer = juge
+            .finir(fin, temps, trial)
+            .map(|fin| conclure(trial, capture, fin, frame, partage));
+    }
+    coup
+}
+
+/// Un coup lu dans l'historique du jeu.
+struct CoupJeu {
+    /// Toutes ses lectures (« 63214MP », « 5MP »...).
+    candidats: Vec<String>,
+    /// Heure de l'appui (côté manette : ligne vue à l'écran moins le délai d'affichage).
+    temps: i64,
+    /// Heure où sa ligne est apparue à l'écran (pour la retrouver).
+    vu: i64,
+    /// Dash avant (66) : un Drive Rush, si le trial l'attend.
+    dash: bool,
+}
+
+/// Ce qui s'est passé sur une ligne du jeu : coups reconnus, étape validée, break.
+#[derive(Debug, Clone, Default)]
+struct Marque {
+    coups: Vec<String>,
+    etape: Option<usize>,
+    cassee: bool,
 }
 
 /// Toutes les façons de lire un appui : « 4MK », « 236MK », « DI »...
@@ -518,6 +603,16 @@ fn appui_etape<'a>(notation: &'a str, candidats: &[String]) -> &'a str {
         notation
     }
 }
+
+/// Les boutons du jeu (bits) et leur nom.
+const BOUTONS_JEU: [(u8, &str); 6] = [
+    (ecran::LP, "LP"),
+    (ecran::MP, "MP"),
+    (ecran::HP, "HP"),
+    (ecran::LK, "LK"),
+    (ecran::MK, "MK"),
+    (ecran::HK, "HK"),
+];
 
 /// Une ligne de l'historique du jeu, pour l'overlay.
 /// `debut` : l'heure de l'appui (côté manette), pour la retrouver dans notre historique.
@@ -701,6 +796,15 @@ struct Juge {
     a_publier: Vec<EntreeJeu>,
     /// La dernière ligne du jeu recopiée (en cours : sa durée n'est pas encore connue).
     en_cours: Option<EntreeJeu>,
+    /// Lignes du jeu pas encore lues pour le trial.
+    a_lire: Vec<EntreeJeu>,
+    /// Les directions du jeu, pour reconnaître les mouvements (frames du jeu), et leur segment.
+    mouvements: Historique,
+    segment_mouvements: Option<u32>,
+    /// Frame du jeu du dernier appui de chaque bouton (bit), pour les appuis simultanés.
+    appuis_jeu: HashMap<u8, u64>,
+    /// Coups, étapes et breaks des lignes du jeu (clé : heure où la ligne est apparue).
+    marques: HashMap<i64, Marque>,
 }
 
 struct Attente {
@@ -804,6 +908,7 @@ impl Juge {
             self.latence.mesurer(&entree, &appuis);
             self.journal.push_back(entree);
             self.a_publier.push(entree);
+            self.a_lire.push(entree);
             nouveau = true;
         }
         // Le moment où le jeu lit la manette, déduit de nos appuis : nos limites de frames
@@ -880,6 +985,18 @@ impl Juge {
     /// reconnus sur notre ligne correspondante (et sa marque de break).
     fn publier_lignes(&mut self, p: &mut Partage) {
         let latence = self.latence.valeur().unwrap_or(LATENCE_DEFAUT);
+        // Les breaks trouvés après coup (hits manquants) : sur la ligne du jeu de cet appui.
+        for temps in std::mem::take(&mut p.cassees_jeu) {
+            if let Some(e) = self
+                .journal
+                .iter()
+                .filter(|e| e.nouveaux != 0)
+                .min_by_key(|e| (e.vu - latence - temps).abs())
+                .filter(|e| (e.vu - latence - temps).abs() <= ecran::FRAME)
+            {
+                self.marques.entry(e.vu).or_default().cassee = true;
+            }
+        }
         for entree in std::mem::take(&mut self.a_publier) {
             if let Some(avant) = self.en_cours.take() {
                 // Une ligne qui change de segment : le jeu a perdu le fil (99 frames...).
@@ -889,16 +1006,117 @@ impl Juge {
                     99
                 };
                 let mut ligne = ligne_jeu(&avant, frames, latence);
-                completer(&mut ligne, &p.lignes);
+                self.completer(&mut ligne, &avant, &p.lignes);
                 p.ajouter_ligne_jeu(ligne);
             }
             self.en_cours = Some(entree);
         }
         p.ligne_jeu_en_cours = self.en_cours.map(|e| {
             let mut ligne = ligne_jeu(&e, 0, latence);
-            completer(&mut ligne, &p.lignes);
+            self.completer(&mut ligne, &e, &p.lignes);
             ligne
         });
+        // On oublie les marques des lignes trop anciennes.
+        let journal = &self.journal;
+        self.marques
+            .retain(|&vu, _| journal.iter().any(|e| e.vu == vu));
+    }
+
+    /// Les coups, l'étape et le break d'une ligne du jeu : lus dans le jeu si c'est lui
+    /// qui donne les coups, sinon repris de notre ligne correspondante.
+    fn completer(&self, ligne: &mut Ligne, entree: &EntreeJeu, nos_lignes: &VecDeque<Ligne>) {
+        match self.marques.get(&entree.vu) {
+            Some(marque) => {
+                ligne.coups = marque.coups.clone();
+                ligne.etape = marque.etape;
+                ligne.cassee = marque.cassee;
+            }
+            None if !self.source_jeu() => completer(ligne, nos_lignes),
+            None => {}
+        }
+    }
+
+    /// Vrai si les coups sont lus dans l'historique du jeu (visible à l'écran).
+    fn source_jeu(&self) -> bool {
+        self.visible
+    }
+
+    /// Note ce qui s'est passé sur la ligne du jeu apparue à `vu`.
+    fn marquer(&mut self, vu: i64, marque: Marque) {
+        let m = self.marques.entry(vu).or_default();
+        m.coups.extend(marque.coups);
+        m.etape = marque.etape.or(m.etape);
+        m.cassee |= marque.cassee;
+    }
+
+    /// Les coups des nouvelles lignes du jeu : chaque bouton qui vient d'être appuyé, avec
+    /// les mouvements faits juste avant (lus dans les directions du jeu, frames du jeu).
+    fn coups_du_jeu(&mut self) -> Vec<CoupJeu> {
+        let latence = self.latence.valeur().unwrap_or(LATENCE_DEFAUT);
+        let entrees = std::mem::take(&mut self.a_lire);
+        if !self.source_jeu() {
+            return Vec::new();
+        }
+        let mut coups = Vec::new();
+        for e in entrees {
+            // Le jeu a perdu le fil (historique caché...) : les mouvements repartent de zéro.
+            if self.segment_mouvements != Some(e.segment) {
+                self.segment_mouvements = Some(e.segment);
+                self.mouvements = Historique::default();
+                self.appuis_jeu.clear();
+            }
+            self.mouvements.ajouter(e.frame, e.direction);
+            let temps = e.vu - latence;
+            if e.direction == 6 && self.mouvements.dash(e.frame) {
+                coups.push(CoupJeu {
+                    candidats: vec!["DR".to_string()],
+                    temps,
+                    vu: e.vu,
+                    dash: true,
+                });
+            }
+            if e.nouveaux == 0 {
+                continue;
+            }
+            let mut candidats = Vec::new();
+            for (bit, nom) in BOUTONS_JEU {
+                if e.nouveaux & bit == 0 {
+                    continue;
+                }
+                for m in self.mouvements.reconnaitre_tous(e.frame) {
+                    candidats.push(format!("{}{nom}", m.nom()));
+                }
+                candidats.push(format!("{}{nom}", e.direction));
+                self.appuis_jeu.insert(bit, e.frame);
+            }
+            // Deux boutons ensemble (même frame ou presque) : Drive Parry, Drive Impact, chope.
+            for (a, b, nom) in [
+                (ecran::MP, ecran::MK, "DP"),
+                (ecran::HP, ecran::HK, "DI"),
+                (ecran::LP, ecran::LK, "Throw"),
+            ] {
+                let ensemble = |x: u8| {
+                    self.appuis_jeu
+                        .get(&x)
+                        .is_some_and(|&f| e.frame.saturating_sub(f) < SIMULTANE_FRAMES)
+                };
+                if e.nouveaux & (a | b) != 0
+                    && e.boutons & a != 0
+                    && e.boutons & b != 0
+                    && ensemble(a)
+                    && ensemble(b)
+                {
+                    candidats.push(nom.to_string());
+                }
+            }
+            coups.push(CoupJeu {
+                candidats,
+                temps,
+                vu: e.vu,
+                dash: false,
+            });
+        }
+        coups
     }
 
     /// Le combo vient de finir. Si l'historique ou les dégâts du jeu sont lus, on attend
@@ -1190,6 +1408,44 @@ fn changer_direction(dirs: &mut Directions, bouton: &str, pressed: bool) -> bool
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn les_coups_sont_lus_dans_l_historique_du_jeu() {
+        let mut juge = Juge {
+            visible: true,
+            ..Juge::default()
+        };
+        let ligne = |frame, direction, boutons, nouveaux| EntreeJeu {
+            vu: 1_000_000 + frame as i64 * ecran::FRAME,
+            frame,
+            segment: 1,
+            direction,
+            boutons,
+            nouveaux,
+        };
+        // Comme sur ta capture : → 3, ↓ 2, ↙ 2, ← 1, neutre 2, puis MP.
+        juge.a_lire = vec![
+            ligne(100, 4, ecran::MK, ecran::MK),
+            ligne(106, 6, 0, 0),
+            ligne(109, 2, 0, 0),
+            ligne(111, 1, 0, 0),
+            ligne(113, 4, 0, 0),
+            ligne(114, 5, 0, 0),
+            ligne(116, 5, ecran::MP, ecran::MP),
+        ];
+        let coups = juge.coups_du_jeu();
+        assert_eq!(coups.len(), 2);
+        assert!(coups[0].candidats.contains(&"4MK".to_string()));
+        assert!(coups[1].candidats.contains(&"63214MP".to_string()));
+
+        // MP puis MK une frame plus tard : Drive Parry.
+        juge.a_lire = vec![
+            ligne(200, 5, ecran::MP, ecran::MP),
+            ligne(201, 5, ecran::MP | ecran::MK, ecran::MK),
+        ];
+        let coups = juge.coups_du_jeu();
+        assert!(coups[1].candidats.contains(&"DP".to_string()));
+    }
 
     #[test]
     fn une_ligne_du_jeu_reprend_nos_coups_et_le_break() {
