@@ -21,6 +21,9 @@ use std::collections::{BTreeSet, HashMap, VecDeque};
 use std::sync::{Arc, Mutex};
 use std::time::Duration;
 
+/// Une direction prise moins de 10 ms après un bouton a pu être vue avec lui par le jeu.
+const MARGE_DIRECTION: i64 = 100_000;
+
 /// Deux boutons appuyés à moins de 3 frames d'écart comptent comme simultanés (HP+HK).
 const SIMULTANE_FRAMES: u64 = 3;
 
@@ -83,6 +86,8 @@ pub fn boucle(
     let mut frame_courante = debut;
     let mut appuis_frame: Vec<(Action, i64)> = Vec::new();
     let mut premier_changement: Option<i64> = None;
+    // Appuis d'une frame finie, jugés à la suivante : (action, heure, direction, frame).
+    let mut a_juger: Vec<(Action, i64, u8, u64)> = Vec::new();
     let mut dirs_avant = dirs.numpad();
     let mut tenus_avant = tenus.clone();
 
@@ -124,6 +129,66 @@ pub fn boucle(
                 }
             }
 
+            // Les appuis de la frame d'avant : toutes les lectures possibles, puis le trial.
+            // Ils sont jugés une frame plus tard : si la direction change juste après
+            // l'appui (quelques ms), le jeu a pu voir les deux ensemble (nos limites de frame
+            // ne sont pas parfaites). On accepte alors aussi la lecture avec la nouvelle direction.
+            for (action, quand, dir_appui, frame_appui) in std::mem::take(&mut a_juger) {
+                let mut candidats = lectures(
+                    action,
+                    dir_appui,
+                    frame_appui,
+                    &historique,
+                    &tenus,
+                    &derniers_appuis,
+                );
+                if direction != dir_appui && temps_etat - quand <= MARGE_DIRECTION {
+                    for c in lectures(
+                        action,
+                        direction,
+                        frame,
+                        &historique,
+                        &tenus,
+                        &derniers_appuis,
+                    ) {
+                        if !candidats.contains(&c) {
+                            candidats.push(c);
+                        }
+                    }
+                }
+                derniers_appuis.insert(action, frame_appui);
+                // On affiche la lecture attendue par le trial si elle y est, sinon la première.
+                let coup = candidats
+                    .iter()
+                    .find(|c| correspond(c, trial.attendu()))
+                    .unwrap_or(&candidats[0])
+                    .clone();
+                // Un nouvel essai commence : le verdict du précédent ne peut plus attendre.
+                let nouvel_essai = trial.index == 0
+                    && candidats
+                        .iter()
+                        .any(|c| correspond(c, &trial.etapes[0].notation));
+                if nouvel_essai && let Some(fin) = juge.forcer() {
+                    a_confirmer = Some(conclure(&trial, &mut capture, fin, frame, &partage));
+                }
+                let fin = resultat_trial(
+                    &mut trial,
+                    &mut capture,
+                    &mut juge,
+                    &candidats,
+                    &coup,
+                    (frame_appui, quand),
+                    &partage,
+                );
+                if let Some(fin) = fin {
+                    a_confirmer = juge
+                        .finir(fin, temps, &trial)
+                        .map(|fin| conclure(&trial, &mut capture, fin, frame, &partage));
+                }
+                coups.push(coup);
+                change = true;
+            }
+
             // 2. Nouvel état (direction ou boutons différents, ou nouvel appui) :
             //    on affiche l'ancien avec sa durée, puis on démarre le nouveau.
             let nouvel_etat = Etat {
@@ -154,48 +219,11 @@ pub fn boucle(
                     }
                 }
 
-                // 3. Chaque bouton appuyé : toutes les lectures possibles, puis le trial.
+                // 3. Les boutons appuyés : jugés à la frame suivante (voir `a_juger`).
                 coups.clear();
                 nouveaux.clear();
                 for &(action, quand) in &appuyes {
-                    let candidats = lectures(
-                        action,
-                        direction,
-                        frame,
-                        &historique,
-                        &tenus,
-                        &derniers_appuis,
-                    );
-                    derniers_appuis.insert(action, frame);
-                    // On affiche la lecture attendue par le trial si elle y est, sinon la première.
-                    let coup = candidats
-                        .iter()
-                        .find(|c| correspond(c, trial.attendu()))
-                        .unwrap_or(&candidats[0])
-                        .clone();
-                    // Un nouvel essai commence : le verdict du précédent ne peut plus attendre.
-                    let nouvel_essai = trial.index == 0
-                        && candidats
-                            .iter()
-                            .any(|c| correspond(c, &trial.etapes[0].notation));
-                    if nouvel_essai && let Some(fin) = juge.forcer() {
-                        a_confirmer = Some(conclure(&trial, &mut capture, fin, frame, &partage));
-                    }
-                    let fin = resultat_trial(
-                        &mut trial,
-                        &mut capture,
-                        &mut juge,
-                        &candidats,
-                        &coup,
-                        (frame, quand),
-                        &partage,
-                    );
-                    if let Some(fin) = fin {
-                        a_confirmer = juge
-                            .finir(fin, temps, &trial)
-                            .map(|fin| conclure(&trial, &mut capture, fin, frame, &partage));
-                    }
-                    coups.push(coup);
+                    a_juger.push((action, quand, direction, frame));
                     if !nouveaux.contains(&action) {
                         nouveaux.push(action);
                     }

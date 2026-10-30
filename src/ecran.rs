@@ -624,16 +624,14 @@ impl Latence {
     }
 
     /// Le délai entre la lecture de la manette par le jeu et l'affichage de cette frame.
-    /// Un appui fait juste avant la lecture s'affiche après ce délai exactement ; un appui
-    /// fait plus tôt attend en plus la lecture suivante. C'est donc le plus petit écart
-    /// mesuré (on prend le 10e pourcentile, pour ignorer une mesure aberrante).
+    /// Un appui attend la prochaine lecture (entre 0 et 1 frame, une demi-frame en moyenne),
+    /// puis ce délai : c'est donc la latence médiane moins une demi-frame. La médiane résiste
+    /// mieux que le plus petit écart aux images affichées un peu en avance ou en retard.
     pub fn delai_lecture(&self) -> Option<i64> {
         if self.mesures.len() < 8 {
             return None;
         }
-        let mut triees: Vec<i64> = self.mesures.iter().copied().collect();
-        triees.sort();
-        Some(triees[triees.len() / 10])
+        Some(self.valeur()? - FRAME / 2)
     }
 
     /// La latence estimée, s'il y a assez de mesures.
@@ -920,6 +918,6 @@ mod tests {
             let t = 100_000_000 + i * 10_000_000;
             lat.mesurer(&entree(t + 600_000 + i * 10_000, 0, LP, LP), &[(t, LP)]);
         }
-        assert_eq!(lat.delai_lecture(), Some(610_000));
+        assert_eq!(lat.delai_lecture(), Some(lat.valeur().unwrap() - FRAME / 2));
     }
 }
