@@ -46,7 +46,9 @@ Quatre syntaxes au choix (Réglages, ou `syntaxe = "..."` dans `overlay.toml`) :
 terminal reste en numpad. Dans `combos.toml`, on peut écrire en numpad, en anglais ou avec les
 flèches `↓↘→`.
 
-Le bouton en haut à droite cache ou réaffiche l'overlay. Fermer l'interface ferme l'outil.
+Le bouton en haut à droite cache ou réaffiche l'overlay. L'overlay n'apparaît que quand SF6
+est la fenêtre active (sauf en mode déplacement F8) ; décochable dans les réglages
+(`seulement_jeu` dans `overlay.toml`). Fermer l'interface ferme l'outil.
 
 ## Fichiers de config
 

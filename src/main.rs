@@ -53,12 +53,14 @@ fn lancer() -> Result<(), String> {
     son::activer(config.son);
     let config_capture = capture::charger()?;
     let (dossier_clips, avant_ms) = (config_capture.dossier.clone(), config_capture.avant_ms);
+    let titre_jeu = config_capture.fenetre.clone();
     let capture = capture::lancer(config_capture, &personnage, &trial.nom, &inputs);
 
     let mut etat = Partage::new(&trial.nom, trial.etapes.clone());
     etat.combos = combos.iter().map(|c| c.nom.clone()).collect();
     etat.combo_index = choisi;
     etat.syntaxe = config.syntaxe;
+    etat.seulement_jeu = config.seulement_jeu;
     etat.enregistrement = capture.enregistre;
     let partage = Arc::new(Mutex::new(etat));
 
@@ -99,8 +101,8 @@ fn lancer() -> Result<(), String> {
                 overlay,
                 &config,
                 combos_interface,
-                &dossier_clips,
-                avant_ms,
+                (&dossier_clips, avant_ms),
+                &titre_jeu,
             )))
         }),
     )

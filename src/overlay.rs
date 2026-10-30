@@ -36,6 +36,8 @@ son = true
 # Façon d'écrire les coups : "sf6" (icônes du jeu), "numpad" (236HP),
 # "anglais" (qcf+HP) ou "fleches" (↓↘→ HP). Se change aussi dans les réglages.
 syntaxe = "sf6"
+# true = l'overlay n'apparaît que quand SF6 est la fenêtre active.
+seulement_jeu = true
 "#;
 
 #[derive(Debug, Deserialize)]
@@ -57,6 +59,9 @@ pub struct Config {
     /// Façon d'écrire les coups. Absent des anciens fichiers : numpad.
     #[serde(default)]
     pub syntaxe: Syntaxe,
+    /// L'overlay n'apparaît que quand SF6 est la fenêtre active. Par défaut : oui.
+    #[serde(default = "vrai")]
+    pub seulement_jeu: bool,
 }
 
 fn vrai() -> bool {

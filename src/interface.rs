@@ -77,6 +77,10 @@ pub struct Interface {
     /// Vidéos : seulement celles du combo choisi.
     filtre_combo: bool,
     lecteur: Option<Lecteur>,
+    /// Titre de la fenêtre de SF6 (`fenetre` dans capture.toml).
+    titre_jeu: String,
+    /// L'overlay est montré (pas caché parce que SF6 n'est pas au premier plan).
+    overlay_montre: bool,
 }
 
 impl Interface {
@@ -85,8 +89,8 @@ impl Interface {
         overlay: Overlay,
         config_overlay: &overlay::Config,
         combos: Vec<ComboFichier>,
-        dossier_clips: &str,
-        avant_ms: u64,
+        (dossier_clips, avant_ms): (&str, u64),
+        titre_jeu: &str,
     ) -> Interface {
         let choisi = partage.lock().map_or(0, |p| p.combo_index);
         Interface {
@@ -104,16 +108,20 @@ impl Interface {
             clips_lus: false,
             filtre_combo: true,
             lecteur: None,
+            titre_jeu: titre_jeu.to_string(),
+            overlay_montre: true,
         }
     }
 
     /// Affiche (ou cache) la fenêtre de l'overlay.
     fn fenetre_overlay(&mut self, ctx: &egui::Context, visible: bool) {
         if visible {
-            if !self.overlay_ouvert
-                && let Ok(mut o) = self.overlay.lock()
-            {
-                o.fenetre_recreee();
+            if !self.overlay_ouvert {
+                // Une nouvelle fenêtre est créée visible.
+                self.overlay_montre = true;
+                if let Ok(mut o) = self.overlay.lock() {
+                    o.fenetre_recreee();
+                }
             }
             let overlay = Arc::clone(&self.overlay);
             ctx.show_viewport_deferred(
@@ -191,8 +199,16 @@ impl eframe::App for Interface {
 
     fn ui(&mut self, ui: &mut egui::Ui, _frame: &mut eframe::Frame) {
         let ctx = ui.ctx().clone();
-        let visible = self.partage.lock().is_ok_and(|p| p.overlay_visible);
+        let (visible, jeu_exige) = self.partage.lock().map_or((true, false), |p| {
+            (p.overlay_visible, p.seulement_jeu && !p.deplacement)
+        });
         self.fenetre_overlay(&ctx, visible);
+        // Caché (sans fermer la fenêtre) quand on n'est pas dans SF6.
+        let montrer = !jeu_exige || jeu_au_premier_plan(&self.titre_jeu);
+        if visible && montrer != self.overlay_montre {
+            ctx.send_viewport_cmd_to(overlay::id(), egui::ViewportCommand::Visible(montrer));
+            self.overlay_montre = montrer;
+        }
         if !self.clips_lus {
             self.lire_clips();
         }
@@ -244,7 +260,7 @@ impl eframe::App for Interface {
         });
 
         // L'état du jeu (historique lu, etc.) change sans clic : on se redessine de temps en temps.
-        ctx.request_repaint_after(std::time::Duration::from_millis(500));
+        ctx.request_repaint_after(std::time::Duration::from_millis(200));
     }
 }
 
@@ -777,6 +793,18 @@ impl Interface {
             &mut p.overlay_visible,
             "Afficher l'overlay par-dessus le jeu",
         );
+        if ui
+            .checkbox(
+                &mut p.seulement_jeu,
+                "Seulement quand SF6 est la fenêtre active",
+            )
+            .changed()
+        {
+            ecrire_cles(
+                "overlay.toml",
+                &[("seulement_jeu", p.seulement_jeu.to_string())],
+            );
+        }
         ui.checkbox(
             &mut p.deplacement,
             "Déplacer / redimensionner l'overlay à la souris (F8)",
@@ -927,6 +955,30 @@ fn remplacer_cles(texte: &str, valeurs: &[(&str, String)]) -> String {
         }
     }
     sortie
+}
+
+/// Vrai si la fenêtre active est celle de SF6 (son titre contient `titre`).
+#[cfg(windows)]
+fn jeu_au_premier_plan(titre: &str) -> bool {
+    use windows_sys::Win32::UI::WindowsAndMessaging::{GetForegroundWindow, GetWindowTextW};
+    if titre.is_empty() {
+        return true;
+    }
+    let mut tampon = [0u16; 256];
+    let longueur = unsafe {
+        let hwnd = GetForegroundWindow();
+        if hwnd.is_null() {
+            return false;
+        }
+        GetWindowTextW(hwnd, tampon.as_mut_ptr(), tampon.len() as i32)
+    };
+    let actif = String::from_utf16_lossy(&tampon[..longueur.max(0) as usize]);
+    actif.contains(titre)
+}
+
+#[cfg(not(windows))]
+fn jeu_au_premier_plan(_titre: &str) -> bool {
+    true
 }
 
 /// Ouvre un dossier dans l'explorateur de fichiers.

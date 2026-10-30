@@ -100,6 +100,8 @@ pub struct Partage {
     pub overlay_visible: bool,
     /// Façon d'écrire les coups (overlay et interface).
     pub syntaxe: crate::syntaxe::Syntaxe,
+    /// L'overlay n'apparaît que quand SF6 est la fenêtre active.
+    pub seulement_jeu: bool,
 }
 
 impl Partage {
@@ -135,6 +137,7 @@ impl Partage {
             combo_demande: None,
             overlay_visible: true,
             syntaxe: crate::syntaxe::Syntaxe::default(),
+            seulement_jeu: true,
         }
     }
 
