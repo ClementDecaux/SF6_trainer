@@ -213,6 +213,10 @@ pub fn normaliser(etape: &str) -> Result<String, String> {
 /// lus dans le jeu et ses hits valident le combo.
 const DELAI_MAX: u64 = 300;
 
+/// Un double tap (ou un mash) et un Drive Rush pas lu se font dans la foulée de l'étape
+/// d'avant. Plus tard que ça, le même coup est plutôt le début d'un nouvel essai.
+const FOULEE_MAX: u64 = 50;
+
 /// Ce qui arrive quand on donne un coup au trial.
 #[derive(Debug, PartialEq, Eq)]
 pub enum Resultat {
@@ -233,6 +237,8 @@ pub struct Trial {
     /// Index de l'étape attendue.
     pub index: usize,
     derniere_frame: u64,
+    /// Frame du dernier appui pris en compte (étape validée, ou mash ignoré).
+    dernier_appui: u64,
     /// Essai en cours (ou dernier essai) : écart en frames de chaque étape avec la précédente.
     pub ecarts: Vec<u64>,
     /// Appuis ignorés car faits pendant la récupération (coups intercalés, mash).
@@ -293,6 +299,7 @@ impl Trial {
             etapes,
             index: 0,
             derniere_frame: 0,
+            dernier_appui: 0,
             ecarts: Vec::new(),
             intercales: 0,
             hits: None,
@@ -349,6 +356,7 @@ impl Trial {
             }
             self.index += 1;
             self.derniere_frame = frame;
+            self.dernier_appui = frame;
             if self.index == self.etapes.len() {
                 self.index = 0;
                 return Resultat::Reussi;
@@ -358,9 +366,11 @@ impl Trial {
 
         // Drive Rush pas lu (son appui MP+MK n'apparaît pas toujours dans l'historique du
         // jeu) mais le coup d'après est là : on le compte comme fait. Ce sont les hits du jeu
-        // qui diront si le combo est vraiment passé.
+        // qui diront si le combo est vraiment passé. Seulement dans la foulée : plus tard,
+        // c'est sans doute qu'on recommence le combo (« LP, DR, LP » raté après le 1er LP).
         if self.hits.is_some()
             && self.index > 0
+            && ecart <= FOULEE_MAX
             && self.attendu() == "DR"
             && let Some(apres) = self.etapes.get(self.index + 1).map(|e| e.notation.clone())
             && candidats.iter().any(|c| self.accepte(c, &apres))
@@ -369,6 +379,7 @@ impl Trial {
             self.ecarts.push(0);
             self.index += 2;
             self.derniere_frame = frame;
+            self.dernier_appui = frame;
             if self.index == self.etapes.len() {
                 self.index = 0;
                 return Resultat::Reussi;
@@ -402,9 +413,13 @@ impl Trial {
         // Le même bouton que l'étape d'avant, ré-appuyé : c'est le « double tap » (ou le mash)
         // qu'on fait pour assurer un link. Le jeu l'ignore pendant la récupération, nous aussi.
         // La direction ne compte pas : en mashant, le stick revient souvent au neutre (5MK).
+        // Seulement dans la foulée : plus tard, ce coup recommence le combo.
         let bouton_avant = bouton(&self.etapes[self.index - 1].notation);
-        if candidats.iter().any(|c| bouton(c) == bouton_avant) {
+        if frame.saturating_sub(self.dernier_appui) <= FOULEE_MAX
+            && candidats.iter().any(|c| bouton(c) == bouton_avant)
+        {
             self.intercales += 1;
+            self.dernier_appui = frame;
             return Resultat::Ignore;
         }
         let attendu = self.attendu().to_string();
@@ -421,6 +436,7 @@ impl Trial {
             self.nouvel_essai();
             self.index = 1;
             self.derniere_frame = frame;
+            self.dernier_appui = frame;
         }
         Resultat::Rate { attendu }
     }
@@ -655,6 +671,28 @@ mod tests {
         assert_eq!(t.coup(&c("4MK"), 30), Resultat::Avance);
         assert_eq!(t.coup(&c("5MK"), 40), Resultat::Ignore);
         assert_eq!(t.coup(&c("63214MP"), 50), Resultat::Reussi);
+    }
+
+    #[test]
+    fn on_recommence_lp_dr_lp_apres_une_erreur() {
+        // « LP, DR, LP » : 1er LP, le Drive Rush ne sort pas, et on recommence le combo.
+        let mut t = Trial::new("test", parser("5LP xx DR, 5LP").unwrap());
+        t.hits = Some(2);
+        assert_eq!(t.coup(&c("5LP"), 100), Resultat::Avance);
+        // Le LP du nouvel essai, bien après : pas un mash, pas un DR sauté, un nouveau départ.
+        assert!(matches!(t.coup(&c("5LP"), 200), Resultat::Rate { .. }));
+        assert_eq!(t.index, 1);
+        assert_eq!(t.coup(&c("DR"), 215), Resultat::Avance);
+        assert_eq!(t.coup(&c("5LP"), 235), Resultat::Reussi);
+    }
+
+    #[test]
+    fn drive_rush_saute_seulement_dans_la_foulee() {
+        let mut t = Trial::new("test", parser("5LP xx DR, 5LP").unwrap());
+        t.hits = Some(2);
+        t.coup(&c("5LP"), 100);
+        // DR pas lu, le LP d'après arrive vite : combo fini.
+        assert_eq!(t.coup(&c("5LP"), 125), Resultat::Reussi);
     }
 
     #[test]
