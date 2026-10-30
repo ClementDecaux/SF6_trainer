@@ -250,8 +250,37 @@ pub fn lancer(config: Config, personnage: &str, combo: &str, inputs: &str) -> Ca
 
 /// Le nom des fichiers d'un clip, sans extension : « Dhalsim_Drive-Impact-Yoga-Flame ».
 /// Un seul clip par combo : le dernier réussi remplace le précédent.
+///
+/// Toujours 16 caractères : l'empreinte (FNV-1a 64 bits, en hexadécimal) du personnage et du
+/// nom du combo. Une fonction de taille fixe ne peut pas être bijective (il y a plus de combos
+/// possibles que de noms), mais on retrouve le combo avec [`combo_du_fichier`], qui calcule
+/// l'empreinte des combos connus, et le `.json` à côté de la vidéo garde le nom complet.
 pub fn nom_fichier(infos: &InfosClip) -> String {
-    format!("{}_{}", nettoyer(&infos.personnage), nettoyer(&infos.combo))
+    empreinte(&infos.personnage, &infos.combo)
+}
+
+/// Empreinte de taille fixe (16 caractères hexadécimaux) d'un combo d'un personnage.
+/// FNV-1a : stable d'une version de Rust à l'autre, contrairement au hasher standard.
+pub fn empreinte(personnage: &str, combo: &str) -> String {
+    let mut h: u64 = 0xcbf2_9ce4_8422_2325;
+    for octet in personnage.bytes().chain([0]).chain(combo.bytes()) {
+        h ^= u64::from(octet);
+        h = h.wrapping_mul(0x0100_0000_01b3);
+    }
+    format!("{h:016x}")
+}
+
+/// Le combo (parmi `noms`) dont la vidéo s'appelle `fichier` (avec ou sans extension).
+#[allow(dead_code)]
+pub fn combo_du_fichier<'a>(
+    fichier: &str,
+    personnage: &str,
+    noms: &'a [String],
+) -> Option<&'a str> {
+    let base = fichier.split('.').next().unwrap_or(fichier);
+    noms.iter()
+        .map(String::as_str)
+        .find(|n| empreinte(personnage, n) == base)
 }
 
 /// Supprime les clips déjà gardés pour ce combo (vidéo et `.json`), y compris ceux des
@@ -284,19 +313,6 @@ pub fn supprimer_anciens(dossier: &std::path::Path, infos: &InfosClip) -> usize 
         }
     }
     supprimes
-}
-
-/// Garde lettres et chiffres, remplace le reste par des tirets (noms de fichiers sûrs).
-fn nettoyer(texte: &str) -> String {
-    let mut sortie = String::new();
-    for c in texte.chars() {
-        if c.is_alphanumeric() {
-            sortie.push(c);
-        } else if !sortie.is_empty() && !sortie.ends_with('-') {
-            sortie.push('-');
-        }
-    }
-    sortie.trim_end_matches('-').to_string()
 }
 
 /// Une image du jeu gardée en mémoire (pixels BGRA, lignes du bas vers le haut).
@@ -947,7 +963,26 @@ mod tests {
             latence: 0,
             lignes: vec![],
         };
-        assert_eq!(nom_fichier(&infos), "Dhalsim_Drive-Impact-Yoga-Flame");
+        let nom = nom_fichier(&infos);
+        assert_eq!(nom.len(), 16);
+        assert!(nom.chars().all(|c| c.is_ascii_hexdigit()));
+        // Toujours la même empreinte, quelle que soit la longueur du nom.
+        assert_eq!(nom, nom_fichier(&infos));
+        assert_eq!(super::empreinte("Dhalsim", "a").len(), 16);
+        assert_eq!(
+            super::empreinte("Dhalsim", &"très long combo ".repeat(20)).len(),
+            16
+        );
+        // Et on retrouve le combo depuis le nom de la vidéo.
+        let noms = vec!["2MK, Yoga Fire".to_string(), infos.combo.clone()];
+        assert_eq!(
+            super::combo_du_fichier(&format!("{nom}.mp4"), "Dhalsim", &noms),
+            Some(infos.combo.as_str())
+        );
+        assert_eq!(
+            super::combo_du_fichier("0123456789abcdef", "Dhalsim", &noms),
+            None
+        );
     }
 
     #[test]
