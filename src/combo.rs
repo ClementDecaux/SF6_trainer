@@ -442,15 +442,17 @@ impl Trial {
     }
 
     /// Ce coup valide-t-il l'étape `attendu` ? Quand les hits sont vérifiés dans le jeu
-    /// (`hits` connu), la direction d'un coup normal ne compte pas : 5MK ou 6MK au lieu de
-    /// 4MK peut sortir le même coup (pas de 6MK chez ce perso) ou passer quand même. Si ça ne
-    /// touche pas, le compteur de hits le dira.
+    /// (`hits` connu), la direction exacte d'un coup normal ne compte pas : 5MK ou 6MK au
+    /// lieu de 4MK peut sortir le même coup ou passer quand même, et le compteur de hits dira
+    /// si ça a touché. Mais la posture compte : accroupi (1, 2, 3) et debout (4 à 9) sont
+    /// deux coups différents (d/b HP n'est pas b+HP).
     pub fn accepte(&self, coup: &str, attendu: &str) -> bool {
         correspond(coup, attendu)
             || (self.hits.is_some()
                 && normal(coup)
                 && normal(attendu)
-                && bouton(coup) == bouton(attendu))
+                && bouton(coup) == bouton(attendu)
+                && accroupi(coup) == accroupi(attendu))
     }
 
     /// À appeler régulièrement : remet à zéro si on a trop attendu. Renvoie vrai si c'est le cas.
@@ -477,6 +479,11 @@ fn retournes_de(coups: &[String]) -> Vec<String> {
 fn normal(notation: &str) -> bool {
     let chiffres = notation.chars().take_while(|c| c.is_ascii_digit()).count();
     chiffres == 1 && notation.len() > 1
+}
+
+/// Un coup normal accroupi (direction 1, 2 ou 3).
+fn accroupi(notation: &str) -> bool {
+    matches!(notation.chars().next(), Some('1' | '2' | '3'))
 }
 
 /// Le bouton d'une notation, sans la direction ni le mouvement : « 236MK » -> « MK ».
@@ -570,6 +577,10 @@ mod tests {
         // Un mouvement spécial doit toujours être fait.
         assert!(!t.accepte("2MK", "236MK"));
         assert!(t.accepte("5MK", "4MK"));
+        // Accroupi et debout ne se remplacent pas.
+        assert!(!t.accepte("1HP", "4HP"));
+        assert!(!t.accepte("5MK", "2MK"));
+        assert!(t.accepte("1MK", "2MK"));
     }
 
     #[test]
