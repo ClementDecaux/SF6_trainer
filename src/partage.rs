@@ -70,6 +70,8 @@ pub struct Partage {
     pub lignes_total: u64,
     /// Bouton photo cliqué sur l'overlay (le thread de la manette prend la photo).
     pub photo_demandee: bool,
+    /// L'étape où le dernier essai a cassé (mauvais coup, hors timing ou coup qui n'a pas touché).
+    pub etape_cassee: Option<usize>,
 }
 
 impl Partage {
@@ -93,6 +95,7 @@ impl Partage {
             hits_direct: 0,
             lignes_total: 0,
             photo_demandee: false,
+            etape_cassee: None,
         }
     }
 

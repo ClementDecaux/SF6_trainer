@@ -418,6 +418,7 @@ fn resultat_trial(
     (frame, temps): (u64, i64),
     partage: &Mutex<Partage>,
 ) -> Option<Fin> {
+    let attendue = trial.index;
     let resultat = trial.coup(candidats, frame);
     suivre_video(trial, capture, &resultat, frame);
     // Les appuis des étapes, pour les retrouver ensuite dans l'historique du jeu.
@@ -455,6 +456,8 @@ fn resultat_trial(
     match resultat {
         Resultat::Avance => {
             crate::son::etape(trial.index);
+            // Une étape passée : l'endroit du dernier break n'est plus affiché.
+            p.etape_cassee = None;
             // Nouvel essai : on efface le raté d'avant.
             if trial.index == 1 {
                 p.message = None;
@@ -466,6 +469,7 @@ fn resultat_trial(
             return Some(Fin {
                 ecarts: trial.ecarts.clone(),
                 erreurs: trial.erreurs_timing.clone(),
+                cassee: premiere_hors_timing(&trial.ecarts, trial.fenetres.as_deref()),
                 exact: false,
                 raison: None,
                 hits: None,
@@ -479,6 +483,7 @@ fn resultat_trial(
             );
             println!("{}", affichage::trial(trial));
             p.message(format!("Raté : attendu {attendu}, reçu {coup}"), false);
+            p.etape_cassee = Some(attendue);
         }
         Resultat::Ignore => {}
     }
@@ -500,6 +505,8 @@ fn appui_etape<'a>(notation: &'a str, candidats: &[String]) -> &'a str {
 struct Fin {
     ecarts: Vec<u64>,
     erreurs: Vec<String>,
+    /// L'étape où le combo a cassé (hors timing, ou après le dernier coup qui a touché).
+    cassee: Option<usize>,
     /// Écarts lus dans l'historique du jeu (sinon : estimés avec notre horloge).
     exact: bool,
     /// Pourquoi les écarts n'ont pas pu être lus dans le jeu.
@@ -507,6 +514,15 @@ struct Fin {
     /// Coups qui ont touché (panneau des dégâts du jeu), et combien il en faut.
     hits: Option<u32>,
     hits_attendus: Option<u32>,
+}
+
+/// La première étape sortie de sa fenêtre de timing (les fenêtres vont des étapes 2 à N).
+fn premiere_hors_timing(ecarts: &[u64], fenetres: Option<&[(u64, u64)]>) -> Option<usize> {
+    ecarts
+        .iter()
+        .zip(fenetres?)
+        .position(|(&e, &f)| verifier(e, f).is_some())
+        .map(|i| i + 1)
 }
 
 /// Donne le verdict d'un combo fini : son, message, vidéo gardée ou non.
@@ -555,6 +571,11 @@ fn conclure(
         p.ecarts_exacts = fin.exact;
         p.raison_estimee = fin.raison.clone();
         p.hits = fin.hits;
+        p.etape_cassee = if fin.erreurs.is_empty() {
+            None
+        } else {
+            fin.cassee
+        };
         if fin.erreurs.is_empty() {
             p.reussites += 1;
             p.message(format!("COMBO RÉUSSI !{hits}"), true);
@@ -862,8 +883,11 @@ impl Juge {
                 if hits >= attendus {
                     // Tous les coups ont touché : le jeu a validé le combo, le timing aussi.
                     fin.erreurs.clear();
+                    fin.cassee = None;
                 } else {
-                    fin.erreurs = vec![self.lache(&attente, hits, attendus)];
+                    let (erreur, cassee) = self.lache(&attente, hits, attendus);
+                    fin.erreurs = vec![erreur];
+                    fin.cassee = Some(cassee);
                 }
             }
         }
@@ -871,18 +895,25 @@ impl Juge {
     }
 
     /// « 4/7 hits : lâché après 236MK » : la dernière étape faite avant le dernier coup qui a touché.
-    fn lache(&self, attente: &Attente, hits: u32, attendus: u32) -> String {
+    /// Renvoie aussi l'étape d'après, celle où le combo a cassé.
+    fn lache(&self, attente: &Attente, hits: u32, attendus: u32) -> (String, usize) {
         let Some(&dernier) = self.coups.iter().rev().find(|&&t| t >= attente.debut) else {
-            return format!("0/{attendus} hits : aucun coup n'a touché");
+            return (format!("0/{attendus} hits : aucun coup n'a touché"), 0);
         };
-        let etape = attente
+        let derniere = attente
             .appuis
             .iter()
-            .zip(&attente.notations)
-            .rfind(|(a, _)| a.temps + attente.latence <= dernier)
-            .map(|(_, n)| n.as_str())
-            .unwrap_or("?");
-        format!("{hits}/{attendus} hits : lâché après {etape}")
+            .rposition(|a| a.temps + attente.latence <= dernier);
+        let etape = derniere
+            .and_then(|k| attente.notations.get(k))
+            .map_or("?", String::as_str);
+        let cassee = derniere.map_or(0, |k| {
+            (k + 1).min(attente.notations.len().saturating_sub(1))
+        });
+        (
+            format!("{hits}/{attendus} hits : lâché après {etape}"),
+            cassee,
+        )
     }
 
     /// Les écarts exacts du combo en attente, avec ses erreurs de timing.
@@ -905,6 +936,7 @@ impl Juge {
             }
         }
         Ok(Fin {
+            cassee: premiere_hors_timing(&ecarts, attente.fenetres.as_deref()),
             ecarts,
             erreurs,
             exact: true,

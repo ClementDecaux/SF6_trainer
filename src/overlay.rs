@@ -356,8 +356,12 @@ fn entete(ui: &mut egui::Ui, p: &Partage) {
 /// La liste des étapes, une par ligne, comme les trials du jeu.
 fn etapes(ui: &mut egui::Ui, p: &Partage) {
     for (i, etape) in p.etapes.iter().enumerate() {
+        let cassee = p.etape_cassee == Some(i) && i >= p.index;
         let (couleur, fond) = if i < p.index {
             (VERT, Color32::TRANSPARENT)
+        } else if cassee {
+            // Là où le combo a cassé.
+            (ROUGE, Color32::from_rgba_unmultiplied(255, 60, 60, 70))
         } else if i == p.index {
             (JAUNE, Color32::from_rgba_unmultiplied(255, 210, 60, 40))
         } else {
@@ -369,8 +373,14 @@ fn etapes(ui: &mut egui::Ui, p: &Partage) {
             Liaison::Link => ",",
         };
 
+        let bord = if cassee {
+            egui::Stroke::new(1.5, ROUGE)
+        } else {
+            egui::Stroke::NONE
+        };
         egui::Frame::new()
             .fill(fond)
+            .stroke(bord)
             .corner_radius(6)
             .inner_margin(egui::Margin::symmetric(8, 3))
             .show(ui, |ui| {
