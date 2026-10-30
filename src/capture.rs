@@ -417,7 +417,7 @@ pub fn supprimer_anciens(dossier: &std::path::Path, infos: &InfosClip) -> usize 
 
 /// Les étapes du traitement d'une image, dans l'ordre de `Image::phases` (la dernière :
 /// le total).
-pub const PHASES: [&str; 5] = ["ordres", "lecture", "historique", "copie", "total"];
+pub const PHASES: [&str; 5] = ["ordres", "lecture", "envoi historique", "copie", "total"];
 
 /// Décrit le temps passé dans chaque étape (`phases` en µs), pour le diagnostic.
 pub fn decrire_phases(phases: &[u32; 5]) -> String {
@@ -429,7 +429,8 @@ pub fn decrire_phases(phases: &[u32; 5]) -> String {
     format!("{} ms", morceaux.join(", "))
 }
 
-/// Une image du jeu gardée en mémoire (pixels BGRA, lignes du bas vers le haut).
+/// Une image du jeu gardée en mémoire (pixels BGRA, lignes du haut vers le bas, sans
+/// remplissage : `largeur × 4` octets par ligne).
 /// Les pixels sont partagés (`Arc`) : la même image est dans le tampon et chez l'encodeur,
 /// sans copie.
 #[derive(Clone)]
@@ -548,9 +549,34 @@ impl Tampon {
     }
 }
 
-/// Copie une image en retournant ses lignes : Windows encode les pixels donnés « à la main »
+/// Copie une image en enlevant le remplissage de la carte graphique au bout des lignes
+/// (`pas` = octets par ligne dans `source`).
+/// Retourner les lignes : Windows encode les pixels donnés « à la main »
 /// en commençant par la ligne du bas. `pas` = octets par ligne dans `source` (parfois plus
 /// que la largeur, la carte graphique ajoute du remplissage).
+pub fn copier_lignes(
+    source: &[u8],
+    pas: usize,
+    octets_par_ligne: usize,
+    hauteur: usize,
+    destination: &mut Vec<u8>,
+) {
+    destination.resize(octets_par_ligne * hauteur, 0);
+    if pas == octets_par_ligne
+        && let Some(tout) = source.get(..octets_par_ligne * hauteur)
+    {
+        destination.copy_from_slice(tout);
+        return;
+    }
+    for y in 0..hauteur {
+        let Some(ligne) = source.get(y * pas..y * pas + octets_par_ligne) else {
+            break;
+        };
+        destination[y * octets_par_ligne..(y + 1) * octets_par_ligne].copy_from_slice(ligne);
+    }
+}
+
+/// Comme `copier_lignes`, sans le remplissage, mais en retournant les lignes.
 pub fn retourner_lignes(
     source: &[u8],
     pas: usize,
@@ -572,8 +598,8 @@ pub fn retourner_lignes(
 #[cfg(windows)]
 mod capture_windows {
     use super::{
-        Config, Image, InfosClip, OCTETS_MAX_TAMPON, Ordre, Tampon, ecrire_infos, nom_fichier,
-        retourner_lignes, supprimer_anciens,
+        Config, Image, InfosClip, OCTETS_MAX_TAMPON, Ordre, Tampon, copier_lignes, ecrire_infos,
+        nom_fichier, retourner_lignes, supprimer_anciens,
     };
     use std::path::{Path, PathBuf};
     use std::sync::mpsc::{Receiver, Sender};
@@ -763,7 +789,9 @@ mod capture_windows {
         /// F10 appuyée : la prochaine image est enregistrée en PNG.
         photo: bool,
         /// Lecture de l'historique d'inputs et des dégâts du jeu.
-        lecteur: crate::ecran::Lecteur,
+        lecteur: Arc<Mutex<crate::ecran::Lecteur>>,
+        /// Les images entières partent là pour y être lues (voir `lancer_lecture`).
+        lecture: std::sync::mpsc::SyncSender<Image>,
         /// Temps passé dans chaque étape pour l'image en cours (voir `PHASES`).
         phases: [u32; 5],
     }
@@ -956,7 +984,9 @@ mod capture_windows {
                     ((x1 - x0) as usize, (y1 - y0) as usize),
                     pas,
                 );
-                crate::ecran::lire_image(&mut self.lecteur, &vue, temps);
+                if let Ok(mut lecteur) = self.lecteur.lock() {
+                    crate::ecran::lire_image(&mut lecteur, &vue, temps);
+                }
                 return Ok(None);
             }
             let chrono = Instant::now();
@@ -965,14 +995,8 @@ mod capture_windows {
             let brut = image.as_raw_buffer();
             self.phases[1] = chrono.elapsed().as_micros() as u32;
             let chrono = Instant::now();
-            if self.config.historique {
-                let vue = crate::ecran::Vue::jeu(brut, largeur as usize, hauteur as usize, pas);
-                crate::ecran::lire_image(&mut self.lecteur, &vue, temps);
-            }
-            self.phases[2] = chrono.elapsed().as_micros() as u32;
-            let chrono = Instant::now();
             let mut pixels = self.tampon.place();
-            retourner_lignes(
+            copier_lignes(
                 brut,
                 pas,
                 largeur as usize * 4,
@@ -980,13 +1004,21 @@ mod capture_windows {
                 &mut pixels,
             );
             self.phases[3] = chrono.elapsed().as_micros() as u32;
-            Ok(Some(Image {
+            let image = Image {
                 temps,
                 largeur,
                 hauteur,
                 pixels: std::sync::Arc::new(pixels),
                 phases: [0; 5],
-            }))
+            };
+            // L'historique est lu sur un autre fil : ici, il prenait jusqu'à 13 ms sur les
+            // 16,7 d'une image. En retard (file pleine) : cette image n'est pas lue.
+            let chrono = Instant::now();
+            if self.config.historique {
+                let _ = self.lecture.try_send(image.clone());
+            }
+            self.phases[2] = chrono.elapsed().as_micros() as u32;
+            Ok(Some(image))
         }
 
         /// Démarre la vidéo avec les images du tampon (l'image actuelle comprise).
@@ -1145,10 +1177,22 @@ mod capture_windows {
     ) -> (Sender<Envoi>, std::thread::JoinHandle<bool>) {
         let (envoi, reception) = std::sync::mpsc::channel::<Envoi>();
         let fil = std::thread::spawn(move || {
+            // Windows encode les pixels donnés « à la main » en commençant par la ligne du
+            // bas : l'image est retournée ici, hors de la capture.
+            let mut retournee = Vec::new();
             for envoye in reception {
                 match envoye {
                     Envoi::Image(image) => {
-                        if let Err(e) = encodeur.send_frame_buffer(&image.pixels, image.temps) {
+                        let ligne = image.largeur as usize * 4;
+                        retourner_lignes(
+                            &image.pixels,
+                            ligne,
+                            ligne,
+                            image.hauteur as usize,
+                            &mut retournee,
+                        );
+                        drop(image.pixels);
+                        if let Err(e) = encodeur.send_frame_buffer(&retournee, image.temps) {
                             eprintln!("Vidéo : image perdue ({e}).");
                         }
                     }
@@ -1168,6 +1212,23 @@ mod capture_windows {
             }
         });
         (envoi, fil)
+    }
+
+    /// Lit l'historique d'inputs et les dégâts sur les images entières, sur un fil à part.
+    fn lancer_lecture(
+        lecteur: Arc<Mutex<crate::ecran::Lecteur>>,
+    ) -> std::sync::mpsc::SyncSender<Image> {
+        let (envoi, reception) = std::sync::mpsc::sync_channel::<Image>(3);
+        std::thread::spawn(move || {
+            for image in reception {
+                let (l, h) = (image.largeur as usize, image.hauteur as usize);
+                let vue = crate::ecran::Vue::jeu(&image.pixels, l, h, l * 4);
+                if let Ok(mut lecteur) = lecteur.lock() {
+                    crate::ecran::lire_image(&mut lecteur, &vue, image.temps);
+                }
+            }
+        });
+        envoi
     }
 
     /// Envoie à l'encodeur le son reçu depuis la dernière fois, jusqu'à l'heure `temps`.
@@ -1239,6 +1300,7 @@ mod capture_windows {
 
         fn new(ctx: Context<Self::Flags>) -> Result<Self, Self::Error> {
             let tampon = Tampon::new(ctx.flags.config.avant_ms, OCTETS_MAX_TAMPON);
+            let lecteur = Arc::new(Mutex::new(crate::ecran::Lecteur::default()));
             Ok(Enregistreur {
                 config: ctx.flags.config,
                 ordres: ctx.flags.ordres,
@@ -1249,7 +1311,8 @@ mod capture_windows {
                 tampon,
                 numero: 0,
                 photo: false,
-                lecteur: crate::ecran::Lecteur::default(),
+                lecteur: lecteur.clone(),
+                lecture: lancer_lecture(lecteur),
                 phases: [0; 5],
             })
         }
@@ -1604,6 +1667,17 @@ mod tests {
     #[test]
     fn tampon_coupe_si_avant_ms_vaut_zero() {
         assert!(!Tampon::new(0, usize::MAX).actif());
+    }
+
+    #[test]
+    fn les_lignes_sont_copiees_sans_le_remplissage() {
+        // 2 lignes de 2 octets, 3 octets par ligne dans la source (1 de remplissage).
+        let source = [1, 2, 0, 3, 4, 0];
+        let mut destination = Vec::new();
+        copier_lignes(&source, 3, 2, 2, &mut destination);
+        assert_eq!(destination, [1, 2, 3, 4]);
+        copier_lignes(&[5, 6, 7, 8], 2, 2, 2, &mut destination);
+        assert_eq!(destination, [5, 6, 7, 8]);
     }
 
     #[test]
