@@ -94,6 +94,12 @@ pub struct Overlay {
     regler_dans: u8,
     /// Mode déplacement actuellement appliqué à la fenêtre.
     deplacement: bool,
+    /// La souris est au-dessus de l'historique : la fenêtre la garde (pour la molette).
+    survol: bool,
+    /// Où est l'historique à l'écran (en points), pour savoir si la souris le survole.
+    zone_historique: Option<egui::Rect>,
+    /// Nombre de lignes déjà vues : une nouvelle ligne ramène l'historique en haut.
+    lignes_vues: u64,
 }
 
 impl Overlay {
@@ -105,7 +111,16 @@ impl Overlay {
             opacite_fenetre: config.opacite_fenetre,
             regler_dans: 1,
             deplacement: false,
+            survol: false,
+            zone_historique: None,
+            lignes_vues: 0,
         }
+    }
+
+    /// Les clics et la molette passent au jeu, sauf en mode déplacement (F8)
+    /// et quand la souris est au-dessus de l'historique (pour le faire défiler).
+    fn traversant(&self) -> bool {
+        !self.deplacement && !self.survol
     }
 }
 
@@ -128,21 +143,29 @@ impl eframe::App for Overlay {
         };
 
         // F8 : on rend la fenêtre cliquable (pour la glisser), ou de nouveau traversable.
+        // Pareil quand la souris arrive au-dessus de l'historique (pour la molette).
+        let traversant_avant = self.traversant();
         if partage.deplacement != self.deplacement {
             self.deplacement = partage.deplacement;
-            let ctx = ui.ctx().clone();
-            ctx.send_viewport_cmd(egui::ViewportCommand::MousePassthrough(!self.deplacement));
             if !self.deplacement {
-                enregistrer_position(&ctx);
+                enregistrer_position(ui.ctx());
             }
+        }
+        self.survol = souris_sur(ui.ctx(), self.zone_historique);
+        if self.traversant() != traversant_avant {
+            ui.ctx()
+                .send_viewport_cmd(egui::ViewportCommand::MousePassthrough(self.traversant()));
             // Le changement est appliqué après cette image : on règle Windows deux images plus tard.
             self.regler_dans = 2;
         }
+        // La souris ne nous est pas envoyée quand elle traverse : on regarde où elle est
+        // régulièrement.
+        ui.ctx().request_repaint_after(Duration::from_millis(100));
         if self.regler_dans > 0 {
             self.regler_dans -= 1;
             if self.regler_dans == 0 {
                 #[cfg(windows)]
-                regler_fenetre_windows(frame, self.opacite_fenetre, !self.deplacement);
+                regler_fenetre_windows(frame, self.opacite_fenetre, self.traversant());
                 #[cfg(not(windows))]
                 let _ = (frame, self.opacite_fenetre);
             } else {
@@ -164,12 +187,10 @@ impl eframe::App for Overlay {
                 ui.set_width(ui.available_width());
                 if self.deplacement {
                     ui.label(
-                        RichText::new(
-                            "Glisse-moi à la souris, molette pour l'historique, F8 pour finir",
-                        )
-                        .color(JAUNE)
-                        .size(16.0)
-                        .strong(),
+                        RichText::new("Glisse-moi à la souris, F8 pour finir")
+                            .color(JAUNE)
+                            .size(16.0)
+                            .strong(),
                     );
                 }
                 entete(ui, &partage);
@@ -185,15 +206,22 @@ impl eframe::App for Overlay {
                 ui.add_space(8.0);
                 message(ui, &partage);
                 ui.separator();
-                // L'historique défile à la molette. Les clics et la molette passent au jeu
-                // d'habitude : on ne peut donc le faire défiler qu'en mode déplacement (F8).
-                egui::ScrollArea::vertical()
+                // L'historique défile à la molette ; une nouvelle ligne le ramène en haut.
+                let mut defilement = egui::ScrollArea::vertical();
+                if partage.lignes_total != self.lignes_vues {
+                    self.lignes_vues = partage.lignes_total;
+                    defilement = defilement.vertical_scroll_offset(0.0);
+                }
+                let sortie = defilement
                     .scroll_source(
                         egui::scroll_area::ScrollSource::MOUSE_WHEEL
                             | egui::scroll_area::ScrollSource::SCROLL_BAR,
                     )
                     .auto_shrink([false, false])
                     .show(ui, |ui| historique(ui, &partage.lignes));
+                let fenetre = ui.ctx().input(|i| i.viewport().inner_rect);
+                self.zone_historique =
+                    fenetre.map(|f| sortie.inner_rect.translate(f.min.to_vec2()));
             });
 
         // Mode déplacement : cliquer-glisser n'importe où déplace la fenêtre.
@@ -477,6 +505,27 @@ fn regler_fenetre_windows(frame: &eframe::Frame, opacite: u8, traversant: bool) 
         SetWindowLongPtrW(hwnd, GWL_EXSTYLE, style);
         SetLayeredWindowAttributes(hwnd, 0, opacite, LWA_ALPHA);
     }
+}
+
+/// Vrai si la souris est dans `zone` (coordonnées de l'écran, en points).
+#[cfg(windows)]
+fn souris_sur(ctx: &egui::Context, zone: Option<egui::Rect>) -> bool {
+    use windows_sys::Win32::Foundation::POINT;
+    use windows_sys::Win32::UI::WindowsAndMessaging::GetCursorPos;
+    let Some(zone) = zone else {
+        return false;
+    };
+    let mut p = POINT { x: 0, y: 0 };
+    if unsafe { GetCursorPos(&mut p) } == 0 {
+        return false;
+    }
+    let echelle = ctx.pixels_per_point();
+    zone.contains(egui::pos2(p.x as f32 / echelle, p.y as f32 / echelle))
+}
+
+#[cfg(not(windows))]
+fn souris_sur(_ctx: &egui::Context, _zone: Option<egui::Rect>) -> bool {
+    false
 }
 
 /// Mêmes couleurs que dans le terminal : poings en bleu, pieds en rouge...

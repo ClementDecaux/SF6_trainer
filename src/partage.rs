@@ -66,6 +66,8 @@ pub struct Partage {
     pub hits: Option<u32>,
     /// Compteur de hits en direct (combo en cours ou dernier combo).
     pub hits_direct: u32,
+    /// Nombre de lignes ajoutées à l'historique depuis le lancement.
+    pub lignes_total: u64,
 }
 
 impl Partage {
@@ -87,11 +89,13 @@ impl Partage {
             degats_visibles: false,
             hits: None,
             hits_direct: 0,
+            lignes_total: 0,
         }
     }
 
     pub fn ajouter_ligne(&mut self, ligne: Ligne) {
         self.lignes.push_front(ligne);
+        self.lignes_total += 1;
         self.lignes.truncate(LIGNES_MAX);
     }
 
