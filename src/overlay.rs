@@ -678,6 +678,14 @@ fn ligne_historique(ui: &mut egui::Ui, ligne: &Ligne) {
         for coup in &ligne.coups {
             ui.label(RichText::new(format!("» {coup}")).color(JAUNE).size(16.0));
         }
+        if let Some(etape) = ligne.etape {
+            ui.label(
+                RichText::new(format!("étape {etape}"))
+                    .color(VERT)
+                    .size(14.0)
+                    .strong(),
+            );
+        }
         if ligne.cassee {
             ui.label(RichText::new("× break").color(ROUGE).size(14.0).strong());
         }

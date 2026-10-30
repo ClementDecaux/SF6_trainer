@@ -251,7 +251,13 @@ impl Trial {
 
         // Avant l'ouverture de la fenêtre, le coup d'avant est encore en récupération :
         // le jeu ignore les appuis (double tap, coup intercalé pour le rythme). Nous aussi.
-        if fenetre.is_some_and(|(min, _)| ecart + TOLERANCE < min) {
+        // Sauf le coup attendu avec un autre bouton que l'étape d'avant : ce n'est pas un
+        // double tap, et le jeu a pu le garder en mémoire (buffer) ou la fenêtre apprise
+        // être trop étroite. Il compte, « trop tôt » ; les hits du jeu trancheront.
+        let attendu_tot = candidats.iter().any(|c| self.accepte(c, self.attendu()))
+            && self.index > 0
+            && bouton(self.attendu()) != bouton(&self.etapes[self.index - 1].notation);
+        if fenetre.is_some_and(|(min, _)| ecart + TOLERANCE < min) && !attendu_tot {
             self.intercales += 1;
             return Resultat::Ignore;
         }
@@ -499,6 +505,16 @@ mod tests {
         assert_eq!(t.coup(&c("4MK"), 125), Resultat::Ignore);
         assert_eq!(t.coup(&c("4MK"), 141), Resultat::Reussi);
         assert_eq!(t.intercales, 2);
+    }
+
+    #[test]
+    fn le_coup_attendu_avant_la_fenetre_compte_trop_tot() {
+        let mut t = trial_avec_fenetres();
+        t.coup(&c("4HP"), 100);
+        // 236MK (autre bouton que 4HP) avant sa fenêtre : pas un double tap, il compte.
+        assert_eq!(t.coup(&c("236MK"), 104), Resultat::Avance);
+        assert_eq!(t.erreurs_timing.len(), 1);
+        assert!(t.erreurs_timing[0].contains("trop tôt"));
     }
 
     #[test]

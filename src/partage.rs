@@ -27,6 +27,8 @@ pub struct Ligne {
     pub exact: bool,
     /// Le combo a cassé sur cette ligne (affichée en rouge).
     pub cassee: bool,
+    /// Le numéro (à partir de 1) de l'étape du combo validée sur cette ligne.
+    pub etape: Option<usize>,
 }
 
 /// Le dernier événement du trial, affiché quelques instants.
@@ -76,6 +78,8 @@ pub struct Partage {
     pub etape_cassee: Option<usize>,
     /// Un mauvais coup vient d'être fait : la prochaine ligne ajoutée est celle du break.
     pub ligne_cassee_a_venir: bool,
+    /// Une étape vient d'être validée : son numéro va sur la prochaine ligne ajoutée.
+    pub etape_a_venir: Option<usize>,
     /// L'historique lu dans le jeu (lignes finies, la plus récente en premier),
     /// avec les coups reconnus de notre côté. Affiché quand l'historique du jeu est visible.
     pub lignes_jeu: VecDeque<Ligne>,
@@ -108,6 +112,7 @@ impl Partage {
             photo_demandee: false,
             etape_cassee: None,
             ligne_cassee_a_venir: false,
+            etape_a_venir: None,
             lignes_jeu: VecDeque::new(),
             ligne_jeu_en_cours: None,
             lignes_jeu_total: 0,
@@ -124,6 +129,9 @@ impl Partage {
     pub fn ajouter_ligne(&mut self, mut ligne: Ligne) {
         if std::mem::take(&mut self.ligne_cassee_a_venir) {
             ligne.cassee = true;
+        }
+        if let Some(etape) = self.etape_a_venir.take() {
+            ligne.etape = Some(etape);
         }
         self.lignes.push_front(ligne);
         self.lignes_total += 1;

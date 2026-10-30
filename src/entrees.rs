@@ -217,6 +217,7 @@ pub fn boucle(
                             debut: debut_temps,
                             exact: false,
                             cassee: false,
+                            etape: None,
                         });
                     }
                 }
@@ -461,6 +462,8 @@ fn resultat_trial(
             crate::son::etape(trial.index);
             // Une étape passée : l'endroit du dernier break n'est plus affiché.
             p.etape_cassee = None;
+            // Son numéro, sur la ligne de l'historique où elle a été faite.
+            p.etape_a_venir = Some(trial.index);
             // Nouvel essai : on efface le raté d'avant.
             if trial.index == 1 {
                 p.message = None;
@@ -469,6 +472,7 @@ fn resultat_trial(
         }
         Resultat::Reussi => {
             crate::son::etape(trial.etapes.len());
+            p.etape_a_venir = Some(trial.etapes.len());
             return Some(Fin {
                 ecarts: trial.ecarts.clone(),
                 erreurs: trial.erreurs_timing.clone(),
@@ -529,6 +533,7 @@ fn ligne_jeu(entree: &EntreeJeu, frames: u64, latence: i64) -> Ligne {
         debut: entree.vu - latence,
         exact: true,
         cassee: false,
+        etape: None,
     }
 }
 
@@ -549,6 +554,7 @@ fn completer(ligne: &mut Ligne, nos_lignes: &VecDeque<Ligne>) {
     {
         ligne.coups = notre.coups.clone();
         ligne.cassee = notre.cassee;
+        ligne.etape = notre.etape;
     }
 }
 
@@ -1223,6 +1229,7 @@ mod tests {
             debut,
             exact: false,
             cassee: true,
+            etape: None,
         };
         // Même moment mais autre direction, puis la bonne ligne à une demi-frame près.
         let nos_lignes = VecDeque::from([notre(6, 700_000, "6MK"), notre(4, 780_000, "4MK")]);
