@@ -430,12 +430,15 @@ pub fn decrire_phases(phases: &[u32; 5]) -> String {
 }
 
 /// Une image du jeu gardée en mémoire (pixels BGRA, lignes du bas vers le haut).
+/// Les pixels sont partagés (`Arc`) : la même image est dans le tampon et chez l'encodeur,
+/// sans copie.
+#[derive(Clone)]
 pub struct Image {
     /// Heure de l'image, en unités de 100 ns (horloge de Windows).
     pub temps: i64,
     pub largeur: u32,
     pub hauteur: u32,
-    pub pixels: Vec<u8>,
+    pub pixels: std::sync::Arc<Vec<u8>>,
     /// Temps passé à traiter cette image dans la capture, en µs (pour trouver les
     /// saccades) : voir `PHASES`.
     pub phases: [u32; 5],
@@ -483,15 +486,20 @@ impl Tampon {
                 break;
             }
             octets -= plus_vieille.pixels.len();
-            if let Some(image) = self.images.pop_front() {
-                self.recycler(image.pixels);
+            // Plus utilisée par l'encodeur : sa mémoire resservira.
+            if let Some(image) = self.images.pop_front()
+                && let Ok(pixels) = std::sync::Arc::try_unwrap(image.pixels)
+            {
+                self.recycler(pixels);
             }
         }
     }
 
-    /// Toutes les images gardées, de la plus vieille à la plus récente. Le tampon est vidé.
-    pub fn prendre(&mut self) -> Vec<Image> {
-        self.images.drain(..).collect()
+    /// Toutes les images gardées, de la plus vieille à la plus récente. Elles restent dans
+    /// le tampon : si l'essai est recommencé pendant le film, le début du nouveau clip est
+    /// là (avant, le tampon était vide et le clip commençait à la 1re étape).
+    pub fn copier(&self) -> Vec<Image> {
+        self.images.iter().cloned().collect()
     }
 
     pub fn recycler(&mut self, pixels: Vec<u8>) {
@@ -733,8 +741,6 @@ mod capture_windows {
         lecteur: crate::ecran::Lecteur,
         /// Temps passé dans chaque étape pour l'image en cours (voir `PHASES`).
         phases: [u32; 5],
-        /// La mémoire des images, rendue par l'encodeur une fois l'image encodée.
-        retour: (Sender<Vec<u8>>, Receiver<Vec<u8>>),
     }
 
     impl Enregistreur {
@@ -953,13 +959,13 @@ mod capture_windows {
                 temps,
                 largeur,
                 hauteur,
-                pixels,
+                pixels: std::sync::Arc::new(pixels),
                 phases: [0; 5],
             }))
         }
 
-        /// Démarre la vidéo : d'abord les images du tampon, puis l'image actuelle.
-        fn commencer(&mut self, frame: &Frame, temps: i64, actuelle: Option<Image>) {
+        /// Démarre la vidéo avec les images du tampon (l'image actuelle comprise).
+        fn commencer(&mut self, frame: &Frame, temps: i64) {
             let chrono = Instant::now();
             let (largeur, hauteur) = (frame.width(), frame.height());
             let Pret {
@@ -975,16 +981,14 @@ mod capture_windows {
                     return;
                 }
             };
-            let (envoi, fil) = lancer_encodage(encodeur, self.retour.0.clone());
+            let (envoi, fil) = lancer_encodage(encodeur);
             let mut manquees = 0;
             let mut trous = Vec::new();
             let mut premier = None;
             let mut precedente = None;
             let mut avant = (0, 0, [0; 5]);
-            let images = self.tampon.prendre().into_iter().chain(actuelle);
-            for image in images {
+            for image in self.tampon.copier() {
                 if image.largeur != largeur || image.hauteur != hauteur {
-                    self.tampon.recycler(image.pixels);
                     continue;
                 }
                 if let Some(p) = precedente {
@@ -1109,11 +1113,10 @@ mod capture_windows {
     /// L'encodeur tourne sur son propre fil. Lui donner une image la copie (8 Mo en
     /// 1080p) : fait pendant la capture, ça la ralentissait et des images du jeu étaient
     /// perdues (saccades). Ici, la capture ne fait que lui passer l'image, sans copie. La
-    /// mémoire de l'image revient par `retour` pour resservir. Le fil se termine (et la
+    /// mémoire de l'image resservira quand le tampon l'aura lâchée. Le fil se termine (et la
     /// vidéo avec) quand `Envoi` n'a plus d'expéditeur ; il dit si tout s'est bien passé.
     fn lancer_encodage(
         mut encodeur: VideoEncoder,
-        retour: Sender<Vec<u8>>,
     ) -> (Sender<Envoi>, std::thread::JoinHandle<bool>) {
         let (envoi, reception) = std::sync::mpsc::channel::<Envoi>();
         let fil = std::thread::spawn(move || {
@@ -1123,7 +1126,6 @@ mod capture_windows {
                         if let Err(e) = encodeur.send_frame_buffer(&image.pixels, image.temps) {
                             eprintln!("Vidéo : image perdue ({e}).");
                         }
-                        let _ = retour.send(image.pixels);
                     }
                     Envoi::Son(octets) => {
                         if let Err(e) = encodeur.send_audio_buffer(&octets, 0) {
@@ -1223,7 +1225,6 @@ mod capture_windows {
                 numero: 0,
                 photo: false,
                 lecteur: crate::ecran::Lecteur::default(),
-                retour: std::sync::mpsc::channel(),
                 phases: [0; 5],
             })
         }
@@ -1235,10 +1236,6 @@ mod capture_windows {
             _controle: InternalCaptureControl,
         ) -> Result<(), Self::Error> {
             let arrivee = Instant::now();
-            // La mémoire des images déjà encodées resservira.
-            while let Ok(pixels) = self.retour.1.try_recv() {
-                self.tampon.recycler(pixels);
-            }
             // 1. Les ordres arrivés depuis la dernière image.
             let ordres: Vec<Ordre> = match self.ordres.lock() {
                 Ok(reception) => reception.try_iter().collect(),
@@ -1279,11 +1276,10 @@ mod capture_windows {
                     None
                 }
             };
-            // Pas de vidéo en cours : l'image va dans le tampon des dernières images.
-            if matches!(self.etat, Etat::Attente)
-                && let Some(image) = image.take()
-            {
-                self.tampon.ajouter(image);
+            // L'image va toujours dans le tampon des dernières images (même pendant le film :
+            // la mémoire est partagée avec l'encodeur, pas copiée).
+            if let Some(image) = &image {
+                self.tampon.ajouter(image.clone());
             }
 
             // 3. Selon l'état : préparer, commencer, ou continuer à filmer.
@@ -1299,7 +1295,14 @@ mod capture_windows {
                         self.preparer(largeur, hauteur);
                     }
                 }
-                Etat::Demande => self.commencer(frame, temps, image.take()),
+                Etat::Demande => {
+                    self.commencer(frame, temps);
+                    // L'encodeur du prochain essai se prépare déjà : recommencer pendant le
+                    // film ne fait plus attendre sa création (plus de 200 ms).
+                    if matches!(self.etat, Etat::Filme { .. }) {
+                        self.preparer(frame.width(), frame.height());
+                    }
+                }
                 Etat::Filme {
                     envoi,
                     debut,
@@ -1336,22 +1339,17 @@ mod capture_windows {
                     };
                 }
             }
-            if let Some(image) = image {
-                self.tampon.recycler(image.pixels);
-            }
+            drop(image);
             self.phases[4] = arrivee.elapsed().as_micros() as u32;
             let phases = self.phases;
-            match &mut self.etat {
-                Etat::Filme { lentes, pire, .. } => {
-                    if phases[4] > 14_000 {
-                        *lentes += 1;
-                    }
-                    if phases[4] > pire[4] {
-                        *pire = phases;
-                    }
+            self.tampon.noter_phases(phases);
+            if let Etat::Filme { lentes, pire, .. } = &mut self.etat {
+                if phases[4] > 14_000 {
+                    *lentes += 1;
                 }
-                Etat::Attente => self.tampon.noter_phases(phases),
-                Etat::Demande => {}
+                if phases[4] > pire[4] {
+                    *pire = phases;
+                }
             }
             if terminer {
                 self.arreter();
@@ -1552,15 +1550,15 @@ mod tests {
                 temps: i * 160_000,
                 largeur: 1,
                 hauteur: 1,
-                pixels,
+                pixels: std::sync::Arc::new(pixels),
                 phases: [0; 5],
             });
         }
         // 6 intervalles de 16 ms = 96 ms : les images 13 à 19.
-        let images = tampon.prendre();
+        let images = tampon.copier();
         assert_eq!(images.len(), 7);
         assert_eq!(images[0].temps, 13 * 160_000);
-        assert_eq!(tampon.len(), 0);
+        assert_eq!(tampon.len(), 7);
     }
 
     #[test]
@@ -1571,7 +1569,7 @@ mod tests {
                 temps: i,
                 largeur: 10,
                 hauteur: 10,
-                pixels: vec![0; 100],
+                pixels: std::sync::Arc::new(vec![0; 100]),
                 phases: [0; 5],
             });
         }
