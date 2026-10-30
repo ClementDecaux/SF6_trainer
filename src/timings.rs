@@ -1,31 +1,19 @@
-//! Les fenêtres de timing de chaque étape, apprises sur tes vrais combos.
+//! Ce qui est appris sur tes vrais combos (Select après un combo passé), dans `timings.toml`.
 //!
-//! L'outil ne voit que la manette : il ne sait pas si un coup touche. Il mesure donc
-//! l'écart (en frames) entre chaque étape et la précédente. Quand tu vois dans le jeu
-//! qu'un combo est vraiment passé, appuie sur Select : les écarts de cet essai sont
-//! ajoutés à `timings.toml`. Ensuite, une étape trop tôt ou trop tard est signalée.
-//!
-//! La frame data publique ne suffit pas pour ces règles : dans un combo avec juggle
-//! (après un Drive Impact au mur, par exemple), ce qui compte est l'état de l'adversaire
-//! en l'air, pas l'avantage frame. Apprendre sur tes essais marche pour tous les combos.
-//!
-//! Si le panneau des dégâts du mode entraînement est affiché, Select apprend aussi le
-//! nombre de coups qui touchent : un combo est alors validé par ses hits, pas par le timing.
+//! Surtout le nombre de coups qui touchent (lu sur le panneau des dégâts du mode
+//! entraînement) : c'est lui qui valide un combo. Les écarts en frames entre étapes
+//! (min et max vus) sont gardés pour information ; ils ne servent plus à juger.
 
 use serde::{Deserialize, Serialize};
 
 const FICHIER: &str = "timings.toml";
 
-/// Notre horloge et celle du jeu peuvent différer d'une frame : on tolère cet écart.
-pub const TOLERANCE: u64 = 1;
-
-/// Les fenêtres ne servent qu'après ce nombre de vrais combos confirmés :
-/// avec un seul essai, la fenêtre ferait une seule frame de large.
+/// Nombre de vrais combos à confirmer avant de dire que le timing est appris.
 pub const ESSAIS_MIN: u32 = 3;
 
-const EN_TETE: &str =
-    "# Fenêtres de timing apprises sur tes vrais combos (Select après un combo passé).
-# min et max : frames entre l'étape d'avant et celle-ci, à partir de la 2e étape.
+const EN_TETE: &str = "# Appris sur tes vrais combos (Select après un combo passé).
+# hits : coups qui touchent quand le combo passe (c'est ce qui valide le combo).
+# min et max : frames vues entre l'étape d'avant et celle-ci (pour information).
 # Tu peux modifier ces nombres, ou supprimer un combo pour qu'il soit réappris.
 
 ";
@@ -49,16 +37,6 @@ pub struct Timings {
 }
 
 impl Timings {
-    /// Les fenêtres (min, max) d'un combo, si elles ont été apprises pour ce nombre d'étapes
-    /// sur au moins `ESSAIS_MIN` vrais combos.
-    pub fn fenetres(&self, nom: &str, nombre_etapes: usize) -> Option<Vec<(u64, u64)>> {
-        let t = self.combo.iter().find(|t| t.nom == nom)?;
-        if t.essais < ESSAIS_MIN || t.min.len() + 1 != nombre_etapes || t.max.len() != t.min.len() {
-            return None;
-        }
-        Some(t.min.iter().copied().zip(t.max.iter().copied()).collect())
-    }
-
     /// Ajoute un vrai combo : `ecarts` = l'écart de chaque étape à partir de la 2e.
     /// Renvoie le nombre d'essais confirmés pour ce combo.
     pub fn apprendre(&mut self, nom: &str, ecarts: &[u64]) -> u32 {
@@ -118,17 +96,6 @@ pub fn charger() -> Result<Timings, String> {
     }
 }
 
-/// Compare un écart à sa fenêtre : `None` si c'est bon, sinon « trop tôt de 2 f »...
-pub fn verifier(ecart: u64, (min, max): (u64, u64)) -> Option<String> {
-    if ecart + TOLERANCE < min {
-        Some(format!("trop tôt de {} f", min - ecart))
-    } else if ecart > max + TOLERANCE {
-        Some(format!("trop tard de {} f", ecart - max))
-    } else {
-        None
-    }
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -138,10 +105,11 @@ mod tests {
         let mut t = Timings::default();
         assert_eq!(t.apprendre("combo", &[12, 30]), 1);
         assert_eq!(t.apprendre("combo", &[14, 28]), 2);
-        // Pas encore assez de vrais combos pour s'en servir.
-        assert_eq!(t.fenetres("combo", 3), None);
         assert_eq!(t.apprendre("combo", &[13, 29]), 3);
-        assert_eq!(t.fenetres("combo", 3), Some(vec![(12, 14), (28, 30)]));
+        assert_eq!(
+            (t.combo[0].min.clone(), t.combo[0].max.clone()),
+            (vec![12, 28], vec![14, 30])
+        );
     }
 
     #[test]
@@ -150,19 +118,10 @@ mod tests {
         for _ in 0..3 {
             t.apprendre("combo", &[12, 30]);
         }
-        assert_eq!(t.fenetres("combo", 4), None);
         // Réappris avec la nouvelle longueur : l'ancienne entrée est remplacée.
         t.apprendre("combo", &[1, 2, 3]);
         assert_eq!(t.combo.len(), 1);
         assert_eq!(t.combo[0].essais, 1);
-    }
-
-    #[test]
-    fn verifier_avec_la_tolerance() {
-        assert_eq!(verifier(13, (12, 14)), None);
-        assert_eq!(verifier(11, (12, 14)), None); // 1 frame de tolérance
-        assert_eq!(verifier(10, (12, 14)), Some("trop tôt de 2 f".into()));
-        assert_eq!(verifier(17, (12, 14)), Some("trop tard de 3 f".into()));
     }
 
     #[test]

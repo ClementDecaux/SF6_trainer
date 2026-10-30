@@ -52,8 +52,6 @@ pub struct Partage {
     pub reussites: u32,
     /// Écart en frames de chaque étape avec la précédente (essai en cours ou dernier essai).
     pub ecarts: Vec<u64>,
-    /// Fenêtres de timing apprises, pour les étapes 2 à N.
-    pub fenetres: Option<Vec<(u64, u64)>>,
     /// Mode déplacement (F8) : l'overlay peut être glissé à la souris.
     pub deplacement: bool,
     /// Les vidéos des combos réussis sont gardées (F9).
@@ -99,7 +97,6 @@ impl Partage {
             lignes: VecDeque::new(),
             reussites: 0,
             ecarts: Vec::new(),
-            fenetres: None,
             deplacement: false,
             enregistrement: false,
             historique_jeu: false,

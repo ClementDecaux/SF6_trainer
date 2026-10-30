@@ -45,7 +45,6 @@ fn lancer() -> Result<(), String> {
     let controles = controles::charger()?;
     let (mut trial, personnage, inputs) = choisir_trial()?;
     let timings = timings::charger()?;
-    trial.fenetres = timings.fenetres(&trial.nom, trial.etapes.len());
     if !trial.hits_fixe {
         trial.hits = timings.hits(&trial.nom);
     }
@@ -54,7 +53,6 @@ fn lancer() -> Result<(), String> {
     let capture = capture::lancer(capture::charger()?, &personnage, &trial.nom, &inputs);
 
     let mut etat = Partage::new(&trial.nom, trial.etapes.clone());
-    etat.fenetres = trial.fenetres.clone();
     etat.enregistrement = capture.enregistre;
     let partage = Arc::new(Mutex::new(etat));
 

@@ -32,22 +32,18 @@ cargo test         # lance les tests
 | `combos.toml` | Tes combos, en notation forum : `b+hp xx DR xx b+mk xx qcf+mk, b+mk xx hcb+mp` |
 | `controles.toml` | Quel bouton physique fait quoi dans SF6 (LP, MP, HP...) |
 | `overlay.toml` | Position, taille et opacité de l'overlay, son du combo réussi |
-| `timings.toml` | Fenêtres de timing apprises (créé au premier Select) |
+| `timings.toml` | Hits (et écarts) appris sur tes vrais combos (créé au premier Select) |
 | `capture.toml` | Vidéo des combos réussis : on/off, dossier, durée filmée avant et après le combo, qualité |
 
-## Timing des étapes
+## Validation d'un combo
 
-L'outil lit seulement la manette : il ne voit pas si un coup touche. Il mesure donc l'écart en
-frames entre chaque étape et la précédente (affiché `+14 f` dans l'overlay et le terminal).
+Une étape avance quand le bon coup arrive, quel que soit le moment (il n'y a plus de fenêtres
+de timing : elles se trompaient trop souvent). Un autre coup est un raté ; un ré-appui du
+bouton de l'étape d'avant (double tap, mash) est ignoré.
 
-Quand tu vois dans le jeu qu'un combo est vraiment passé, appuie sur **Select** dans les
-10 secondes : ses écarts sont ajoutés à `timings.toml`. Après 3 combos confirmés,
-l'outil connaît la fenêtre de chaque étape (1 frame de tolérance) :
-- avant la fenêtre, les appuis sont ignorés, comme dans le jeu (double tap, coup intercalé) ;
-- dans la fenêtre, le bon coup valide l'étape, un autre coup est un raté ;
-- après la fenêtre : « 4MK trop tard de 3 f », pas de son et pas de vidéo.
-
-Si un vrai combo est marqué « trop tard », appuie quand même sur Select : la fenêtre s'élargit.
+C'est le panneau des dégâts du jeu (voir plus bas) qui dit si le combo est passé : tous les
+coups attendus doivent avoir touché. L'écart en frames entre chaque étape et la précédente
+reste affiché (`+14 f`), pour information.
 
 ### Frames exactes : l'historique d'inputs du jeu
 
@@ -67,7 +63,7 @@ Affiche les infos de dégâts du mode entraînement (« Damage / Combo Damage »
 L'outil voit les dégâts du combo monter à chaque coup qui touche. Quand tu confirmes un vrai
 combo avec Select, il retient son nombre de hits (dans `timings.toml`). Ensuite, un combo est
 validé si tous ses coups ont touché, quel que soit le timing ; sinon : « 4/7 hits : lâché
-après 236MK ». C'est plus fiable que les fenêtres de timing (positionnement, garde...).
+après 236MK ».
 
 ## Vidéos des combos réussis
 
@@ -102,7 +98,7 @@ Notation reconnue : directions `b f d u db df cr. st.` ou chiffres numpad, mouve
 | `src/overlay.rs` | Fenêtre de l'overlay (egui) |
 | `src/affichage.rs` | Historique d'inputs coloré dans le terminal |
 | `src/capture.rs` | Vidéo des combos réussis (thread de capture Windows) |
-| `src/timings.rs` | Fenêtres de timing apprises sur tes vrais combos |
+| `src/timings.rs` | Hits appris sur tes vrais combos |
 | `src/clavier.rs` | Touche F8 (déplacer l'overlay), lue même quand le jeu a le focus |
 | `src/son.rs` | Petit son du combo réussi, fabriqué par le programme |
 

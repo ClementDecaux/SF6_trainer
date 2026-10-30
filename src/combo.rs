@@ -10,7 +10,6 @@
 //! Chaque étape est ramenée à une forme unique (« 4HP », « 236MK », « DI »)
 //! pour la comparer aux coups reconnus par l'outil.
 
-use crate::timings::{TOLERANCE, verifier};
 use serde::Deserialize;
 
 /// Comment une étape s'enchaîne avec la précédente.
@@ -194,12 +193,8 @@ pub struct Trial {
     /// Index de l'étape attendue.
     pub index: usize,
     derniere_frame: u64,
-    /// Fenêtres de timing apprises (`timings.toml`), pour les étapes 2 à N.
-    pub fenetres: Option<Vec<(u64, u64)>>,
     /// Essai en cours (ou dernier essai) : écart en frames de chaque étape avec la précédente.
     pub ecarts: Vec<u64>,
-    /// Étapes faites hors de leur fenêtre : « 4MK trop tard de 3 f ».
-    pub erreurs_timing: Vec<String>,
     /// Appuis ignorés car faits pendant la récupération (coups intercalés, mash).
     pub intercales: u32,
     /// Nombre de coups qui touchent quand le combo passe (combos.toml, ou appris avec Select).
@@ -215,9 +210,7 @@ impl Trial {
             etapes,
             index: 0,
             derniere_frame: 0,
-            fenetres: None,
             ecarts: Vec::new(),
-            erreurs_timing: Vec::new(),
             intercales: 0,
             hits: None,
             hits_fixe: false,
@@ -227,16 +220,7 @@ impl Trial {
     /// Un nouvel essai commence (1re étape validée).
     fn nouvel_essai(&mut self) {
         self.ecarts.clear();
-        self.erreurs_timing.clear();
         self.intercales = 0;
-    }
-
-    /// La fenêtre de l'étape attendue, si elle a été apprise.
-    fn fenetre(&self) -> Option<(u64, u64)> {
-        if self.index == 0 {
-            return None;
-        }
-        self.fenetres.as_ref()?.get(self.index - 1).copied()
     }
 
     pub fn attendu(&self) -> &str {
@@ -246,31 +230,15 @@ impl Trial {
     /// Un coup vient d'être fait. `candidats` = toutes les lectures possibles
     /// (ex. « 236MK » et « 41236MK » pour le même input).
     pub fn coup(&mut self, candidats: &[String], frame: u64) -> Resultat {
+        // Pas de fenêtre de timing : le coup attendu fait avancer, quel que soit le moment.
+        // Ce sont les hits lus dans le jeu qui disent si le combo est passé.
         let ecart = frame.saturating_sub(self.derniere_frame);
-        let fenetre = self.fenetre();
-
-        // Avant l'ouverture de la fenêtre, le coup d'avant est encore en récupération :
-        // le jeu ignore les appuis (double tap, coup intercalé pour le rythme). Nous aussi.
-        // Sauf le coup attendu avec un autre bouton que l'étape d'avant : ce n'est pas un
-        // double tap, et le jeu a pu le garder en mémoire (buffer) ou la fenêtre apprise
-        // être trop étroite. Il compte, « trop tôt » ; les hits du jeu trancheront.
-        let attendu_tot = candidats.iter().any(|c| self.accepte(c, self.attendu()))
-            && self.index > 0
-            && bouton(self.attendu()) != bouton(&self.etapes[self.index - 1].notation);
-        if fenetre.is_some_and(|(min, _)| ecart + TOLERANCE < min) && !attendu_tot {
-            self.intercales += 1;
-            return Resultat::Ignore;
-        }
 
         if candidats.iter().any(|c| self.accepte(c, self.attendu())) {
             if self.index == 0 {
                 self.nouvel_essai();
             } else {
                 self.ecarts.push(ecart);
-                if let Some(erreur) = fenetre.and_then(|f| verifier(ecart, f)) {
-                    let erreur = format!("{} {erreur}", self.attendu());
-                    self.erreurs_timing.push(erreur);
-                }
             }
             self.index += 1;
             self.derniere_frame = frame;
@@ -478,57 +446,19 @@ mod tests {
         assert!(matches!(t.coup(&c("5LP"), 40), Resultat::Rate { .. }));
     }
 
-    /// « 4HP xx 236MK, 4MK » avec des fenêtres apprises : 236MK à 10-12 f, 4MK à 30-32 f.
-    fn trial_avec_fenetres() -> Trial {
+    #[test]
+    fn plus_de_fenetre_de_timing() {
         let mut t = Trial::new("test", parser("4HP xx 236MK, 4MK").unwrap());
-        t.fenetres = Some(vec![(10, 12), (30, 32)]);
-        t
-    }
-
-    #[test]
-    fn dans_la_fenetre_c_est_reussi() {
-        let mut t = trial_avec_fenetres();
         t.coup(&c("4HP"), 100);
-        assert_eq!(t.coup(&c("236MK"), 111), Resultat::Avance);
-        assert_eq!(t.coup(&c("4MK"), 142), Resultat::Reussi);
-        assert_eq!(t.ecarts, vec![11, 31]);
-        assert!(t.erreurs_timing.is_empty());
+        // Tôt ou tard : le coup attendu avance, les écarts sont gardés pour information.
+        assert_eq!(t.coup(&c("236MK"), 102), Resultat::Avance);
+        assert_eq!(t.coup(&c("4MK"), 180), Resultat::Reussi);
+        assert_eq!(t.ecarts, vec![2, 78]);
     }
 
     #[test]
-    fn un_coup_intercale_avant_la_fenetre_est_ignore() {
-        let mut t = trial_avec_fenetres();
-        t.coup(&c("4HP"), 100);
-        t.coup(&c("236MK"), 111);
-        // LP pendant la récupération du 236MK, puis le 4MK trop tôt : le jeu les ignore.
-        assert_eq!(t.coup(&c("5LP"), 120), Resultat::Ignore);
-        assert_eq!(t.coup(&c("4MK"), 125), Resultat::Ignore);
-        assert_eq!(t.coup(&c("4MK"), 141), Resultat::Reussi);
-        assert_eq!(t.intercales, 2);
-    }
-
-    #[test]
-    fn le_coup_attendu_avant_la_fenetre_compte_trop_tot() {
-        let mut t = trial_avec_fenetres();
-        t.coup(&c("4HP"), 100);
-        // 236MK (autre bouton que 4HP) avant sa fenêtre : pas un double tap, il compte.
-        assert_eq!(t.coup(&c("236MK"), 104), Resultat::Avance);
-        assert_eq!(t.erreurs_timing.len(), 1);
-        assert!(t.erreurs_timing[0].contains("trop tôt"));
-    }
-
-    #[test]
-    fn trop_tard_est_signale() {
-        let mut t = trial_avec_fenetres();
-        t.coup(&c("4HP"), 100);
-        t.coup(&c("236MK"), 111);
-        assert_eq!(t.coup(&c("4MK"), 146), Resultat::Reussi);
-        assert_eq!(t.erreurs_timing, vec!["4MK trop tard de 3 f".to_string()]);
-    }
-
-    #[test]
-    fn un_autre_coup_dans_la_fenetre_est_un_rate() {
-        let mut t = trial_avec_fenetres();
+    fn un_autre_coup_est_un_rate() {
+        let mut t = Trial::new("test", parser("4HP xx 236MK, 4MK").unwrap());
         t.coup(&c("4HP"), 100);
         t.coup(&c("236MK"), 111);
         assert!(matches!(t.coup(&c("5LP"), 140), Resultat::Rate { .. }));

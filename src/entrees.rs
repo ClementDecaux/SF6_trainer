@@ -14,7 +14,7 @@ use crate::manette::{Evenement, Manette};
 use crate::motion::Historique;
 use crate::notation::Directions;
 use crate::partage::{Ligne, Partage};
-use crate::timings::{ESSAIS_MIN, Timings, verifier};
+use crate::timings::{ESSAIS_MIN, Timings};
 use colored::Colorize;
 use eframe::egui;
 use std::collections::{BTreeSet, HashMap, VecDeque};
@@ -47,11 +47,9 @@ pub fn boucle(
     }
     println!("Ctrl+C pour quitter. Joueur à gauche de l'écran (b = 4 = vers la gauche).\n");
     println!("{}  {}", trial.nom.bold(), affichage::trial(&trial));
-    match &trial.fenetres {
-        Some(_) => println!("Timing : fenêtres apprises dans timings.toml."),
-        None => println!(
-            "Timing : pas encore appris. Appuie sur Select après un vrai combo ({ESSAIS_MIN} fois)."
-        ),
+    match trial.hits {
+        Some(hits) => println!("Combo validé par les hits du jeu : {hits} attendus."),
+        None => println!("Hits pas encore appris : appuie sur Select après un vrai combo."),
     }
     println!("F8 : déplacer l'overlay. F9 : garder ou non les vidéos. F10 : photo du jeu (PNG).");
     println!();
@@ -475,8 +473,8 @@ fn resultat_trial(
             p.etape_a_venir = Some(trial.etapes.len());
             return Some(Fin {
                 ecarts: trial.ecarts.clone(),
-                erreurs: trial.erreurs_timing.clone(),
-                cassee: premiere_hors_timing(&trial.ecarts, trial.fenetres.as_deref()),
+                erreurs: Vec::new(),
+                cassee: None,
                 temps_cassee: None,
                 exact: false,
                 raison: None,
@@ -574,15 +572,6 @@ struct Fin {
     /// Coups qui ont touché (panneau des dégâts du jeu), et combien il en faut.
     hits: Option<u32>,
     hits_attendus: Option<u32>,
-}
-
-/// La première étape sortie de sa fenêtre de timing (les fenêtres vont des étapes 2 à N).
-fn premiere_hors_timing(ecarts: &[u64], fenetres: Option<&[(u64, u64)]>) -> Option<usize> {
-    ecarts
-        .iter()
-        .zip(fenetres?)
-        .position(|(&e, &f)| verifier(e, f).is_some())
-        .map(|i| i + 1)
 }
 
 /// Donne le verdict d'un combo fini : son, message, vidéo gardée ou non.
@@ -706,7 +695,6 @@ struct Juge {
 struct Attente {
     fin: Fin,
     appuis: Vec<Appui>,
-    fenetres: Option<Vec<(u64, u64)>>,
     notations: Vec<String>,
     /// Heure du premier et du dernier appui du combo.
     debut: i64,
@@ -928,7 +916,6 @@ impl Juge {
             fin,
             debut: appuis.first().map_or(temps, |a| a.temps),
             appuis,
-            fenetres: trial.fenetres.clone(),
             notations: trial.etapes.iter().map(|e| e.notation.clone()).collect(),
             quand: temps,
             latence: self.latence.valeur().unwrap_or(LATENCE_DEFAUT),
@@ -1052,20 +1039,11 @@ impl Juge {
         let journal: Vec<EntreeJeu> = self.journal.iter().copied().collect();
         let ecarts = ecran::ecarts_du_jeu(&attente.appuis, &journal, attente.latence)
             .map_err(|(i, raison)| format!("{} {raison}", attente.notations[i]))?;
-        let mut erreurs = Vec::new();
-        if let Some(fenetres) = &attente.fenetres {
-            for (i, (&ecart, &fenetre)) in ecarts.iter().zip(fenetres).enumerate() {
-                if let Some(e) = verifier(ecart, fenetre) {
-                    erreurs.push(format!("{} {e}", attente.notations[i + 1]));
-                }
-            }
-        }
-        let cassee = premiere_hors_timing(&ecarts, attente.fenetres.as_deref());
         Ok(Fin {
-            cassee,
-            temps_cassee: cassee.and_then(|k| attente.appuis.get(k)).map(|a| a.temps),
+            cassee: None,
+            temps_cassee: None,
             ecarts,
-            erreurs,
+            erreurs: Vec::new(),
             exact: true,
             raison: None,
             hits: None,
@@ -1141,10 +1119,6 @@ fn confirmer(
             let hits = trial.hits.map_or(String::new(), |h| format!(", {h} hits"));
             if let Err(e) = timings.enregistrer() {
                 eprintln!("{e}");
-            }
-            trial.fenetres = timings.fenetres(&trial.nom, trial.etapes.len());
-            if let Ok(mut p) = partage.lock() {
-                p.fenetres = trial.fenetres.clone();
             }
             if n < ESSAIS_MIN {
                 format!("Timing : {n}/{ESSAIS_MIN} vrais combos confirmés{hits}")
