@@ -60,6 +60,10 @@ pub struct Partage {
     pub ecarts_exacts: bool,
     /// Pourquoi le dernier combo n'a pas pu être vérifié sur l'historique du jeu.
     pub raison_estimee: Option<String>,
+    /// Le panneau des dégâts du jeu est lu (coups qui touchent comptés).
+    pub degats_visibles: bool,
+    /// Coups qui ont touché au dernier combo.
+    pub hits: Option<u32>,
 }
 
 impl Partage {
@@ -78,6 +82,8 @@ impl Partage {
             historique_jeu: false,
             ecarts_exacts: false,
             raison_estimee: None,
+            degats_visibles: false,
+            hits: None,
         }
     }
 

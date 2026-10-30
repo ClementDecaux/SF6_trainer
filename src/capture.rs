@@ -505,8 +505,8 @@ mod capture_windows {
         numero: u32,
         /// F10 appuyée : la prochaine image est enregistrée en PNG.
         photo: bool,
-        /// Lecture de l'historique d'inputs du jeu.
-        suivi: crate::ecran::Suivi,
+        /// Lecture de l'historique d'inputs et des dégâts du jeu.
+        lecteur: crate::ecran::Lecteur,
     }
 
     impl Enregistreur {
@@ -620,7 +620,7 @@ mod capture_windows {
             let brut = image.as_raw_buffer();
             if self.config.historique {
                 let vue = crate::ecran::Vue::jeu(brut, largeur as usize, hauteur as usize, pas);
-                crate::ecran::lire_image(&mut self.suivi, &vue, temps);
+                crate::ecran::lire_image(&mut self.lecteur, &vue, temps);
             }
             if !self.tampon.actif() {
                 return Ok(());
@@ -700,7 +700,7 @@ mod capture_windows {
                 tampon,
                 numero: 0,
                 photo: false,
-                suivi: crate::ecran::Suivi::default(),
+                lecteur: crate::ecran::Lecteur::default(),
             })
         }
 

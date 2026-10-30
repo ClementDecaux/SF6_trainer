@@ -197,6 +197,8 @@ pub struct Trial {
     pub erreurs_timing: Vec<String>,
     /// Appuis ignorés car faits pendant la récupération (coups intercalés, mash).
     pub intercales: u32,
+    /// Nombre de coups qui touchent quand le combo passe (appris avec Select).
+    pub hits: Option<u32>,
 }
 
 impl Trial {
@@ -210,6 +212,7 @@ impl Trial {
             ecarts: Vec::new(),
             erreurs_timing: Vec::new(),
             intercales: 0,
+            hits: None,
         }
     }
 

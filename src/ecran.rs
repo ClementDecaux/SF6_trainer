@@ -432,14 +432,180 @@ impl Suivi {
     }
 }
 
+// --- Le panneau « Combo Damage » du mode entraînement (en haut, au milieu) ---
+//
+// Chaque coup qui touche fait monter les dégâts du combo ; ils reviennent à 0 quand le
+// combo est fini. On n'a pas besoin de lire la valeur : il suffit de voir le nombre changer.
+// Le texte est blanc sur un bandeau sombre, « 1488 (2526) », aligné à droite.
+
+const DEGATS_Y: i32 = 206;
+const DEGATS_H: i32 = 20;
+const DEGATS_X0: i32 = 645;
+const DEGATS_X1: i32 = 800;
+
+/// Le nombre des dégâts du combo, lu sur une image.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct LectureDegats {
+    /// Empreinte des pixels du nombre : change quand le nombre change.
+    pub empreinte: u64,
+    /// Nombre de chiffres (1 = « 0 », pas de combo en cours).
+    pub chiffres: usize,
+}
+
+/// Lit le nombre des dégâts du combo (joueur 1). `None` si le panneau n'est pas affiché.
+pub fn lire_degats(vue: &Vue) -> Option<LectureDegats> {
+    let largeur = (DEGATS_X1 - DEGATS_X0) as usize;
+    let mut colonnes = vec![false; largeur];
+    let mut blancs = vec![false; largeur * DEGATS_H as usize];
+    for dy in 0..DEGATS_H {
+        for dx in 0..largeur {
+            let p = vue.rgb(DEGATS_X0 + dx as i32, DEGATS_Y + dy);
+            if p.iter().all(|&c| c > 180) {
+                blancs[dy as usize * largeur + dx] = true;
+                colonnes[dx] = true;
+            }
+        }
+    }
+    // Les signes : des groupes de colonnes avec du blanc.
+    let mut signes: Vec<(usize, usize)> = Vec::new();
+    let mut debut = None;
+    for (x, &c) in colonnes.iter().chain([&false]).enumerate() {
+        match (c, debut) {
+            (true, None) => debut = Some(x),
+            (false, Some(d)) => {
+                signes.push((d, x));
+                debut = None;
+            }
+            _ => {}
+        }
+    }
+    // Le panneau : « N (M) », 5 à 14 signes, le dernier « ) » vers x = 775-780.
+    let fin_texte = DEGATS_X0 as usize + signes.last()?.1;
+    if !(5..=14).contains(&signes.len()) || !(770..=790).contains(&fin_texte) {
+        return None;
+    }
+    // Le premier nombre : les signes jusqu'au premier grand espace (avant « ( »).
+    let mut fin = 1;
+    while fin < signes.len() && signes[fin].0 - signes[fin - 1].1 < 6 {
+        fin += 1;
+    }
+    let (x0, x1) = (signes[0].0, signes[fin - 1].1);
+    let mut empreinte: u64 = 0xcbf2_9ce4_8422_2325;
+    for dy in 0..DEGATS_H as usize {
+        for x in x0..x1 {
+            empreinte ^= blancs[dy * largeur + x] as u64 + 1;
+            empreinte = empreinte.wrapping_mul(0x100_0000_01b3);
+        }
+    }
+    Some(LectureDegats {
+        empreinte,
+        chiffres: fin,
+    })
+}
+
+/// Ce que le panneau des dégâts nous apprend.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum Degats {
+    /// Un coup vient de toucher (heure de l'image).
+    Coup(i64),
+    /// Le combo est fini : les dégâts sont revenus à 0.
+    Fin(i64),
+}
+
+/// Suit les dégâts du combo d'une image à l'autre.
+#[derive(Debug, Default)]
+pub struct SuiviDegats {
+    actuel: Option<u64>,
+    precedent: Option<u64>,
+    en_combo: bool,
+}
+
+impl SuiviDegats {
+    pub fn image(&mut self, lecture: Option<LectureDegats>, temps: i64) -> Option<Degats> {
+        let lecture = lecture?;
+        if Some(lecture.empreinte) == self.actuel {
+            return None;
+        }
+        let avant = self.actuel;
+        // Un retour à la valeur d'avant (image tremblée) ne compte pas comme un coup.
+        if Some(lecture.empreinte) == self.precedent && lecture.chiffres > 1 {
+            self.actuel = Some(lecture.empreinte);
+            self.precedent = avant;
+            return None;
+        }
+        self.precedent = avant;
+        self.actuel = Some(lecture.empreinte);
+        if lecture.chiffres <= 1 {
+            let fin = self.en_combo;
+            self.en_combo = false;
+            return fin.then_some(Degats::Fin(temps));
+        }
+        // Premier passage (on vient d'arriver) : pas un coup.
+        avant?;
+        self.en_combo = true;
+        Some(Degats::Coup(temps))
+    }
+}
+
+static DEGATS: Mutex<VecDeque<(u64, Degats)>> = Mutex::new(VecDeque::new());
+static DEGATS_LUS: AtomicI64 = AtomicI64::new(0);
+
+fn publier_degats(suivi: &mut SuiviDegats, vue: &Vue, temps: i64) {
+    let lecture = lire_degats(vue);
+    if lecture.is_some() {
+        DEGATS_LUS.store(temps, Ordering::Relaxed);
+    }
+    let Some(evenement) = suivi.image(lecture, temps) else {
+        return;
+    };
+    if let Ok(mut journal) = DEGATS.lock() {
+        let numero = journal.back().map_or(0, |(n, _)| *n) + 1;
+        journal.push_back((numero, evenement));
+        while journal.len() > JOURNAL_MAX {
+            journal.pop_front();
+        }
+    }
+}
+
+/// Vrai si le panneau des dégâts a été lu dans la dernière seconde.
+pub fn degats_visibles(maintenant: i64) -> bool {
+    let derniere = DEGATS_LUS.load(Ordering::Relaxed);
+    derniere > 0 && maintenant - derniere < 10_000_000
+}
+
+/// Les événements des dégâts arrivés depuis le dernier appel.
+pub fn nouveaux_degats(dernier: &mut u64) -> Vec<Degats> {
+    let Ok(journal) = DEGATS.lock() else {
+        return Vec::new();
+    };
+    let nouveaux = journal
+        .iter()
+        .filter(|(n, _)| *n > *dernier)
+        .map(|(_, e)| *e)
+        .collect();
+    if let Some((n, _)) = journal.back() {
+        *dernier = *n;
+    }
+    nouveaux
+}
+
 /// Le journal des lignes du jeu, rempli par le thread de capture : (numéro, entrée).
 static JOURNAL: Mutex<VecDeque<(u64, EntreeJeu)>> = Mutex::new(VecDeque::new());
 /// Heure de la dernière image où l'historique a été lu (0 = jamais).
 static DERNIERE_LECTURE: AtomicI64 = AtomicI64::new(0);
 const JOURNAL_MAX: usize = 400;
 
-/// Lit une image du jeu et ajoute ses nouvelles lignes au journal.
-pub fn lire_image(suivi: &mut Suivi, vue: &Vue, temps: i64) {
+/// Ce que le thread de capture suit d'une image à l'autre.
+#[derive(Debug, Default)]
+pub struct Lecteur {
+    pub historique: Suivi,
+    pub degats: SuiviDegats,
+}
+
+/// Lit une image du jeu : l'historique d'inputs et le panneau des dégâts.
+pub fn lire_image(lecteur: &mut Lecteur, vue: &Vue, temps: i64) {
+    publier_degats(&mut lecteur.degats, vue, temps);
+    let suivi = &mut lecteur.historique;
     let lignes = lire_lignes(vue);
     if lignes.len() >= 2 {
         DERNIERE_LECTURE.store(temps, Ordering::Relaxed);
@@ -887,6 +1053,58 @@ mod tests {
         assert_eq!(duree_dans_le_jeu(&journal, 1_700_000, 5, MK), None);
         // Trop loin dans le temps : ce n'est pas la même.
         assert_eq!(duree_dans_le_jeu(&journal, 9_000_000, 4, 0), None);
+    }
+
+    fn photo_entiere(nom: &str) -> Option<(Vec<u8>, usize, usize)> {
+        let chemin = format!("tests/photos/{nom}.png");
+        let fichier = std::fs::File::open(&chemin).ok()?;
+        let mut lecteur = png::Decoder::new(std::io::BufReader::new(fichier))
+            .read_info()
+            .unwrap();
+        let mut rgb = vec![0; lecteur.output_buffer_size().unwrap()];
+        let info = lecteur.next_frame(&mut rgb).unwrap();
+        let mut bgra = Vec::new();
+        for p in rgb[..info.buffer_size()].chunks(3) {
+            bgra.extend_from_slice(&[p[2], p[1], p[0], 255]);
+        }
+        Some((bgra, info.width as usize, info.height as usize))
+    }
+
+    #[test]
+    fn lit_le_panneau_des_degats() {
+        // Morceaux de 200x40 pris en (620, 196) : « 0 (2526) », « 2148 (2526) », « 2400 (2526) ».
+        let mut empreintes = Vec::new();
+        for (nom, chiffres) in [("degats_0", 1), ("degats_2148", 4), ("degats_2400", 4)] {
+            let (pixels, l, h) = photo_entiere(nom).unwrap();
+            let vue = Vue::morceau(&pixels, l, h, 620, 196);
+            let lu = lire_degats(&vue).unwrap();
+            assert_eq!(lu.chiffres, chiffres, "{nom}");
+            empreintes.push(lu.empreinte);
+        }
+        assert_ne!(empreintes[1], empreintes[2]);
+        // Ailleurs (pas de panneau) : rien.
+        let (pixels, l, h) = photo(1);
+        assert_eq!(lire_degats(&Vue::morceau(&pixels, l, h, 40, 200)), None);
+    }
+
+    #[test]
+    fn suivi_des_degats() {
+        let mut s = SuiviDegats::default();
+        let l = |empreinte, chiffres| {
+            Some(LectureDegats {
+                empreinte,
+                chiffres,
+            })
+        };
+        assert_eq!(s.image(l(0, 1), 0), None); // « 0 » au départ
+        assert_eq!(s.image(l(1, 3), 10), Some(Degats::Coup(10)));
+        assert_eq!(s.image(l(1, 3), 20), None);
+        assert_eq!(s.image(l(2, 3), 30), Some(Degats::Coup(30)));
+        assert_eq!(s.image(l(1, 3), 40), None); // retour en arrière : image tremblée
+        assert_eq!(s.image(l(2, 3), 45), None);
+        assert_eq!(s.image(None, 50), None); // panneau caché un instant
+        assert_eq!(s.image(l(3, 4), 60), Some(Degats::Coup(60)));
+        assert_eq!(s.image(l(0, 1), 70), Some(Degats::Fin(70)));
     }
 
     #[test]

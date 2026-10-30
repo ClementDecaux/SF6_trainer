@@ -46,6 +46,7 @@ fn lancer() -> Result<(), String> {
     let (mut trial, personnage, inputs) = choisir_trial()?;
     let timings = timings::charger()?;
     trial.fenetres = timings.fenetres(&trial.nom, trial.etapes.len());
+    trial.hits = timings.hits(&trial.nom);
     let config = overlay::charger()?;
     son::activer(config.son);
     let capture = capture::lancer(capture::charger()?, &personnage, &trial.nom, &inputs);

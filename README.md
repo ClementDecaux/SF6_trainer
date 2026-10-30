@@ -61,6 +61,14 @@ Si l'historique n'est pas visible ou mal lu (autre affichage par-dessus, stage t
 l'outil revient à son estimation (`frames estimées`, à une frame près).
 `historique = false` dans `capture.toml` coupe cette lecture.
 
+### Coups qui touchent : le panneau des dégâts
+
+Affiche les infos de dégâts du mode entraînement (« Damage / Combo Damage », en haut au milieu).
+L'outil voit les dégâts du combo monter à chaque coup qui touche. Quand tu confirmes un vrai
+combo avec Select, il retient son nombre de hits (dans `timings.toml`). Ensuite, un combo est
+validé si tous ses coups ont touché, quel que soit le timing ; sinon : « 4/7 hits : lâché
+après 236MK ». C'est plus fiable que les fenêtres de timing (positionnement, garde...).
+
 ## Vidéos des combos réussis
 
 Rien à installer (pas d'OBS) : l'outil filme la fenêtre de SF6 avec l'API de capture de Windows.

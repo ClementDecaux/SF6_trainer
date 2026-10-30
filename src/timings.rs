@@ -8,6 +8,9 @@
 //! La frame data publique ne suffit pas pour ces règles : dans un combo avec juggle
 //! (après un Drive Impact au mur, par exemple), ce qui compte est l'état de l'adversaire
 //! en l'air, pas l'avantage frame. Apprendre sur tes essais marche pour tous les combos.
+//!
+//! Si le panneau des dégâts du mode entraînement est affiché, Select apprend aussi le
+//! nombre de coups qui touchent : un combo est alors validé par ses hits, pas par le timing.
 
 use serde::{Deserialize, Serialize};
 
@@ -34,6 +37,9 @@ pub struct TimingCombo {
     pub essais: u32,
     pub min: Vec<u64>,
     pub max: Vec<u64>,
+    /// Nombre de coups qui touchent quand le combo passe (lu sur le panneau des dégâts).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub hits: Option<u32>,
 }
 
 #[derive(Debug, Default, Serialize, Deserialize)]
@@ -77,9 +83,23 @@ impl Timings {
                     essais: 1,
                     min: ecarts.to_vec(),
                     max: ecarts.to_vec(),
+                    hits: None,
                 });
                 1
             }
+        }
+    }
+
+    /// Le nombre de coups qui touchent quand ce combo passe, s'il a été appris.
+    pub fn hits(&self, nom: &str) -> Option<u32> {
+        self.combo.iter().find(|t| t.nom == nom)?.hits
+    }
+
+    /// Un vrai combo a touché `hits` fois. On garde le plus petit nombre vu : un combo
+    /// réussi ne doit jamais être refusé (un coup en plus, comme un Punish Counter, passe).
+    pub fn apprendre_hits(&mut self, nom: &str, hits: u32) {
+        if let Some(t) = self.combo.iter_mut().find(|t| t.nom == nom) {
+            t.hits = Some(t.hits.map_or(hits, |h| h.min(hits)));
         }
     }
 
@@ -143,6 +163,16 @@ mod tests {
         assert_eq!(verifier(11, (12, 14)), None); // 1 frame de tolérance
         assert_eq!(verifier(10, (12, 14)), Some("trop tôt de 2 f".into()));
         assert_eq!(verifier(17, (12, 14)), Some("trop tard de 3 f".into()));
+    }
+
+    #[test]
+    fn hits_appris() {
+        let mut t = Timings::default();
+        t.apprendre("combo", &[12]);
+        assert_eq!(t.hits("combo"), None);
+        t.apprendre_hits("combo", 7);
+        t.apprendre_hits("combo", 8);
+        assert_eq!(t.hits("combo"), Some(7));
     }
 
     #[test]
