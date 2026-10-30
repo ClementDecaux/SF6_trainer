@@ -556,8 +556,10 @@ mod capture_windows {
                         (
                             CursorCaptureSettings::WithoutCursor,
                             DrawBorderSettings::WithoutBorder,
-                            // Un peu moins de 16,7 ms : on reçoit chaque image du jeu.
-                            MinimumUpdateIntervalSettings::Custom(Duration::from_millis(15)),
+                            // Pas de limite utile : les images du jeu n'arrivent pas toutes à
+                            // 16,7 ms pile. Avec 15 ms, une image arrivée un peu tôt était sautée
+                            // (des trous d'une image partout dans les vidéos).
+                            MinimumUpdateIntervalSettings::Custom(Duration::from_millis(1)),
                         )
                     } else {
                         (
