@@ -668,6 +668,9 @@ mod capture_windows {
             son: Option<Option<u64>>,
             /// Combo réussi : quand arrêter, et ce qu'on écrira dans le `.json`.
             fin: Option<(Instant, Box<InfosClip>)>,
+            /// Images pas encore données à l'encodeur, dans l'ordre (au démarrage, celles
+            /// d'avant la 1re étape : envoyées quelques-unes à chaque image, pas toutes d'un coup).
+            file: std::collections::VecDeque<Image>,
             /// Taille des images de la vidéo.
             largeur: u32,
             hauteur: u32,
@@ -734,6 +737,7 @@ mod capture_windows {
                 lentes,
                 trous,
                 demarrage_ms,
+                file,
                 ..
             } = etat
             else {
@@ -746,6 +750,11 @@ mod capture_windows {
             {
                 let silence = vec![0u8; (taux / 10 * 4) as usize];
                 let _ = encodeur.send_audio_buffer(&silence, 0);
+            }
+            for image in file {
+                if let Err(e) = encodeur.send_frame_buffer(&image.pixels, image.temps) {
+                    eprintln!("Vidéo : image perdue ({e}).");
+                }
             }
             if let Err(e) = encodeur.finish() {
                 eprintln!("Vidéo : erreur à la fin de l'encodage ({e}).");
@@ -917,49 +926,26 @@ mod capture_windows {
                     return;
                 }
             };
-            let mut image_actuelle_envoyee = false;
-            let mut premier = None;
+            let mut file = std::collections::VecDeque::new();
             let mut manquees = 0;
             let mut trous = Vec::new();
-            let mut precedente: Option<i64> = None;
-            for image in self.tampon.prendre() {
-                if image.largeur == largeur && image.hauteur == hauteur {
-                    premier.get_or_insert(image.temps);
-                    if let Some(p) = precedente.replace(image.temps) {
-                        let n = images_manquees(image.temps - p);
-                        if n > 0 {
-                            manquees += n;
-                            trous.push((p, n));
-                        }
-                    }
-                    if let Err(e) = encodeur.send_frame_buffer(&image.pixels, image.temps) {
-                        eprintln!("Vidéo : image perdue ({e}).");
-                    }
-                    image_actuelle_envoyee |= image.temps == temps;
+            let images = self.tampon.prendre().into_iter().chain(actuelle);
+            for image in images {
+                if image.largeur != largeur || image.hauteur != hauteur {
+                    self.tampon.recycler(image.pixels);
+                    continue;
                 }
-                self.tampon.recycler(image.pixels);
-            }
-            if !image_actuelle_envoyee {
-                if let Some(p) = precedente {
-                    let n = images_manquees(temps - p);
+                if let Some(p) = file.back().map(|i: &Image| i.temps) {
+                    let n = images_manquees(image.temps - p);
                     if n > 0 {
                         manquees += n;
                         trous.push((p, n));
                     }
                 }
-                let envoi = match &actuelle {
-                    Some(image) if image.largeur == largeur && image.hauteur == hauteur => {
-                        encodeur.send_frame_buffer(&image.pixels, temps)
-                    }
-                    _ => encodeur.send_frame(frame),
-                };
-                if let Err(e) = envoi {
-                    eprintln!("Vidéo : image perdue ({e}).");
-                }
+                file.push_back(image);
             }
-            if let Some(image) = actuelle {
-                self.tampon.recycler(image.pixels);
-            }
+            let premier = file.front().map(|i| i.temps);
+            envoyer_file(&mut encodeur, &mut file);
             let premier = premier.unwrap_or(temps);
             // Le son commence à l'heure de la 1re image : il est calé dessus.
             let mut son = taux.map(|_| crate::audio_jeu::numero(premier));
@@ -971,6 +957,7 @@ mod capture_windows {
                 premier,
                 son,
                 fin: None,
+                file,
                 largeur,
                 hauteur,
                 derniere_image: temps,
@@ -979,6 +966,22 @@ mod capture_windows {
                 trous,
                 demarrage_ms: chrono.elapsed().as_millis(),
             };
+        }
+    }
+
+    /// Images données à l'encodeur à chaque image du jeu. Chaque envoi copie l'image (8 Mo
+    /// en 1080p) : toutes celles d'avant la 1re étape d'un coup bloquaient la capture
+    /// (images du jeu perdues). Trois par image, la file est vidée en une quinzaine d'images.
+    const ENVOIS_PAR_IMAGE: usize = 3;
+
+    fn envoyer_file(encodeur: &mut VideoEncoder, file: &mut std::collections::VecDeque<Image>) {
+        for _ in 0..ENVOIS_PAR_IMAGE {
+            let Some(image) = file.pop_front() else {
+                return;
+            };
+            if let Err(e) = encodeur.send_frame_buffer(&image.pixels, image.temps) {
+                eprintln!("Vidéo : image perdue ({e}).");
+            }
         }
     }
 
@@ -1112,6 +1115,7 @@ mod capture_windows {
                     fin,
                     premier,
                     son,
+                    file,
                     largeur,
                     hauteur,
                     derniere_image,
@@ -1127,18 +1131,15 @@ mod capture_windows {
                     *derniere_image = temps;
                     // L'image copiée en mémoire, pas la texture de la capture : Windows réutilise
                     // cette texture pour l'image suivante avant que l'encodeur l'ait lue, et la
-                    // vidéo montrait alors des images répétées (saccades).
-                    let envoi = match &image {
-                        Some(i) if i.largeur == *largeur && i.hauteur == *hauteur => {
-                            encodeur.send_frame_buffer(&i.pixels, temps)
-                        }
-                        // La fenêtre a changé de taille : image sautée.
-                        Some(_) => Ok(()),
-                        None => encodeur.send_frame(frame),
-                    };
-                    if let Err(e) = envoi {
-                        eprintln!("Vidéo : image perdue ({e}).");
+                    // vidéo montrait alors des images répétées (saccades). Elle passe par la
+                    // file, derrière celles d'avant la 1re étape. Pas copiée (erreur) ou taille
+                    // changée : image sautée.
+                    if let Some(i) =
+                        image.take_if(|i| i.largeur == *largeur && i.hauteur == *hauteur)
+                    {
+                        file.push_back(i);
                     }
+                    envoyer_file(encodeur, file);
                     envoyer_son(encodeur, son, *premier, temps);
                     terminer = match fin {
                         Some((quand, _)) => Instant::now() >= *quand,
