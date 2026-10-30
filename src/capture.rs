@@ -478,8 +478,9 @@ impl Tampon {
     }
 
     pub fn recycler(&mut self, pixels: Vec<u8>) {
-        // Deux suffisent : on en reprend une à chaque image.
-        if self.libres.len() < 2 {
+        // Quelques-unes suffisent : on en reprend une à chaque image (celles données à
+        // l'encodeur reviennent un peu plus tard).
+        if self.libres.len() < 6 {
             self.libres.push(pixels);
         }
     }
@@ -518,7 +519,7 @@ mod capture_windows {
         retourner_lignes, supprimer_anciens,
     };
     use std::path::{Path, PathBuf};
-    use std::sync::mpsc::Receiver;
+    use std::sync::mpsc::{Receiver, Sender};
     use std::sync::{Arc, Mutex};
     use std::time::{Duration, Instant};
     use windows_capture::capture::{Context, GraphicsCaptureApiHandler};
@@ -658,8 +659,9 @@ mod capture_windows {
         /// On a reçu `Demarrer` : on commence à la prochaine image.
         Demande,
         Filme {
-            // `Box` : l'encodeur est gros, on le range à part en mémoire.
-            encodeur: Box<VideoEncoder>,
+            /// L'encodeur, sur son propre fil (voir `lancer_encodage`).
+            envoi: Sender<Envoi>,
+            fil: std::thread::JoinHandle<bool>,
             chemin: PathBuf,
             debut: Instant,
             /// Heure de la 1re image de la vidéo (horloge de la capture).
@@ -668,9 +670,6 @@ mod capture_windows {
             son: Option<Option<u64>>,
             /// Combo réussi : quand arrêter, et ce qu'on écrira dans le `.json`.
             fin: Option<(Instant, Box<InfosClip>)>,
-            /// Images pas encore données à l'encodeur, dans l'ordre (au démarrage, celles
-            /// d'avant la 1re étape : envoyées quelques-unes à chaque image, pas toutes d'un coup).
-            file: std::collections::VecDeque<Image>,
             /// Taille des images de la vidéo.
             largeur: u32,
             hauteur: u32,
@@ -700,6 +699,8 @@ mod capture_windows {
         photo: bool,
         /// Lecture de l'historique d'inputs et des dégâts du jeu.
         lecteur: crate::ecran::Lecteur,
+        /// La mémoire des images, rendue par l'encodeur une fois l'image encodée.
+        retour: (Sender<Vec<u8>>, Receiver<Vec<u8>>),
     }
 
     impl Enregistreur {
@@ -728,7 +729,8 @@ mod capture_windows {
         fn arreter(&mut self) {
             let etat = std::mem::replace(&mut self.etat, Etat::Attente);
             let Etat::Filme {
-                mut encodeur,
+                envoi,
+                fil,
                 chemin,
                 fin,
                 premier,
@@ -737,7 +739,6 @@ mod capture_windows {
                 lentes,
                 trous,
                 demarrage_ms,
-                file,
                 ..
             } = etat
             else {
@@ -749,15 +750,11 @@ mod capture_windows {
                 && let Some(taux) = crate::audio_jeu::taux()
             {
                 let silence = vec![0u8; (taux / 10 * 4) as usize];
-                let _ = encodeur.send_audio_buffer(&silence, 0);
+                let _ = envoi.send(Envoi::Son(silence));
             }
-            for image in file {
-                if let Err(e) = encodeur.send_frame_buffer(&image.pixels, image.temps) {
-                    eprintln!("Vidéo : image perdue ({e}).");
-                }
-            }
-            if let Err(e) = encodeur.finish() {
-                eprintln!("Vidéo : erreur à la fin de l'encodage ({e}).");
+            // Plus rien à envoyer : le fil de l'encodeur termine la vidéo.
+            drop(envoi);
+            if !fil.join().unwrap_or(false) {
                 let _ = std::fs::remove_file(&chemin);
                 return;
             }
@@ -914,7 +911,7 @@ mod capture_windows {
             let chrono = Instant::now();
             let (largeur, hauteur) = (frame.width(), frame.height());
             let Pret {
-                mut encodeur,
+                encodeur,
                 chemin,
                 taux,
                 ..
@@ -926,38 +923,40 @@ mod capture_windows {
                     return;
                 }
             };
-            let mut file = std::collections::VecDeque::new();
+            let (envoi, fil) = lancer_encodage(encodeur, self.retour.0.clone());
             let mut manquees = 0;
             let mut trous = Vec::new();
+            let mut premier = None;
+            let mut precedente = None;
             let images = self.tampon.prendre().into_iter().chain(actuelle);
             for image in images {
                 if image.largeur != largeur || image.hauteur != hauteur {
                     self.tampon.recycler(image.pixels);
                     continue;
                 }
-                if let Some(p) = file.back().map(|i: &Image| i.temps) {
+                if let Some(p) = precedente {
                     let n = images_manquees(image.temps - p);
                     if n > 0 {
                         manquees += n;
                         trous.push((p, n));
                     }
                 }
-                file.push_back(image);
+                premier.get_or_insert(image.temps);
+                precedente = Some(image.temps);
+                let _ = envoi.send(Envoi::Image(image));
             }
-            let premier = file.front().map(|i| i.temps);
-            envoyer_file(&mut encodeur, &mut file);
             let premier = premier.unwrap_or(temps);
             // Le son commence à l'heure de la 1re image : il est calé dessus.
             let mut son = taux.map(|_| crate::audio_jeu::numero(premier));
-            envoyer_son(&mut encodeur, &mut son, premier, temps);
+            envoyer_son(&envoi, &mut son, premier, temps);
             self.etat = Etat::Filme {
-                encodeur: Box::new(encodeur),
+                envoi,
+                fil,
                 chemin,
                 debut: Instant::now(),
                 premier,
                 son,
                 fin: None,
-                file,
                 largeur,
                 hauteur,
                 derniere_image: temps,
@@ -969,29 +968,51 @@ mod capture_windows {
         }
     }
 
-    /// Images données à l'encodeur à chaque image du jeu. Chaque envoi copie l'image (8 Mo
-    /// en 1080p) : toutes celles d'avant la 1re étape d'un coup bloquaient la capture
-    /// (images du jeu perdues). Trois par image, la file est vidée en une quinzaine d'images.
-    const ENVOIS_PAR_IMAGE: usize = 3;
+    /// Ce qu'on donne au fil de l'encodeur.
+    enum Envoi {
+        Image(Image),
+        Son(Vec<u8>),
+    }
 
-    fn envoyer_file(encodeur: &mut VideoEncoder, file: &mut std::collections::VecDeque<Image>) {
-        for _ in 0..ENVOIS_PAR_IMAGE {
-            let Some(image) = file.pop_front() else {
-                return;
-            };
-            if let Err(e) = encodeur.send_frame_buffer(&image.pixels, image.temps) {
-                eprintln!("Vidéo : image perdue ({e}).");
+    /// L'encodeur tourne sur son propre fil. Lui donner une image la copie (8 Mo en
+    /// 1080p) : fait pendant la capture, ça la ralentissait et des images du jeu étaient
+    /// perdues (saccades). Ici, la capture ne fait que lui passer l'image, sans copie. La
+    /// mémoire de l'image revient par `retour` pour resservir. Le fil se termine (et la
+    /// vidéo avec) quand `Envoi` n'a plus d'expéditeur ; il dit si tout s'est bien passé.
+    fn lancer_encodage(
+        mut encodeur: VideoEncoder,
+        retour: Sender<Vec<u8>>,
+    ) -> (Sender<Envoi>, std::thread::JoinHandle<bool>) {
+        let (envoi, reception) = std::sync::mpsc::channel::<Envoi>();
+        let fil = std::thread::spawn(move || {
+            for envoye in reception {
+                match envoye {
+                    Envoi::Image(image) => {
+                        if let Err(e) = encodeur.send_frame_buffer(&image.pixels, image.temps) {
+                            eprintln!("Vidéo : image perdue ({e}).");
+                        }
+                        let _ = retour.send(image.pixels);
+                    }
+                    Envoi::Son(octets) => {
+                        if let Err(e) = encodeur.send_audio_buffer(&octets, 0) {
+                            eprintln!("Vidéo : son perdu ({e}).");
+                        }
+                    }
+                }
             }
-        }
+            match encodeur.finish() {
+                Ok(()) => true,
+                Err(e) => {
+                    eprintln!("Vidéo : erreur à la fin de l'encodage ({e}).");
+                    false
+                }
+            }
+        });
+        (envoi, fil)
     }
 
     /// Envoie à l'encodeur le son reçu depuis la dernière fois, jusqu'à l'heure `temps`.
-    fn envoyer_son(
-        encodeur: &mut VideoEncoder,
-        son: &mut Option<Option<u64>>,
-        premier: i64,
-        temps: i64,
-    ) {
+    fn envoyer_son(envoi: &Sender<Envoi>, son: &mut Option<Option<u64>>, premier: i64, temps: i64) {
         let Some(curseur) = son else {
             return;
         };
@@ -1000,10 +1021,8 @@ mod capture_windows {
         };
         let (octets, suivant) = crate::audio_jeu::lire(depuis, temps);
         *curseur = Some(suivant);
-        if !octets.is_empty()
-            && let Err(e) = encodeur.send_audio_buffer(&octets, 0)
-        {
-            eprintln!("Vidéo : son perdu ({e}).");
+        if !octets.is_empty() {
+            let _ = envoi.send(Envoi::Son(octets));
         }
     }
 
@@ -1035,6 +1054,7 @@ mod capture_windows {
                 numero: 0,
                 photo: false,
                 lecteur: crate::ecran::Lecteur::default(),
+                retour: std::sync::mpsc::channel(),
             })
         }
 
@@ -1045,6 +1065,10 @@ mod capture_windows {
             _controle: InternalCaptureControl,
         ) -> Result<(), Self::Error> {
             let arrivee = Instant::now();
+            // La mémoire des images déjà encodées resservira.
+            while let Ok(pixels) = self.retour.1.try_recv() {
+                self.tampon.recycler(pixels);
+            }
             // 1. Les ordres arrivés depuis la dernière image.
             let ordres: Vec<Ordre> = match self.ordres.lock() {
                 Ok(reception) => reception.try_iter().collect(),
@@ -1110,12 +1134,11 @@ mod capture_windows {
                 }
                 Etat::Demande => self.commencer(frame, temps, image.take()),
                 Etat::Filme {
-                    encodeur,
+                    envoi,
                     debut,
                     fin,
                     premier,
                     son,
-                    file,
                     largeur,
                     hauteur,
                     derniere_image,
@@ -1131,16 +1154,14 @@ mod capture_windows {
                     *derniere_image = temps;
                     // L'image copiée en mémoire, pas la texture de la capture : Windows réutilise
                     // cette texture pour l'image suivante avant que l'encodeur l'ait lue, et la
-                    // vidéo montrait alors des images répétées (saccades). Elle passe par la
-                    // file, derrière celles d'avant la 1re étape. Pas copiée (erreur) ou taille
-                    // changée : image sautée.
+                    // vidéo montrait alors des images répétées (saccades). Pas copiée (erreur)
+                    // ou taille changée : image sautée.
                     if let Some(i) =
                         image.take_if(|i| i.largeur == *largeur && i.hauteur == *hauteur)
                     {
-                        file.push_back(i);
+                        let _ = envoi.send(Envoi::Image(i));
                     }
-                    envoyer_file(encodeur, file);
-                    envoyer_son(encodeur, son, *premier, temps);
+                    envoyer_son(envoi, son, *premier, temps);
                     terminer = match fin {
                         Some((quand, _)) => Instant::now() >= *quand,
                         // Rien de réussi depuis trop longtemps : on jette.
