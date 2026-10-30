@@ -88,6 +88,11 @@ pub fn boucle(
     let mut a_juger: Vec<(Action, i64, u8, u64)> = Vec::new();
     let mut dirs_avant = dirs.numpad();
     let mut tenus_avant = tenus.clone();
+    // Toutes les directions passées pendant la frame, même moins d'une frame. Le jeu ne lit
+    // la manette qu'une fois par frame, et pas forcément au même moment que nous : un ←
+    // tenu une demi-frame à la fin d'un 63214 peut être vu par le jeu et pas par nous.
+    // Pour reconnaître les mouvements, on les garde toutes.
+    let mut directions_frame: Vec<u8> = Vec::new();
 
     loop {
         // Le numéro de frame, calé sur les images du jeu (voir horloge.rs).
@@ -106,6 +111,9 @@ pub fn boucle(
             let appuyes: Vec<(Action, i64)> = std::mem::take(&mut appuis_frame);
             let temps_etat = premier_changement.take().unwrap_or(temps);
             let direction = dirs.numpad();
+            for d in directions_frame.drain(..) {
+                historique.ajouter(frame, d);
+            }
             if direction != etat.direction {
                 historique.ajouter(frame, direction);
                 // Drive Rush par dash (66) : seulement si c'est ce que le trial attend.
@@ -279,6 +287,9 @@ pub fn boucle(
             && (dirs.numpad() != dirs_avant || tenus != tenus_avant || !appuis_frame.is_empty())
         {
             premier_changement = Some(temps);
+        }
+        if dirs.numpad() != dirs_avant {
+            directions_frame.push(dirs.numpad());
         }
         dirs_avant = dirs.numpad();
         tenus_avant = tenus.clone();

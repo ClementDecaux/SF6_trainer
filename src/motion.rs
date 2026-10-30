@@ -87,6 +87,9 @@ pub struct Historique {
 impl Historique {
     /// Note une nouvelle direction à la frame donnée.
     pub fn ajouter(&mut self, frame: u64, direction: u8) {
+        if self.entrees.back().is_some_and(|&(_, d)| d == direction) {
+            return;
+        }
         self.entrees.push_back((frame, direction));
         // 1 seconde d'historique suffit largement. On garde quand même la dernière
         // direction d'avant cette seconde : elle peut être encore tenue (accroupi depuis longtemps).
@@ -227,6 +230,13 @@ mod tests {
         let tous = h.reconnaitre_tous(110);
         assert_eq!(h.reconnaitre(110), Some(Motion::M41236));
         assert!(tous.contains(&Motion::M236));
+    }
+
+    #[test]
+    fn un_retour_arriere_de_moins_d_une_frame_compte() {
+        // 6, 2, 1, puis ← tenu moins d'une frame avant le neutre : même frame que le 5.
+        let h = historique(&[(0, 6), (3, 2), (5, 1), (7, 4), (7, 5)]);
+        assert!(h.reconnaitre_tous(10).contains(&Motion::M63214));
     }
 
     #[test]
