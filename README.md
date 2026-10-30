@@ -128,7 +128,8 @@ la même image ne comptent que pour un hit, mais les dégâts, eux, sont justes.
 Rien à installer (pas d'OBS) : l'outil filme la fenêtre de SF6 avec l'API de capture de Windows.
 Il garde toujours en mémoire les dernières images du jeu (`avant_ms`, 0,7 s par défaut) : la vidéo
 commence donc un peu avant la 1re étape. Elle est jetée si le combo est raté, et gardée dans
-`clips/` s'il est réussi. L'overlay n'apparaît pas dans la vidéo.
+`clips/` s'il est réussi. Un seul exemplaire par combo : la dernière réussite remplace la
+vidéo précédente (`Dhalsim_Drive-Rush-Yoga-Flame.mp4`). L'overlay n'apparaît pas dans la vidéo.
 
 À côté de chaque vidéo, un `.json` donne le combo, le personnage, la date, l'heure de chaque
 étape et l'historique du jeu pendant la vidéo : c'est ce qui permet au lecteur de l'interface

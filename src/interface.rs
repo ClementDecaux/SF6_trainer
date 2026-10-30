@@ -172,8 +172,11 @@ impl Interface {
                 infos,
             });
         }
-        // Les plus récentes d'abord (le nom commence par la date).
-        self.clips.sort_by(|a, b| b.video.cmp(&a.video));
+        // Les plus récentes d'abord.
+        self.clips.sort_by(|a, b| {
+            let date = |c: &Clip| c.infos.as_ref().map(|i| i.date.clone());
+            date(b).cmp(&date(a))
+        });
     }
 
     fn syntaxe(&self) -> Syntaxe {

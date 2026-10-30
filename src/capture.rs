@@ -248,15 +248,42 @@ pub fn lancer(config: Config, personnage: &str, combo: &str, inputs: &str) -> Ca
     }
 }
 
-/// Le nom des fichiers d'un clip, sans extension :
-/// « 2026-10-29_21-03-05_Dhalsim_Drive-Impact-Yoga-Flame ».
+/// Le nom des fichiers d'un clip, sans extension : « Dhalsim_Drive-Impact-Yoga-Flame ».
+/// Un seul clip par combo : le dernier réussi remplace le précédent.
 pub fn nom_fichier(infos: &InfosClip) -> String {
-    let date = infos.date.replace(' ', "_").replace(':', "-");
-    format!(
-        "{date}_{}_{}",
-        nettoyer(&infos.personnage),
-        nettoyer(&infos.combo)
-    )
+    format!("{}_{}", nettoyer(&infos.personnage), nettoyer(&infos.combo))
+}
+
+/// Supprime les clips déjà gardés pour ce combo (vidéo et `.json`), y compris ceux des
+/// anciennes versions dont le nom commençait par la date. Renvoie le nombre supprimé.
+pub fn supprimer_anciens(dossier: &std::path::Path, infos: &InfosClip) -> usize {
+    let Ok(entrees) = std::fs::read_dir(dossier) else {
+        return 0;
+    };
+    let mut supprimes = 0;
+    for entree in entrees.flatten() {
+        let json = entree.path();
+        if json.extension().is_none_or(|e| e != "json") {
+            continue;
+        }
+        let meme_combo = std::fs::read_to_string(&json)
+            .ok()
+            .and_then(|t| serde_json::from_str::<InfosClip>(&t).ok())
+            .is_some_and(|i| i.combo == infos.combo && i.personnage == infos.personnage);
+        if meme_combo {
+            let video = json.with_extension("mp4");
+            if video.exists() && std::fs::remove_file(&video).is_err() {
+                eprintln!(
+                    "Vidéo : impossible de supprimer {} (ouverte ?).",
+                    video.display()
+                );
+                continue;
+            }
+            let _ = std::fs::remove_file(&json);
+            supprimes += 1;
+        }
+    }
+    supprimes
 }
 
 /// Garde lettres et chiffres, remplace le reste par des tirets (noms de fichiers sûrs).
@@ -372,6 +399,7 @@ pub fn retourner_lignes(
 mod capture_windows {
     use super::{
         Config, Image, InfosClip, OCTETS_MAX_TAMPON, Ordre, Tampon, nom_fichier, retourner_lignes,
+        supprimer_anciens,
     };
     use std::path::{Path, PathBuf};
     use std::sync::mpsc::Receiver;
@@ -592,8 +620,11 @@ mod capture_windows {
 
         /// Renomme la vidéo et écrit le `.json` à côté.
         fn ranger(&self, en_cours: &Path, infos: &InfosClip) {
+            // Un seul exemplaire par combo : l'ancien clip laisse la place au nouveau.
+            supprimer_anciens(Path::new(&self.config.dossier), infos);
             let base = Path::new(&self.config.dossier).join(nom_fichier(infos));
             let video = base.with_extension("mp4");
+            let _ = std::fs::remove_file(&video);
             if let Err(e) = std::fs::rename(en_cours, &video) {
                 eprintln!("Vidéo : impossible de ranger le clip ({e}).");
                 return;
@@ -916,10 +947,35 @@ mod tests {
             latence: 0,
             lignes: vec![],
         };
-        assert_eq!(
-            nom_fichier(&infos),
-            "2026-10-29_21-03-05_Dhalsim_Drive-Impact-Yoga-Flame"
-        );
+        assert_eq!(nom_fichier(&infos), "Dhalsim_Drive-Impact-Yoga-Flame");
+    }
+
+    #[test]
+    fn les_anciens_clips_du_combo_sont_supprimes() {
+        let dossier = std::env::temp_dir().join(format!("sf6_clips_{}", std::process::id()));
+        let _ = std::fs::remove_dir_all(&dossier);
+        std::fs::create_dir_all(&dossier).unwrap();
+        let infos = |combo: &str| InfosClip {
+            personnage: "Dhalsim".into(),
+            combo: combo.into(),
+            inputs: String::new(),
+            date: "2026-10-29 21:03:05".into(),
+            fps: 60,
+            etapes: vec![],
+            debut_video: 0,
+            latence: 0,
+            lignes: vec![],
+        };
+        for (nom, combo) in [("a", "Un"), ("b", "Un"), ("c", "Deux")] {
+            std::fs::write(dossier.join(format!("{nom}.mp4")), b"").unwrap();
+            let json = serde_json::to_string(&infos(combo)).unwrap();
+            std::fs::write(dossier.join(format!("{nom}.json")), json).unwrap();
+        }
+        assert_eq!(supprimer_anciens(&dossier, &infos("Un")), 2);
+        assert!(!dossier.join("a.mp4").exists());
+        assert!(!dossier.join("b.json").exists());
+        assert!(dossier.join("c.mp4").exists());
+        let _ = std::fs::remove_dir_all(&dossier);
     }
 
     #[test]
