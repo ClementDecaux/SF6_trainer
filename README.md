@@ -140,6 +140,8 @@ Il garde toujours en mémoire les dernières images du jeu (`avant_ms`, 0,7 s pa
 commence donc un peu avant la 1re étape. Elle est jetée si le combo est raté, et gardée dans
 `clips/` s'il est réussi. Un seul exemplaire par combo : la dernière réussite remplace la
 vidéo précédente. L'overlay n'apparaît pas dans la vidéo.
+F10 (ou le bouton photo de l'overlay) enregistre une photo du jeu en PNG dans `photos/`
+(`photos` dans `capture.toml`, ou dans les réglages de l'interface).
 Le son du jeu est dans la vidéo, et seulement celui de SF6 : l'outil écoute le programme du
 jeu (`processus` dans `capture.toml`), pas le reste de Windows (musique, Discord…). Il le cale
 sur les images, y compris celles filmées avant la 1re étape. Il faut Windows 10 version 2004 ou

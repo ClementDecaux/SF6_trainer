@@ -84,6 +84,8 @@ pub struct Interface {
     overlay_montre: bool,
     /// SF6 est la fenêtre active (vérifié à chaque image de l'interface).
     jeu_actif: bool,
+    /// Le dossier des photos, tel que tapé dans les réglages.
+    dossier_photos: String,
     /// Hits et dégâts tapés pour compléter un combo (nom du combo, hits, dégâts).
     saisie: (String, u32, u32),
 }
@@ -116,6 +118,7 @@ impl Interface {
             titre_jeu: titre_jeu.to_string(),
             overlay_montre: true,
             jeu_actif: false,
+            dossier_photos: crate::capture::dossier_photos(),
             saisie: (String::new(), 0, 0),
         }
     }
@@ -1271,6 +1274,26 @@ impl Interface {
             ui.label(self.dossier_clips.display().to_string());
             if ui.button("Ouvrir").clicked() {
                 ouvrir_dossier(&self.dossier_clips);
+            }
+        });
+        ui.horizontal(|ui| {
+            ui.label(RichText::new("Dossier des photos (F10) :").color(GRIS));
+            ui.add(egui::TextEdit::singleline(&mut self.dossier_photos).desired_width(320.0));
+            let actuel = crate::capture::dossier_photos();
+            let modifie = self.dossier_photos.trim() != actuel;
+            if ui
+                .add_enabled(
+                    modifie && !self.dossier_photos.trim().is_empty(),
+                    egui::Button::new("Enregistrer"),
+                )
+                .clicked()
+            {
+                crate::capture::changer_dossier_photos(self.dossier_photos.trim());
+            }
+            if ui.button("Ouvrir").clicked() {
+                let dossier = PathBuf::from(&actuel);
+                let _ = std::fs::create_dir_all(&dossier);
+                ouvrir_dossier(&dossier);
             }
         });
 

@@ -40,6 +40,8 @@ processus = "StreetFighter6.exe"
 fenetre = "Street Fighter 6"
 # Dossier où les vidéos sont rangées.
 dossier = "clips"
+# Dossier des photos du jeu (F10). Se change aussi dans les réglages de l'interface.
+photos = "photos"
 # Combien de temps on filme avant la 1re étape, en millisecondes.
 # Ces images sont gardées en mémoire : environ 350 Mo pour 700 ms en 1080p. 0 = rien avant.
 avant_ms = 700
@@ -69,6 +71,9 @@ pub struct Config {
     pub processus: String,
     pub fenetre: String,
     pub dossier: String,
+    /// Dossier des photos (F10). Absent des anciens fichiers : « photos ».
+    #[serde(default = "photos_par_defaut")]
+    pub photos: String,
     /// Absent des anciens fichiers : 700 par défaut.
     #[serde(default = "avant_ms_par_defaut")]
     pub avant_ms: u64,
@@ -82,6 +87,29 @@ pub struct Config {
 
 fn vrai() -> bool {
     true
+}
+
+fn photos_par_defaut() -> String {
+    "photos".to_string()
+}
+
+/// Le dossier des photos du jeu (F10), changeable depuis l'interface pendant que ça tourne.
+static DOSSIER_PHOTOS: std::sync::Mutex<String> = std::sync::Mutex::new(String::new());
+
+pub fn dossier_photos() -> String {
+    match DOSSIER_PHOTOS.lock() {
+        Ok(d) if !d.is_empty() => d.clone(),
+        _ => photos_par_defaut(),
+    }
+}
+
+/// Change le dossier des photos (et l'écrit dans capture.toml).
+pub fn changer_dossier_photos(dossier: &str) {
+    if let Ok(mut d) = DOSSIER_PHOTOS.lock() {
+        *d = dossier.to_string();
+    }
+    // Chaîne littérale TOML (entre apostrophes) : les \ des chemins Windows restent tels quels.
+    crate::interface::ecrire_cles(FICHIER, &[("photos", format!("'{dossier}'"))]);
 }
 
 fn avant_ms_par_defaut() -> u64 {
@@ -220,7 +248,7 @@ impl Capture {
         self.envoyer(Ordre::Annuler);
     }
 
-    /// Une capture d'écran du jeu (PNG) dans le dossier des clips.
+    /// Une capture d'écran du jeu (PNG) dans le dossier des photos.
     pub fn photo(&mut self) {
         self.envoyer(Ordre::Photo);
     }
@@ -236,6 +264,9 @@ impl Capture {
 /// Démarre le thread de capture (si `actif = true` et sous Windows).
 pub fn lancer(config: Config, personnage: &str, combo: &str, inputs: &str) -> Capture {
     crate::horloge::regler_decalage(config.decalage_ms);
+    if let Ok(mut d) = DOSSIER_PHOTOS.lock() {
+        *d = config.photos.clone();
+    }
     if !config.actif {
         println!("Vidéo : coupée dans {FICHIER}.");
         return Capture::new(None, personnage, combo, inputs);
@@ -967,8 +998,9 @@ mod capture_windows {
                     "photo_{}.png",
                     chrono::Local::now().format("%Y-%m-%d_%H-%M-%S")
                 );
-                let chemin = Path::new(&self.config.dossier).join(nom);
-                let _ = std::fs::create_dir_all(&self.config.dossier);
+                let dossier = super::dossier_photos();
+                let chemin = Path::new(&dossier).join(nom);
+                let _ = std::fs::create_dir_all(&dossier);
                 match frame.save_as_image(&chemin, ImageFormat::Png) {
                     Ok(()) => println!("      📷 photo du jeu : {}", chemin.display()),
                     Err(e) => eprintln!("Vidéo : photo impossible ({e})."),
