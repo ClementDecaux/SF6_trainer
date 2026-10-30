@@ -17,7 +17,8 @@
 #![cfg_attr(not(windows), allow(dead_code))]
 
 use crate::ecran_modeles::{
-    BOUTON_C, CHIFFRE_H, CHIFFRE_L, CHIFFRES, DIRECTION_C, DIRECTIONS, PIED, POING,
+    BOUTON_C, CHIFFRE_H, CHIFFRE_L, CHIFFRES, CHIFFRES_DEGATS, DEGAT_H, DEGAT_L, DIRECTION_C,
+    DIRECTIONS, PIED, POING,
 };
 use std::collections::VecDeque;
 use std::sync::atomic::{AtomicI64, Ordering};
@@ -435,34 +436,47 @@ impl Suivi {
 // --- Le panneau « Combo Damage » du mode entraînement (en haut, au milieu) ---
 //
 // Chaque coup qui touche fait monter les dégâts du combo ; ils reviennent à 0 quand le
-// combo est fini. On n'a pas besoin de lire la valeur : il suffit de voir le nombre changer.
+// combo est fini. On lit le nombre, chiffre par chiffre : un tremblement de l'écran déplace
+// le texte d'un pixel ou deux, mais le nombre lu reste le même.
 // Le texte est blanc sur un bandeau sombre, « 1488 (2526) », aligné à droite.
 
-const DEGATS_Y: i32 = 206;
-const DEGATS_H: i32 = 20;
+/// Haut de la bande lue (un peu au-dessus du texte, pour les tremblements).
+const DEGATS_Y: i32 = 202;
+const DEGATS_H: i32 = 28;
 const DEGATS_X0: i32 = 645;
 const DEGATS_X1: i32 = 800;
+/// En dessous, un signe ne ressemble à aucun chiffre connu : c'est le 7 (pas encore de modèle).
+const SCORE_DEGAT: f32 = 0.75;
 
-/// Le nombre des dégâts du combo, lu sur une image.
+/// Les dégâts du combo (joueur 1), lus sur une image.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct LectureDegats {
-    /// Empreinte des pixels du nombre : change quand le nombre change.
-    pub empreinte: u64,
-    /// Nombre de chiffres (1 = « 0 », pas de combo en cours).
-    pub chiffres: usize,
+    pub valeur: u32,
 }
 
-/// Lit le nombre des dégâts du combo (joueur 1). `None` si le panneau n'est pas affiché.
+fn modeles_degats() -> &'static Vec<Option<Modele>> {
+    static MODELES: OnceLock<Vec<Option<Modele>>> = OnceLock::new();
+    MODELES.get_or_init(|| {
+        CHIFFRES_DEGATS
+            .iter()
+            .map(|c| c.iter().any(|&v| v > 0).then(|| Modele::new(c)))
+            .collect()
+    })
+}
+
+/// Lit les dégâts du combo. `None` si le panneau n'est pas affiché ou mal lu.
 pub fn lire_degats(vue: &Vue) -> Option<LectureDegats> {
     let largeur = (DEGATS_X1 - DEGATS_X0) as usize;
+    let hauteur = DEGATS_H as usize;
+    let mut gris = vec![0u8; largeur * hauteur];
     let mut colonnes = vec![false; largeur];
-    let mut blancs = vec![false; largeur * DEGATS_H as usize];
-    for dy in 0..DEGATS_H {
+    for dy in 0..hauteur {
         for dx in 0..largeur {
-            let p = vue.rgb(DEGATS_X0 + dx as i32, DEGATS_Y + dy);
+            let p = vue.rgb(DEGATS_X0 + dx as i32, DEGATS_Y + dy as i32);
+            let g = *p.iter().min().unwrap();
+            gris[dy * largeur + dx] = g;
             // Le texte est à ~240 ; le décor vu à travers le bandeau ne dépasse pas ~205.
-            if p.iter().all(|&c| c > 225) {
-                blancs[dy as usize * largeur + dx] = true;
+            if g > 225 {
                 colonnes[dx] = true;
             }
         }
@@ -482,40 +496,56 @@ pub fn lire_degats(vue: &Vue) -> Option<LectureDegats> {
     }
     // Le panneau : « N (M) », 5 à 14 signes, le dernier « ) » vers x = 775-780.
     let fin_texte = DEGATS_X0 as usize + signes.last()?.1;
-    if !(5..=14).contains(&signes.len()) || !(770..=790).contains(&fin_texte) {
+    if !(5..=14).contains(&signes.len()) || !(768..=792).contains(&fin_texte) {
         return None;
     }
-    // Chaque signe doit avoir la forme d'un caractère : 3 à 11 px de large, du haut
-    // (lignes 0-3) au bas (lignes 15-19) du texte. Une tache du décor est refusée.
-    // Les parenthèses dépassent : de la ligne 0 à la ligne 18 (les chiffres : 1 à 17).
-    let mut parentheses = Vec::new();
+    // Chaque signe doit avoir la forme d'un caractère : 3 à 11 px de large, 14 à 19 px de
+    // haut. Les parenthèses sont plus hautes (19 px) que les chiffres (16 px).
+    let mut formes = Vec::new();
     for &(x0, x1) in &signes {
-        let lignes: Vec<usize> = (0..DEGATS_H as usize)
-            .filter(|&dy| (x0..x1).any(|x| blancs[dy * largeur + x]))
+        let lignes: Vec<usize> = (0..hauteur)
+            .filter(|&dy| (x0..x1).any(|x| gris[dy * largeur + x] > 225))
             .collect();
         let (haut, bas) = (*lignes.first()?, *lignes.last()?);
-        if !(3..=11).contains(&(x1 - x0)) || haut > 3 || bas < 15 {
+        let h = bas - haut;
+        if !(3..=11).contains(&(x1 - x0)) || !(13..=19).contains(&h) {
             return None;
         }
-        parentheses.push(x1 - x0 <= 5 && haut == 0 && bas >= 18);
+        formes.push((haut, x1 - x0 <= 5 && h >= 18));
     }
-    // Le premier nombre : les signes avant « ( », suivi d'un nombre et de « ) ».
-    let fin = parentheses.iter().position(|&p| p)?;
-    if fin == 0 || !parentheses[parentheses.len() - 1] {
+    // Le premier nombre : les signes avant « ( » ; le texte finit par « ) ».
+    let fin = formes.iter().position(|&(_, p)| p)?;
+    if fin == 0 || !formes[formes.len() - 1].1 {
         return None;
     }
-    let (x0, x1) = (signes[0].0, signes[fin - 1].1);
-    let mut empreinte: u64 = 0xcbf2_9ce4_8422_2325;
-    for dy in 0..DEGATS_H as usize {
-        for x in x0..x1 {
-            empreinte ^= blancs[dy * largeur + x] as u64 + 1;
-            empreinte = empreinte.wrapping_mul(0x100_0000_01b3);
+    // Chaque chiffre : comparé aux modèles, centré, à partir de son haut.
+    let modeles = modeles_degats();
+    let mut valeur: u32 = 0;
+    for (&(x0, x1), &(haut, _)) in signes.iter().zip(&formes).take(fin) {
+        let cx = (x0 + x1) as i32 / 2;
+        let mut echantillon = Vec::with_capacity(DEGAT_L * DEGAT_H);
+        for dy in 0..DEGAT_H {
+            for dx in 0..DEGAT_L as i32 {
+                let x = cx - DEGAT_L as i32 / 2 + dx;
+                let y = haut + dy;
+                let g = if x >= 0 && (x as usize) < largeur && y < hauteur {
+                    gris[y * largeur + x as usize]
+                } else {
+                    0
+                };
+                echantillon.push(g as f32 / 255.0);
+            }
         }
+        let echantillon = centrer(&echantillon);
+        let (chiffre, score) = modeles
+            .iter()
+            .enumerate()
+            .filter_map(|(i, m)| m.as_ref().map(|m| (i, m.score(&echantillon))))
+            .max_by(|a, b| a.1.total_cmp(&b.1))?;
+        let chiffre = if score >= SCORE_DEGAT { chiffre } else { 7 };
+        valeur = valeur.checked_mul(10)?.checked_add(chiffre as u32)?;
     }
-    Some(LectureDegats {
-        empreinte,
-        chiffres: fin,
-    })
+    Some(LectureDegats { valeur })
 }
 
 /// Ce que le panneau des dégâts nous apprend.
@@ -530,34 +560,30 @@ pub enum Degats {
 /// Suit les dégâts du combo d'une image à l'autre.
 #[derive(Debug, Default)]
 pub struct SuiviDegats {
-    actuel: Option<u64>,
-    precedent: Option<u64>,
-    en_combo: bool,
+    /// Dernière valeur lue (`None` : pas encore lu).
+    valeur: Option<u32>,
 }
 
 impl SuiviDegats {
     pub fn image(&mut self, lecture: Option<LectureDegats>, temps: i64) -> Option<Degats> {
-        let lecture = lecture?;
-        if Some(lecture.empreinte) == self.actuel {
+        let nouvelle = lecture?.valeur;
+        let Some(avant) = self.valeur else {
+            // Premier passage (on vient d'arriver) : pas un coup.
+            self.valeur = Some(nouvelle);
+            return None;
+        };
+        if nouvelle == avant {
             return None;
         }
-        let avant = self.actuel;
-        // Un retour à la valeur d'avant (image tremblée) ne compte pas comme un coup.
-        if Some(lecture.empreinte) == self.precedent && lecture.chiffres > 1 {
-            self.actuel = Some(lecture.empreinte);
-            self.precedent = avant;
+        if nouvelle == 0 {
+            self.valeur = Some(0);
+            return Some(Degats::Fin(temps));
+        }
+        // Les dégâts d'un combo ne font que monter : une baisse est une mauvaise lecture.
+        if nouvelle < avant {
             return None;
         }
-        self.precedent = avant;
-        self.actuel = Some(lecture.empreinte);
-        if lecture.chiffres <= 1 {
-            let fin = self.en_combo;
-            self.en_combo = false;
-            return fin.then_some(Degats::Fin(temps));
-        }
-        // Premier passage (on vient d'arriver) : pas un coup.
-        avant?;
-        self.en_combo = true;
+        self.valeur = Some(nouvelle);
         Some(Degats::Coup(temps))
     }
 }
@@ -1088,15 +1114,19 @@ mod tests {
     #[test]
     fn lit_le_panneau_des_degats() {
         // Morceaux de 200x40 pris en (620, 196) : « 0 (2526) », « 2148 (2526) », « 2400 (2526) ».
-        let mut empreintes = Vec::new();
-        for (nom, chiffres) in [("degats_0", 1), ("degats_2148", 4), ("degats_2400", 4)] {
+        for (nom, valeur) in [
+            ("degats_0", 0),
+            ("degats_2148", 2148),
+            ("degats_2400", 2400),
+        ] {
             let (pixels, l, h) = photo_entiere(nom).unwrap();
-            let vue = Vue::morceau(&pixels, l, h, 620, 196);
-            let lu = lire_degats(&vue).unwrap();
-            assert_eq!(lu.chiffres, chiffres, "{nom}");
-            empreintes.push(lu.empreinte);
+            // Tel quel, puis décalé d'un ou deux pixels (tremblement de l'écran).
+            for (dx, dy) in [(0, 0), (1, 0), (0, 1), (-1, -2), (2, 2)] {
+                let vue = Vue::morceau(&pixels, l, h, 620 + dx, 196 + dy);
+                let lu = lire_degats(&vue).map(|l| l.valeur);
+                assert_eq!(lu, Some(valeur), "{nom} décalé de ({dx}, {dy})");
+            }
         }
-        assert_ne!(empreintes[1], empreintes[2]);
         // Ailleurs (pas de panneau) : rien.
         let (pixels, l, h) = photo(1);
         assert_eq!(lire_degats(&Vue::morceau(&pixels, l, h, 40, 200)), None);
@@ -1105,21 +1135,15 @@ mod tests {
     #[test]
     fn suivi_des_degats() {
         let mut s = SuiviDegats::default();
-        let l = |empreinte, chiffres| {
-            Some(LectureDegats {
-                empreinte,
-                chiffres,
-            })
-        };
-        assert_eq!(s.image(l(0, 1), 0), None); // « 0 » au départ
-        assert_eq!(s.image(l(1, 3), 10), Some(Degats::Coup(10)));
-        assert_eq!(s.image(l(1, 3), 20), None);
-        assert_eq!(s.image(l(2, 3), 30), Some(Degats::Coup(30)));
-        assert_eq!(s.image(l(1, 3), 40), None); // retour en arrière : image tremblée
-        assert_eq!(s.image(l(2, 3), 45), None);
+        let l = |valeur| Some(LectureDegats { valeur });
+        assert_eq!(s.image(l(0), 0), None); // « 0 » au départ
+        assert_eq!(s.image(l(480), 10), Some(Degats::Coup(10)));
+        assert_eq!(s.image(l(480), 20), None);
+        assert_eq!(s.image(l(1440), 30), Some(Degats::Coup(30)));
+        assert_eq!(s.image(l(1140), 40), None); // mauvaise lecture : les dégâts ne baissent pas
         assert_eq!(s.image(None, 50), None); // panneau caché un instant
-        assert_eq!(s.image(l(3, 4), 60), Some(Degats::Coup(60)));
-        assert_eq!(s.image(l(0, 1), 70), Some(Degats::Fin(70)));
+        assert_eq!(s.image(l(1488), 60), Some(Degats::Coup(60)));
+        assert_eq!(s.image(l(0), 70), Some(Degats::Fin(70)));
     }
 
     #[test]
