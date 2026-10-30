@@ -102,6 +102,8 @@ pub struct Partage {
     pub syntaxe: crate::syntaxe::Syntaxe,
     /// L'overlay n'apparaît que quand SF6 est la fenêtre active.
     pub seulement_jeu: bool,
+    /// Affichage des liaisons (cancel / link).
+    pub liaisons: crate::syntaxe::StyleLiaison,
 }
 
 impl Partage {
@@ -138,6 +140,7 @@ impl Partage {
             overlay_visible: true,
             syntaxe: crate::syntaxe::Syntaxe::default(),
             seulement_jeu: true,
+            liaisons: crate::syntaxe::StyleLiaison::default(),
         }
     }
 

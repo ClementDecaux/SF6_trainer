@@ -7,7 +7,6 @@
 //! Les polices d'egui n'ont pas les symboles ✓ ou ↙ : on dessine les coches et les
 //! flèches nous-mêmes avec le `Painter` (des traits, comme sur une feuille).
 
-use crate::combo::Liaison;
 use crate::controles::Action;
 use crate::partage::{Ligne, Partage};
 use crate::syntaxe::Syntaxe;
@@ -38,6 +37,9 @@ son = true
 syntaxe = "sf6"
 # true = l'overlay n'apparaît que quand SF6 est la fenêtre active.
 seulement_jeu = true
+# Liaisons entre les coups : "pastilles" (CANCEL / LINK), "mots", "symboles" (xx ,),
+# "courts" (> ,) ou "aucune".
+liaisons = "pastilles"
 "#;
 
 #[derive(Debug, Deserialize)]
@@ -62,6 +64,9 @@ pub struct Config {
     /// L'overlay n'apparaît que quand SF6 est la fenêtre active. Par défaut : oui.
     #[serde(default = "vrai")]
     pub seulement_jeu: bool,
+    /// Affichage des liaisons (cancel / link).
+    #[serde(default)]
+    pub liaisons: crate::syntaxe::StyleLiaison,
 }
 
 fn vrai() -> bool {
@@ -610,12 +615,6 @@ fn etapes(ui: &mut egui::Ui, p: &Partage) {
         } else {
             (Color32::from_white_alpha(170), Color32::TRANSPARENT)
         };
-        let liaison = match etape.liaison {
-            Liaison::Debut => "",
-            Liaison::Cancel => "xx",
-            Liaison::Link => ",",
-        };
-
         let bord = if cassee {
             egui::Stroke::new(1.5, ROUGE)
         } else {
@@ -630,7 +629,7 @@ fn etapes(ui: &mut egui::Ui, p: &Partage) {
                 ui.set_width(ui.available_width());
                 ui.horizontal(|ui| {
                     dessiner_coche(ui, i < p.index);
-                    ui.label(RichText::new(liaison).color(GRIS).size(14.0).monospace());
+                    crate::syntaxe::dessiner_liaison(ui, etape.liaison, p.liaisons, 15.0, true);
                     crate::syntaxe::dessiner(ui, &etape.notation, p.syntaxe, 24.0, couleur);
                     timing(ui, p, i);
                 });

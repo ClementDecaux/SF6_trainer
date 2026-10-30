@@ -9,7 +9,7 @@ use crate::combo::ComboFichier;
 use crate::ecran::EntreeJeu;
 use crate::overlay::{self, CYAN, GRIS, JAUNE, Overlay, ROUGE, VERT};
 use crate::partage::Partage;
-use crate::syntaxe::{self, Syntaxe};
+use crate::syntaxe::{self, StyleLiaison, Syntaxe};
 use crate::video::Video;
 use eframe::egui::{self, Color32, RichText};
 use std::path::{Path, PathBuf};
@@ -321,6 +321,10 @@ impl Interface {
             });
 
         let syntaxe = self.syntaxe();
+        let liaisons = self
+            .partage
+            .lock()
+            .map_or(Default::default(), |p| p.liaisons);
         egui::CentralPanel::default().show(ui, |ui| {
             let Some(combo) = self.combos.get(self.choisi).cloned() else {
                 ui.label("Aucun combo dans combos.toml.");
@@ -339,11 +343,7 @@ impl Interface {
                     ui.horizontal_wrapped(|ui| {
                         for (i, e) in etapes.iter().enumerate() {
                             if i > 0 {
-                                let liaison = match e.liaison {
-                                    crate::combo::Liaison::Link => ",",
-                                    _ => "xx",
-                                };
-                                ui.label(RichText::new(liaison).color(GRIS));
+                                syntaxe::dessiner_liaison(ui, e.liaison, liaisons, 15.0, false);
                             }
                             syntaxe::dessiner(ui, &e.notation, syntaxe, 20.0, Color32::WHITE);
                         }
@@ -836,19 +836,35 @@ impl Interface {
                 ui.radio_value(&mut p.syntaxe, s, s.nom());
             }
         });
+        let avant_liaisons = p.liaisons;
+        ui.horizontal_wrapped(|ui| {
+            ui.label(RichText::new("Liaisons :").color(GRIS));
+            for s in StyleLiaison::TOUS {
+                ui.radio_value(&mut p.liaisons, s, s.nom());
+            }
+        });
         ui.horizontal(|ui| {
+            use crate::combo::Liaison;
             ui.label(RichText::new("Exemple :").color(GRIS));
-            for (i, coup) in ["1HP", "DR", "1MK", "236MK", "63214MP"].iter().enumerate() {
-                if i > 0 {
-                    ui.label(RichText::new("xx").color(GRIS));
-                }
+            for (liaison, coup) in [
+                (Liaison::Debut, "1HP"),
+                (Liaison::Cancel, "DR"),
+                (Liaison::Cancel, "1MK"),
+                (Liaison::Cancel, "236MK"),
+                (Liaison::Link, "1MK"),
+                (Liaison::Cancel, "63214MP"),
+            ] {
+                syntaxe::dessiner_liaison(ui, liaison, p.liaisons, 15.0, false);
                 syntaxe::dessiner(ui, coup, p.syntaxe, 20.0, Color32::WHITE);
             }
         });
-        if p.syntaxe != avant {
+        if p.syntaxe != avant || p.liaisons != avant_liaisons {
             ecrire_cles(
                 "overlay.toml",
-                &[("syntaxe", format!("\"{}\"", p.syntaxe.cle()))],
+                &[
+                    ("syntaxe", format!("\"{}\"", p.syntaxe.cle())),
+                    ("liaisons", format!("\"{}\"", p.liaisons.cle())),
+                ],
             );
         }
 

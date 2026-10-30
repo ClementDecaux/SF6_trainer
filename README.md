@@ -46,6 +46,11 @@ Quatre syntaxes au choix (Réglages, ou `syntaxe = "..."` dans `overlay.toml`) :
 terminal reste en numpad. Dans `combos.toml`, on peut écrire en numpad, en anglais ou avec les
 flèches `↓↘→`.
 
+Les liaisons entre les coups (cancel, link) ont aussi leur style, dans les mêmes réglages
+(`liaisons = "..."` dans `overlay.toml`) : `pastilles` (étiquettes CANCEL orange et LINK bleue,
+par défaut), `mots`, `symboles` (`xx` et `,`), `courts` (`>` et `,`) ou `aucune`. Dans
+l'overlay, elles ont une colonne de largeur fixe : les coups sont alignés.
+
 Le bouton en haut à droite cache ou réaffiche l'overlay. L'overlay n'apparaît que quand SF6
 est la fenêtre active (sauf en mode déplacement F8) ; décochable dans les réglages
 (`seulement_jeu` dans `overlay.toml`). Fermer l'interface ferme l'outil.

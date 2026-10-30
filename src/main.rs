@@ -61,6 +61,7 @@ fn lancer() -> Result<(), String> {
     etat.combo_index = choisi;
     etat.syntaxe = config.syntaxe;
     etat.seulement_jeu = config.seulement_jeu;
+    etat.liaisons = config.liaisons;
     etat.enregistrement = capture.enregistre;
     let partage = Arc::new(Mutex::new(etat));
 

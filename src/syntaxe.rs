@@ -246,6 +246,140 @@ pub fn texte(notation: &str, syntaxe: Syntaxe) -> String {
     }
 }
 
+// ---------------------------------------------------------------- Liaisons
+
+/// Comment afficher les liaisons entre deux coups (cancel / link).
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Deserialize)]
+#[serde(rename_all = "lowercase")]
+pub enum StyleLiaison {
+    /// Petites étiquettes colorées : CANCEL (orange), LINK (bleu).
+    #[default]
+    Pastilles,
+    /// « cancel », « link » en toutes lettres.
+    Mots,
+    /// « xx » et « , » comme sur les forums.
+    Symboles,
+    /// « > » et « , ».
+    Courts,
+    /// Rien.
+    Aucune,
+}
+
+impl StyleLiaison {
+    pub const TOUS: [StyleLiaison; 5] = [
+        StyleLiaison::Pastilles,
+        StyleLiaison::Mots,
+        StyleLiaison::Symboles,
+        StyleLiaison::Courts,
+        StyleLiaison::Aucune,
+    ];
+
+    pub fn nom(self) -> &'static str {
+        match self {
+            StyleLiaison::Pastilles => "Étiquettes (CANCEL, LINK)",
+            StyleLiaison::Mots => "Mots (cancel, link)",
+            StyleLiaison::Symboles => "Symboles (xx  ,)",
+            StyleLiaison::Courts => "Courts (>  ,)",
+            StyleLiaison::Aucune => "Aucune",
+        }
+    }
+
+    pub fn cle(self) -> &'static str {
+        match self {
+            StyleLiaison::Pastilles => "pastilles",
+            StyleLiaison::Mots => "mots",
+            StyleLiaison::Symboles => "symboles",
+            StyleLiaison::Courts => "courts",
+            StyleLiaison::Aucune => "aucune",
+        }
+    }
+
+    /// Largeur de la colonne des liaisons, pour que tous les coups soient alignés.
+    fn largeur(self, taille: f32) -> f32 {
+        let l = match self {
+            StyleLiaison::Pastilles => 4.6,
+            StyleLiaison::Mots => 3.6,
+            StyleLiaison::Symboles => 1.7,
+            StyleLiaison::Courts => 1.2,
+            StyleLiaison::Aucune => 0.0,
+        };
+        (l * taille).round()
+    }
+}
+
+pub const COULEUR_CANCEL: Color32 = Color32::from_rgb(255, 150, 40);
+pub const COULEUR_LINK: Color32 = Color32::from_rgb(80, 185, 255);
+
+/// Dessine la liaison avant un coup. `colonne` : largeur fixe (même pour le 1er coup, sans
+/// liaison), pour aligner les coups les uns sous les autres.
+pub fn dessiner_liaison(
+    ui: &mut egui::Ui,
+    liaison: crate::combo::Liaison,
+    style: StyleLiaison,
+    taille: f32,
+    colonne: bool,
+) {
+    use crate::combo::Liaison;
+    let cancel = match liaison {
+        Liaison::Cancel => true,
+        Liaison::Link => false,
+        Liaison::Debut => {
+            if colonne && style != StyleLiaison::Aucune {
+                ui.allocate_exact_size(
+                    egui::vec2(style.largeur(taille), taille),
+                    egui::Sense::hover(),
+                );
+            }
+            return;
+        }
+    };
+    let (mot, couleur) = match (style, cancel) {
+        (StyleLiaison::Aucune, _) => return,
+        (StyleLiaison::Pastilles, true) => ("CANCEL", COULEUR_CANCEL),
+        (StyleLiaison::Pastilles, false) => ("LINK", COULEUR_LINK),
+        (StyleLiaison::Mots, true) => ("cancel", COULEUR_CANCEL),
+        (StyleLiaison::Mots, false) => ("link", COULEUR_LINK),
+        (StyleLiaison::Symboles, true) => ("xx", Color32::from_gray(160)),
+        (StyleLiaison::Courts, true) => (">", Color32::from_gray(160)),
+        (_, false) => (",", Color32::from_gray(160)),
+    };
+    let police = egui::FontId::proportional(if style == StyleLiaison::Pastilles {
+        (taille * 0.8).round()
+    } else {
+        taille
+    });
+    let galee = ui
+        .painter()
+        .layout_no_wrap(mot.to_string(), police.clone(), couleur);
+    let largeur = if colonne {
+        style.largeur(taille).max(galee.size().x + 8.0)
+    } else {
+        galee.size().x
+            + if style == StyleLiaison::Pastilles {
+                10.0
+            } else {
+                2.0
+            }
+    };
+    let (rect, _) = ui.allocate_exact_size(egui::vec2(largeur, taille * 1.2), egui::Sense::hover());
+    let centre = rect.center();
+    if style == StyleLiaison::Pastilles {
+        let cadre = egui::Rect::from_center_size(
+            centre,
+            egui::vec2(galee.size().x + 8.0, galee.size().y + 2.0),
+        );
+        ui.painter().rect(
+            cadre,
+            4,
+            couleur.gamma_multiply(0.18),
+            egui::Stroke::new(1.0, couleur),
+            egui::StrokeKind::Inside,
+        );
+    }
+    ui.painter()
+        .text(centre, egui::Align2::CENTER_CENTER, mot, police, couleur);
+}
+
 // ---------------------------------------------------------------- Dessin
 
 /// Dessine un coup dans la syntaxe choisie, sur la ligne en cours (dans un `horizontal`).
