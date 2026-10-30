@@ -122,6 +122,8 @@ pub struct Overlay {
     deplacement: bool,
     /// La souris est au-dessus de l'overlay : la fenêtre la garde (clics, molette).
     survol: bool,
+    /// Pas dans SF6 ou pas en mode entraînement : la fenêtre est invisible et traversée.
+    cache: bool,
     /// L'historique est déplié (languette en bas).
     historique_ouvert: bool,
     /// Hauteur de la fenêtre historique déplié (repliée, la fenêtre se réduit au contenu).
@@ -250,6 +252,7 @@ impl Overlay {
             regler_dans: 1,
             deplacement: false,
             survol: false,
+            cache: false,
             historique_ouvert: config.historique_ouvert,
             hauteur_ouverte: config.hauteur,
             attendre_hauteur: None,
@@ -261,7 +264,17 @@ impl Overlay {
     /// Les clics et la molette passent au jeu, sauf en mode déplacement (F8)
     /// et quand la souris est au-dessus de l'historique (pour le faire défiler).
     fn traversant(&self) -> bool {
-        !self.deplacement && !self.survol && self.glisse.is_none()
+        self.cache || (!self.deplacement && !self.survol && self.glisse.is_none())
+    }
+
+    /// Montre ou rend invisible l'overlay. Vrai si ça change (il faut alors le redessiner).
+    pub fn montrer(&mut self, oui: bool) -> bool {
+        if self.cache != oui {
+            return false;
+        }
+        self.cache = !oui;
+        self.regler_dans = 1;
+        true
     }
 }
 
@@ -280,6 +293,8 @@ pub fn fenetre(config: &Config) -> egui::ViewportBuilder {
         .with_transparent(config.transparence)
         .with_decorations(false)
         .with_always_on_top()
+        // Créée sans prendre le focus (SF6 le garde).
+        .with_active(false)
         .with_mouse_passthrough(true)
         .with_taskbar(false)
         .with_position([config.x, config.y])
@@ -366,8 +381,11 @@ impl Overlay {
         if self.regler_dans > 0 {
             self.regler_dans -= 1;
             if self.regler_dans == 0 {
+                let opacite = if self.cache { 0 } else { self.opacite_fenetre };
                 #[cfg(windows)]
-                regler_fenetre_windows(self.opacite_fenetre, self.traversant());
+                regler_fenetre_windows(opacite, self.traversant());
+                #[cfg(not(windows))]
+                let _ = opacite;
             } else {
                 ui.ctx().request_repaint();
             }

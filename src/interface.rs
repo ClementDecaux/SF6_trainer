@@ -209,12 +209,19 @@ impl eframe::App for Interface {
                     p.en_entrainement() || p.deplacement,
                 )
             });
-        // Pas dans SF6, ou pas en mode entraînement : la fenêtre est fermée, et rouverte au
-        // même endroit ensuite. (La cacher sans la fermer la laissait parfois blanche et
-        // impossible à cliquer quand elle réapparaissait : jamais redessinée.)
+        self.fenetre_overlay(&ctx, visible);
+        // Pas dans SF6, ou pas en mode entraînement : la fenêtre reste là mais devient
+        // invisible et traversée par la souris. Ni cachée ni recréée : une fenêtre qui
+        // (ré)apparaît prend le focus à SF6, et l'overlay restait alors bloqué (F8, F9 et
+        // clics sans effet).
         self.jeu_actif = jeu_au_premier_plan(&self.titre_jeu);
         let montrer = (!jeu_exige || self.jeu_actif) && entrainement;
-        self.fenetre_overlay(&ctx, visible && montrer);
+        if visible
+            && let Ok(mut o) = self.overlay.lock()
+            && o.montrer(montrer)
+        {
+            ctx.request_repaint_of(overlay::id());
+        }
         // Un nouveau clip vient d'être filmé : on relit le dossier et on rouvre la vidéo
         // (le nouveau clip remplace l'ancien du même combo).
         let ranges = crate::capture::CLIPS_RANGES.load(std::sync::atomic::Ordering::Relaxed);
