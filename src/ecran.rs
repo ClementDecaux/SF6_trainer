@@ -445,7 +445,7 @@ const DEGATS_Y: i32 = 202;
 const DEGATS_H: i32 = 28;
 const DEGATS_X0: i32 = 645;
 const DEGATS_X1: i32 = 800;
-/// En dessous, un signe ne ressemble à aucun chiffre connu : c'est le 7 (pas encore de modèle).
+/// En dessous, un signe ne ressemble à aucun chiffre : la lecture est refusée.
 const SCORE_DEGAT: f32 = 0.75;
 
 /// Les dégâts du combo (joueur 1), lus sur une image.
@@ -459,7 +459,7 @@ fn modeles_degats() -> &'static Vec<Option<Modele>> {
     MODELES.get_or_init(|| {
         CHIFFRES_DEGATS
             .iter()
-            .map(|c| c.iter().any(|&v| v > 0).then(|| Modele::new(c)))
+            .map(|c| Some(Modele::new(c)))
             .collect()
     })
 }
@@ -542,7 +542,9 @@ pub fn lire_degats(vue: &Vue) -> Option<LectureDegats> {
             .enumerate()
             .filter_map(|(i, m)| m.as_ref().map(|m| (i, m.score(&echantillon))))
             .max_by(|a, b| a.1.total_cmp(&b.1))?;
-        let chiffre = if score >= SCORE_DEGAT { chiffre } else { 7 };
+        if score < SCORE_DEGAT {
+            return None;
+        }
         valeur = valeur.checked_mul(10)?.checked_add(chiffre as u32)?;
     }
     Some(LectureDegats { valeur })
@@ -1116,6 +1118,7 @@ mod tests {
         // Morceaux de 200x40 pris en (620, 196) : « 0 (2526) », « 2148 (2526) », « 2400 (2526) ».
         for (nom, valeur) in [
             ("degats_0", 0),
+            ("degats_720", 720),
             ("degats_2148", 2148),
             ("degats_2400", 2400),
         ] {
