@@ -29,7 +29,7 @@ cargo test         # lance les tests
 
 | Fichier | Contenu |
 | --- | --- |
-| `combos.toml` | Tes combos, en notation forum : `b+hp xx DI xx b+mk xx qcf+mk, b+mk xx hcb+mp` |
+| `combos.toml` | Tes combos, en notation forum : `b+hp xx DR xx b+mk xx qcf+mk, b+mk xx hcb+mp` |
 | `controles.toml` | Quel bouton physique fait quoi dans SF6 (LP, MP, HP...) |
 | `overlay.toml` | Position, taille et opacité de l'overlay, son du combo réussi |
 | `timings.toml` | Fenêtres de timing apprises (créé au premier Select) |
@@ -74,7 +74,7 @@ par image, par exemple dans VLC (touche `E`) ou mpv (touche `.`).
 
 Notation reconnue : directions `b f d u db df cr. st.` ou chiffres numpad, mouvements
 `qcf qcb hcf hcb dp` ou `236 214 41236 63214 623 421`, `DI` (HP+HK), `DP` (MP+MK),
-`DR` (66), `xx` ou `>` pour un cancel, `,` pour un link.
+`DR` (66, ou MP+MK pendant un coup annulable), `xx` ou `>` pour un cancel, `,` pour un link.
 
 ## Organisation du code
 

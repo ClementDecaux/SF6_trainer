@@ -6,7 +6,7 @@
 use crate::affichage::{self, Etat};
 use crate::capture::Capture;
 use crate::clavier::Touche;
-use crate::combo::{Resultat, Trial};
+use crate::combo::{Resultat, Trial, correspond};
 use crate::controles::{Action, Controles};
 use crate::ecran::{self, Appui, EntreeJeu};
 use crate::horloge;
@@ -242,12 +242,14 @@ pub fn boucle(
                 // On affiche la lecture attendue par le trial si elle y est, sinon la première.
                 let coup = candidats
                     .iter()
-                    .find(|c| c.as_str() == trial.attendu())
+                    .find(|c| correspond(c, trial.attendu()))
                     .unwrap_or(&candidats[0])
                     .clone();
                 // Un nouvel essai commence : le verdict du précédent ne peut plus attendre.
-                let nouvel_essai =
-                    trial.index == 0 && candidats.iter().any(|c| *c == trial.etapes[0].notation);
+                let nouvel_essai = trial.index == 0
+                    && candidats
+                        .iter()
+                        .any(|c| correspond(c, &trial.etapes[0].notation));
                 if nouvel_essai && let Some(fin) = juge.forcer() {
                     a_confirmer = Some(conclure(&trial, &mut capture, fin, frame, &partage));
                 }
@@ -353,15 +355,18 @@ fn resultat_trial(
     match resultat {
         Resultat::Avance | Resultat::Rate { .. } if trial.index == 1 => {
             juge.etapes.clear();
-            juge.etape(temps, &trial.etapes[0].notation);
+            juge.etape(temps, appui_etape(&trial.etapes[0].notation, candidats));
         }
-        Resultat::Avance => juge.etape(temps, &trial.etapes[trial.index - 1].notation),
+        Resultat::Avance => juge.etape(
+            temps,
+            appui_etape(&trial.etapes[trial.index - 1].notation, candidats),
+        ),
         Resultat::Reussi => {
             if trial.etapes.len() == 1 {
                 juge.etapes.clear();
             }
             if let Some(derniere) = trial.etapes.last() {
-                juge.etape(temps, &derniere.notation);
+                juge.etape(temps, appui_etape(&derniere.notation, candidats));
             }
         }
         _ => {}
@@ -399,6 +404,16 @@ fn resultat_trial(
         Resultat::Ignore => {}
     }
     None
+}
+
+/// Ce qui a été appuyé pour une étape : un Drive Rush fait avec le bouton Drive Parry
+/// s'est vu dans le jeu comme MP+MK.
+fn appui_etape<'a>(notation: &'a str, candidats: &[String]) -> &'a str {
+    if notation == "DR" && candidats.iter().any(|c| c == "DP") {
+        "DP"
+    } else {
+        notation
+    }
 }
 
 /// Un combo fini : écarts entre les étapes et erreurs de timing.

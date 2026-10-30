@@ -1,10 +1,10 @@
 //! Les combos : lecture de la notation et moteur de trial.
 //!
 //! Un combo s'écrit comme sur les forums, par exemple :
-//! `b+hp xx DI xx b+mk xx qcf+mk, b+mk xx hcb+mp`
+//! `b+hp xx DR xx b+mk xx qcf+mk, b+mk xx hcb+mp`
 //! - `xx` ou `>` = cancel, `,` = link.
 //! - b, f, d, u, db, df, cr. = directions ; qcf, qcb, hcf, hcb, dp = mouvements.
-//! - DI = Drive Impact (HP+HK), DP = Drive Parry (MP+MK), DR = Drive Rush (66).
+//! - DI = Drive Impact (HP+HK), DP = Drive Parry (MP+MK), DR = Drive Rush (66, ou MP+MK pendant un coup annulable).
 //! - On peut aussi écrire directement en numpad : `4HP xx DI xx 4MK xx 236MK`.
 //!
 //! Chaque étape est ramenée à une forme unique (« 4HP », « 236MK », « DI »)
@@ -51,8 +51,8 @@ const COMBOS_PAR_DEFAUT: &str = r#"# Tes combos. Écris-les comme sur les forums
 personnage = "Dhalsim"
 
 [[combo]]
-nom = "Drive Impact, Yoga Flame"
-inputs = "b+hp xx DI xx b+mk xx qcf+mk, b+mk xx hcb+mp"
+nom = "Drive Rush, Yoga Flame"
+inputs = "b+hp xx DR xx b+mk xx qcf+mk, b+mk xx hcb+mp"
 "#;
 
 /// Charge `combos.toml`, ou le crée avec le combo d'exemple.
@@ -245,7 +245,7 @@ impl Trial {
             return Resultat::Ignore;
         }
 
-        if candidats.iter().any(|c| c == self.attendu()) {
+        if candidats.iter().any(|c| correspond(c, self.attendu())) {
             if self.index == 0 {
                 self.nouvel_essai();
             } else {
@@ -268,7 +268,7 @@ impl Trial {
         // deux boutons arrive seul : on attend le second au lieu de compter un raté.
         let boutons = match self.attendu() {
             "DI" => Some(("HP", "HK")),
-            "DP" => Some(("MP", "MK")),
+            "DP" | "DR" => Some(("MP", "MK")),
             _ => None,
         };
         if let Some((a, b)) = boutons
@@ -293,7 +293,7 @@ impl Trial {
         let attendu = self.attendu().to_string();
         self.index = 0;
         // Ce coup raté est peut-être le début d'un nouvel essai.
-        if candidats.iter().any(|c| c == self.attendu()) {
+        if candidats.iter().any(|c| correspond(c, self.attendu())) {
             self.nouvel_essai();
             self.index = 1;
             self.derniere_frame = frame;
@@ -311,6 +311,12 @@ impl Trial {
     }
 }
 
+/// Un coup reconnu valide-t-il l'étape attendue ? En plus du nom exact : pendant un coup
+/// annulable, MP+MK (le bouton Drive Parry) lance un Drive Rush, comme 66.
+pub fn correspond(coup: &str, attendu: &str) -> bool {
+    coup == attendu || (attendu == "DR" && coup == "DP")
+}
+
 /// Le bouton d'une notation, sans la direction ni le mouvement : « 236MK » -> « MK ».
 fn bouton(notation: &str) -> &str {
     notation.trim_start_matches(|c: char| c.is_ascii_digit())
@@ -322,6 +328,16 @@ mod tests {
 
     fn c(s: &str) -> Vec<String> {
         vec![s.to_string()]
+    }
+
+    #[test]
+    fn drive_rush_par_le_bouton_parry() {
+        let mut t = Trial::new("test", parser("4HP xx DR xx 4MK").unwrap());
+        assert_eq!(t.coup(&c("4HP"), 10), Resultat::Avance);
+        // MP seul (boutons séparés) : on attend le MK.
+        assert_eq!(t.coup(&c("5MP"), 12), Resultat::Ignore);
+        assert_eq!(t.coup(&c("DP"), 13), Resultat::Avance);
+        assert_eq!(t.coup(&c("4MK"), 30), Resultat::Reussi);
     }
 
     #[test]
