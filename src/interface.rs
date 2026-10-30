@@ -768,9 +768,10 @@ impl Lecteur {
                 // Assez de place en dessous pour la barre, les boutons et les étapes.
                 let hauteur = (ui.available_height() - 130.0).max(120.0);
                 let echelle = (largeur / taille.x).min(hauteur / taille.y);
-                ui.add(egui::Image::new(&texture).fit_to_exact_size(taille * echelle));
+                let video = ui.add(egui::Image::new(&texture).fit_to_exact_size(taille * echelle));
 
-                // Barre de temps avec les étapes.
+                // Barre de temps avec les étapes, de la largeur de la vidéo.
+                ui.spacing_mut().slider_width = video.rect.width();
                 let mut image = self.image;
                 let barre = ui.add(
                     egui::Slider::new(&mut image, 0..=total - 1)
@@ -780,7 +781,8 @@ impl Lecteur {
                 if barre.changed() {
                     aller = Some(image);
                 }
-                let rect = barre.rect;
+                // Le rail du curseur est un peu en retrait des bords (la poignée dépasse).
+                let rect = barre.rect.shrink2(egui::vec2(barre.rect.height() / 2.5, 0.0));
                 let peintre = ui.painter();
                 for &(i, ref notation) in &etapes {
                     let x = rect.left() + rect.width() * i as f32 / (total.max(2) - 1) as f32;
