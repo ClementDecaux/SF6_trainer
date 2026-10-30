@@ -128,9 +128,9 @@ impl Interface {
 
     /// Affiche (ou cache) la fenêtre de l'overlay.
     fn fenetre_overlay(&mut self, ctx: &egui::Context, mut visible: bool) {
-        // Parfois la fenêtre de l'overlay n'est plus jamais redessinée (figée : pas
-        // cliquable, F8 et F9 sans effet visible). Fermer puis rouvrir la fenêtre la
-        // répare : on le fait tout seul quand elle n'a pas été dessinée depuis 1 s.
+        // Par sécurité : si la fenêtre de l'overlay n'est plus redessinée (figée : pas
+        // cliquable, F8 et F9 sans effet visible), la fermer puis la rouvrir la répare.
+        // On le fait tout seul quand elle n'a pas été dessinée depuis 2 s.
         if visible && self.overlay_ouvert {
             // Invisible (hors du jeu) : pas besoin, et la recréer pourrait voler le focus.
             let fige = self.overlay.lock().is_ok_and(|o| {
@@ -138,7 +138,7 @@ impl Interface {
                     return false;
                 }
                 let depuis = o.dernier_dessin.unwrap_or(self.overlay_ouvert_a);
-                depuis.max(self.overlay_ouvert_a).elapsed() > std::time::Duration::from_secs(1)
+                depuis.max(self.overlay_ouvert_a).elapsed() > std::time::Duration::from_secs(2)
             });
             if fige {
                 eprintln!("Overlay figé : fenêtre recréée.");
@@ -154,16 +154,18 @@ impl Interface {
             {
                 o.fenetre_recreee();
             }
+            // Dessiné en même temps que l'interface (« immediate »), pas à part : quand SF6
+            // est devant, Windows ne demandait plus jamais à la fenêtre de l'overlay de se
+            // redessiner, et elle restait figée (pas cliquable, F8 et F9 sans effet visible).
+            // L'interface, elle, continue d'être redessinée.
             let overlay = Arc::clone(&self.overlay);
-            ctx.show_viewport_deferred(
-                overlay::id(),
-                self.fenetre_overlay.clone(),
-                move |ui, _| {
-                    if let Ok(mut o) = overlay.lock() {
-                        o.dessiner(ui);
-                    }
-                },
-            );
+            ctx.show_viewport_immediate(overlay::id(), self.fenetre_overlay.clone(), |ui, _| {
+                if let Ok(mut o) = overlay.lock() {
+                    o.dessiner(ui);
+                }
+            });
+            // L'overlay suit le jeu en direct : redessiné au moins 20 fois par seconde.
+            ctx.request_repaint_after(std::time::Duration::from_millis(50));
         } else if self.overlay_ouvert {
             // Caché : on retient où il était, pour le rouvrir au même endroit.
             if let Some(rect) = ctx.input_for(overlay::id(), |i| i.viewport().outer_rect) {
