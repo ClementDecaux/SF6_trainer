@@ -772,22 +772,48 @@ pub fn noms_boutons(boutons: u8) -> String {
 /// La durée exacte (en frames) de la ligne du jeu qui a cette direction et ces boutons,
 /// et qui est apparue vers `attendu` (heure de la capture). `None` si elle n'est pas
 /// retrouvée ou pas encore finie.
+#[cfg(test)]
 pub fn duree_dans_le_jeu(
     journal: &[EntreeJeu],
     attendu: i64,
     direction: u8,
     boutons: u8,
 ) -> Option<u64> {
+    let i = ligne_du_jeu(journal, attendu, direction, boutons)?;
+    duree_ligne(journal, i)
+}
+
+/// L'index, dans le journal, de la ligne du jeu qui a cette direction et ces boutons
+/// et qui est apparue vers `attendu` (heure de la capture).
+pub fn ligne_du_jeu(
+    journal: &[EntreeJeu],
+    attendu: i64,
+    direction: u8,
+    boutons: u8,
+) -> Option<usize> {
     let (i, e) = journal
         .iter()
         .enumerate()
         .filter(|(_, e)| e.direction == direction && e.boutons == boutons)
         .min_by_key(|(_, e)| (e.vu - attendu).abs())?;
-    if (e.vu - attendu).abs() > 2 * FRAME {
-        return None;
-    }
+    ((e.vu - attendu).abs() <= 2 * FRAME).then_some(i)
+}
+
+/// La durée (en frames) de la ligne `i` du journal, si elle est finie.
+pub fn duree_ligne(journal: &[EntreeJeu], i: usize) -> Option<u64> {
+    let e = journal.get(i)?;
     let suivante = journal.get(i + 1)?;
     (suivante.segment == e.segment).then(|| suivante.frame - e.frame)
+}
+
+/// Vrai si le jeu passe directement de la ligne `avant` à la ligne `apres` du journal
+/// (une ligne à nous entre les deux n'a pas été vue par le jeu).
+pub fn lignes_consecutives(journal: &[EntreeJeu], avant: usize, apres: usize) -> bool {
+    apres == avant + 1
+        && journal
+            .get(avant)
+            .zip(journal.get(apres))
+            .is_some_and(|(a, b)| a.segment == b.segment)
 }
 
 /// Estime le délai entre nos appuis et leur apparition à l'écran.

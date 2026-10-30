@@ -778,17 +778,43 @@ impl Juge {
             return;
         };
         let journal: Vec<EntreeJeu> = self.journal.iter().copied().collect();
-        for ligne in lignes.iter_mut().filter(|l| !l.exact) {
-            let boutons = ligne
-                .boutons
-                .iter()
-                .fold(0, |b, (a, _)| b | ecran::boutons_etape(&a.to_string()));
-            if let Some(frames) =
-                ecran::duree_dans_le_jeu(&journal, ligne.debut + latence, ligne.direction, boutons)
+        // La ligne du jeu de chacune de nos lignes (la plus récente en premier).
+        let dans_le_jeu: Vec<Option<usize>> = lignes
+            .iter()
+            .map(|ligne| {
+                let boutons = ligne
+                    .boutons
+                    .iter()
+                    .fold(0, |b, (a, _)| b | ecran::boutons_etape(&a.to_string()));
+                ecran::ligne_du_jeu(&journal, ligne.debut + latence, ligne.direction, boutons)
+            })
+            .collect();
+        for (ligne, &i) in lignes.iter_mut().zip(&dans_le_jeu) {
+            if !ligne.exact
+                && let Some(frames) = i.and_then(|i| ecran::duree_ligne(&journal, i))
             {
                 ligne.frames = frames;
                 ligne.exact = true;
             }
+        }
+        // Une ligne à nous que le jeu n'a pas vue : le jeu passe directement de la ligne
+        // d'avant à celle d'après. Typiquement une frame de neutre entre ↓ et → sur un
+        // leverless : on a lâché ↓ et appuyé → dans deux de nos frames, mais le jeu a lu
+        // les deux changements dans la même frame. On l'enlève, comme dans le jeu.
+        let absentes: Vec<usize> = (1..lignes.len().saturating_sub(1))
+            .filter(|&k| {
+                let ligne = &lignes[k];
+                dans_le_jeu[k].is_none()
+                    && ligne.coups.is_empty()
+                    && !ligne.boutons.iter().any(|&(_, nouveau)| nouveau)
+                    && matches!(
+                        (dans_le_jeu[k + 1], dans_le_jeu[k - 1]),
+                        (Some(avant), Some(apres)) if ecran::lignes_consecutives(&journal, avant, apres)
+                    )
+            })
+            .collect();
+        for k in absentes.into_iter().rev() {
+            lignes.remove(k);
         }
     }
 
