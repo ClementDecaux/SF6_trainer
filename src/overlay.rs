@@ -101,6 +101,71 @@ pub struct Overlay {
     zones: Vec<egui::Rect>,
     /// Nombre de lignes déjà vues : une nouvelle ligne ramène l'historique en haut.
     lignes_vues: u64,
+    /// Mode déplacement : la fenêtre en train d'être glissée ou redimensionnée.
+    glisse: Option<Glisse>,
+}
+
+/// Un glisser en cours : d'où il est parti, et quels bords il tire (aucun = déplacer).
+struct Glisse {
+    curseur: egui::Pos2,
+    fenetre: egui::Rect,
+    bords: Bords,
+}
+
+/// Les bords de la fenêtre sous la souris (pour la redimensionner).
+#[derive(Clone, Copy, Default, PartialEq)]
+struct Bords {
+    gauche: bool,
+    droite: bool,
+    haut: bool,
+    bas: bool,
+}
+
+impl Bords {
+    /// Largeur (en points) de la bande, le long des bords, qui redimensionne.
+    const BANDE: f32 = 12.0;
+
+    fn sous(souris: egui::Pos2, fenetre: egui::Rect) -> Bords {
+        Bords {
+            gauche: souris.x < fenetre.min.x + Self::BANDE,
+            droite: souris.x > fenetre.max.x - Self::BANDE,
+            haut: souris.y < fenetre.min.y + Self::BANDE,
+            bas: souris.y > fenetre.max.y - Self::BANDE,
+        }
+    }
+
+    fn curseur(self) -> egui::CursorIcon {
+        use egui::CursorIcon as C;
+        match (self.gauche, self.droite, self.haut, self.bas) {
+            (true, _, true, _) | (_, true, _, true) => C::ResizeNwSe,
+            (true, _, _, true) | (_, true, true, _) => C::ResizeNeSw,
+            (true, _, _, _) | (_, true, _, _) => C::ResizeHorizontal,
+            (_, _, true, _) | (_, _, _, true) => C::ResizeVertical,
+            _ => C::Grab,
+        }
+    }
+
+    /// La fenêtre de départ, avec les bords tirés de `delta` (ou déplacée si aucun bord).
+    fn appliquer(self, depart: egui::Rect, delta: egui::Vec2) -> egui::Rect {
+        const MIN: egui::Vec2 = egui::vec2(220.0, 200.0);
+        if self == Bords::default() {
+            return depart.translate(delta);
+        }
+        let mut r = depart;
+        if self.gauche {
+            r.min.x = (depart.min.x + delta.x).min(depart.max.x - MIN.x);
+        }
+        if self.droite {
+            r.max.x = (depart.max.x + delta.x).max(depart.min.x + MIN.x);
+        }
+        if self.haut {
+            r.min.y = (depart.min.y + delta.y).min(depart.max.y - MIN.y);
+        }
+        if self.bas {
+            r.max.y = (depart.max.y + delta.y).max(depart.min.y + MIN.y);
+        }
+        r
+    }
 }
 
 impl Overlay {
@@ -115,6 +180,7 @@ impl Overlay {
             survol: false,
             zones: Vec::new(),
             lignes_vues: 0,
+            glisse: None,
         }
     }
 
@@ -188,7 +254,7 @@ impl eframe::App for Overlay {
                 ui.set_width(ui.available_width());
                 if self.deplacement {
                     ui.label(
-                        RichText::new("Glisse-moi à la souris, F8 pour finir")
+                        RichText::new("Glisse-moi, tire un bord pour la taille, F8 pour finir")
                             .color(JAUNE)
                             .size(16.0)
                             .strong(),
@@ -228,16 +294,14 @@ impl eframe::App for Overlay {
                 self.zones.extend(ecran(sortie.inner_rect));
             });
 
-        // Mode déplacement : cliquer-glisser n'importe où déplace la fenêtre.
+        // Mode déplacement : cliquer-glisser au milieu déplace la fenêtre, sur un bord
+        // ou un coin il la redimensionne. On bouge la fenêtre nous-mêmes en suivant la
+        // souris à l'écran : le glisser de Windows ne marche pas sur une fenêtre qui ne
+        // prend pas le focus (pour le laisser à SF6).
         if self.deplacement {
-            let zone = ui.interact(
-                ui.max_rect(),
-                egui::Id::unique("deplacer"),
-                egui::Sense::click_and_drag(),
-            );
-            if zone.drag_started() {
-                ui.ctx().send_viewport_cmd(egui::ViewportCommand::StartDrag);
-            }
+            glisser(ui, &mut self.glisse);
+        } else {
+            self.glisse = None;
         }
 
         // Redessiner un peu plus tard pour faire disparaître le message à temps.
@@ -245,6 +309,76 @@ impl eframe::App for Overlay {
             ui.ctx().request_repaint_after(Duration::from_millis(100));
         }
     }
+}
+
+/// Mode déplacement : suit la souris pour déplacer ou redimensionner la fenêtre.
+fn glisser(ui: &mut egui::Ui, glisse: &mut Option<Glisse>) {
+    let ctx = ui.ctx().clone();
+    let zone = ui.interact(
+        ui.max_rect(),
+        egui::Id::unique("deplacer"),
+        egui::Sense::click_and_drag(),
+    );
+    let Some(fenetre) = ctx.input(|i| i.viewport().outer_rect) else {
+        return;
+    };
+    let bords = match glisse {
+        Some(g) => g.bords,
+        None => zone
+            .hover_pos()
+            .map(|p| Bords::sous(p, ui.max_rect()))
+            .unwrap_or_default(),
+    };
+    if zone.hovered() || glisse.is_some() {
+        ctx.set_cursor_icon(bords.curseur());
+    }
+    if zone.drag_started()
+        && let Some(curseur) = curseur_ecran(&ctx)
+    {
+        *glisse = Some(Glisse {
+            curseur,
+            fenetre,
+            bords,
+        });
+    }
+    if let Some(g) = glisse {
+        if zone.dragged()
+            && let Some(curseur) = curseur_ecran(&ctx)
+        {
+            let r = g.bords.appliquer(g.fenetre, curseur - g.curseur);
+            if r.min != fenetre.min {
+                ctx.send_viewport_cmd(egui::ViewportCommand::OuterPosition(r.min));
+            }
+            if r.size() != fenetre.size() {
+                ctx.send_viewport_cmd(egui::ViewportCommand::InnerSize(r.size()));
+            }
+            ctx.request_repaint();
+        } else {
+            *glisse = None;
+        }
+    }
+}
+
+/// La position de la souris sur l'écran (en points), même hors de la fenêtre.
+#[cfg(windows)]
+fn curseur_ecran(ctx: &egui::Context) -> Option<egui::Pos2> {
+    use windows_sys::Win32::Foundation::POINT;
+    use windows_sys::Win32::UI::WindowsAndMessaging::GetCursorPos;
+    let mut p = POINT { x: 0, y: 0 };
+    if unsafe { GetCursorPos(&mut p) } == 0 {
+        return None;
+    }
+    let echelle = ctx.pixels_per_point();
+    Some(egui::pos2(p.x as f32 / echelle, p.y as f32 / echelle))
+}
+
+/// Ailleurs : la souris dans la fenêtre, ramenée à l'écran.
+#[cfg(not(windows))]
+fn curseur_ecran(ctx: &egui::Context) -> Option<egui::Pos2> {
+    ctx.input(|i| {
+        let souris = i.pointer.latest_pos()?;
+        Some(souris + i.viewport().outer_rect?.min.to_vec2())
+    })
 }
 
 /// Les boutons cliquables : son, vidéos, déplacement, photo. Renvoie leur zone.
@@ -565,22 +699,29 @@ fn enregistrer_position(ctx: &egui::Context) {
     let Ok(texte) = std::fs::read_to_string(FICHIER) else {
         return;
     };
-    let nouveau = remplacer_position(&texte, rect.min.x.round(), rect.min.y.round());
+    let nouveau = remplacer_position(&texte, rect);
     if let Err(e) = std::fs::write(FICHIER, nouveau) {
         eprintln!("impossible d'écrire {FICHIER} : {e}");
     }
 }
 
-fn remplacer_position(texte: &str, x: f32, y: f32) -> String {
+/// Remplace la position et la taille (`x`, `y`, `largeur`, `hauteur`) dans `overlay.toml`.
+fn remplacer_position(texte: &str, rect: egui::Rect) -> String {
+    let valeurs = [
+        ("x", rect.min.x),
+        ("y", rect.min.y),
+        ("largeur", rect.width()),
+        ("hauteur", rect.height()),
+    ];
     let mut sortie = String::new();
     for ligne in texte.lines() {
-        let debut = ligne.trim_start();
-        if debut.starts_with("x =") || debut.starts_with("x=") {
-            sortie.push_str(&format!("x = {x}"));
-        } else if debut.starts_with("y =") || debut.starts_with("y=") {
-            sortie.push_str(&format!("y = {y}"));
-        } else {
-            sortie.push_str(ligne);
+        let cle = ligne.split('=').next().unwrap_or("").trim();
+        match valeurs
+            .iter()
+            .find(|(nom, _)| *nom == cle && ligne.contains('='))
+        {
+            Some((nom, valeur)) => sortie.push_str(&format!("{nom} = {}", valeur.round())),
+            None => sortie.push_str(ligne),
         }
         sortie.push('\n');
     }
@@ -656,11 +797,30 @@ mod tests {
 
     #[test]
     fn la_position_est_remplacee_sans_toucher_au_reste() {
-        let nouveau = remplacer_position(CONFIG_PAR_DEFAUT, 640.0, 75.0);
+        let rect = egui::Rect::from_min_size(egui::pos2(640.0, 75.0), egui::vec2(420.0, 650.0));
+        let nouveau = remplacer_position(CONFIG_PAR_DEFAUT, rect);
         let c: Config = toml::from_str(&nouveau).unwrap();
         assert_eq!((c.x, c.y), (640.0, 75.0));
-        assert_eq!(c.largeur, 380.0);
+        assert_eq!((c.largeur, c.hauteur), (420.0, 650.0));
         assert!(nouveau.contains("# Position et taille"));
+    }
+
+    #[test]
+    fn tirer_un_bord_redimensionne() {
+        let depart = egui::Rect::from_min_size(egui::pos2(100.0, 100.0), egui::vec2(380.0, 720.0));
+        let gauche = Bords {
+            gauche: true,
+            ..Bords::default()
+        };
+        let r = gauche.appliquer(depart, egui::vec2(-50.0, 30.0));
+        assert_eq!((r.min.x, r.max.x, r.min.y), (50.0, 480.0, 100.0));
+        // Taille minimale respectée.
+        let r = gauche.appliquer(depart, egui::vec2(500.0, 0.0));
+        assert_eq!(r.width(), 220.0);
+        // Aucun bord : la fenêtre se déplace.
+        let r = Bords::default().appliquer(depart, egui::vec2(10.0, 20.0));
+        assert_eq!(r.size(), depart.size());
+        assert_eq!(r.min, egui::pos2(110.0, 120.0));
     }
 
     #[test]
