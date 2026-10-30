@@ -86,6 +86,8 @@ pub struct Interface {
     jeu_actif: bool,
     /// Le dossier des photos, tel que tapé dans les réglages.
     dossier_photos: String,
+    /// Clips rangés par la capture la dernière fois qu'on a relu le dossier.
+    clips_vus: u64,
     /// Hits et dégâts tapés pour compléter un combo (nom du combo, hits, dégâts).
     saisie: (String, u32, u32),
 }
@@ -119,6 +121,7 @@ impl Interface {
             overlay_montre: true,
             jeu_actif: false,
             dossier_photos: crate::capture::dossier_photos(),
+            clips_vus: 0,
             saisie: (String::new(), 0, 0),
         }
     }
@@ -219,6 +222,16 @@ impl eframe::App for Interface {
         if visible && montrer != self.overlay_montre {
             ctx.send_viewport_cmd_to(overlay::id(), egui::ViewportCommand::Visible(montrer));
             self.overlay_montre = montrer;
+        }
+        // Un nouveau clip vient d'être filmé : on relit le dossier et on rouvre la vidéo
+        // (le nouveau clip remplace l'ancien du même combo).
+        let ranges = crate::capture::CLIPS_RANGES.load(std::sync::atomic::Ordering::Relaxed);
+        if ranges != self.clips_vus {
+            self.clips_vus = ranges;
+            self.clips_lus = false;
+            if !self.plein_ecran {
+                self.lecteur = None;
+            }
         }
         if !self.clips_lus {
             self.lire_clips();
@@ -776,6 +789,7 @@ impl Interface {
             ui.heading(format!("Vidéos ({})", siens.len()));
             if ui.small_button("Actualiser").clicked() {
                 self.lire_clips();
+                self.lecteur = None;
             }
             if siens.len() > 1 {
                 let ouvert = self.lecteur.as_ref().map(|l| l.video.chemin.clone());

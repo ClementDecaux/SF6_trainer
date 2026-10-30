@@ -89,6 +89,9 @@ fn vrai() -> bool {
     true
 }
 
+/// Nombre de clips rangés depuis le lancement : l'interface relit ses vidéos quand il change.
+pub static CLIPS_RANGES: std::sync::atomic::AtomicU64 = std::sync::atomic::AtomicU64::new(0);
+
 fn photos_par_defaut() -> String {
     "photos".to_string()
 }
@@ -772,6 +775,7 @@ mod capture_windows {
                 eprintln!("Vidéo : impossible d'y ranger les infos du clip ({e}).");
             }
             println!("      🎬 clip enregistré : {}", video.display());
+            super::CLIPS_RANGES.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
         }
 
         fn creer_encodeur(&mut self, largeur: u32, hauteur: u32) -> Result<Pret, Erreur> {
