@@ -106,6 +106,41 @@ impl<'a> Vue<'a> {
         }
     }
 
+    /// La partie de l'image du jeu qui est lue (historique d'inputs et panneau des dégâts),
+    /// en pixels de l'image entière : (x0, y0, x1, y1). Copier seulement cette partie depuis
+    /// la carte graphique coûte bien moins cher que l'image entière.
+    pub fn zone_lue(largeur: u32, hauteur: u32) -> (u32, u32, u32, u32) {
+        let echelle = hauteur as f32 / 1080.0;
+        let ox = ((largeur as f32 - 1920.0 * echelle) / 2.0).max(0.0);
+        let px = |v: f32| v.round().max(0.0) as u32;
+        (
+            px(ox),
+            px(150.0 * echelle).min(hauteur),
+            px(ox + 820.0 * echelle).min(largeur),
+            px(920.0 * echelle).min(hauteur),
+        )
+    }
+
+    /// Le morceau `zone_lue` d'une image du jeu de `largeur` × `hauteur` pixels.
+    pub fn zone(
+        pixels: &'a [u8],
+        (largeur_jeu, hauteur_jeu): (u32, u32),
+        (largeur, hauteur): (usize, usize),
+        pas: usize,
+    ) -> Vue<'a> {
+        let entiere = Vue::jeu(pixels, largeur_jeu as usize, hauteur_jeu as usize, pas);
+        let (x0, y0, _, _) = Vue::zone_lue(largeur_jeu, hauteur_jeu);
+        Vue {
+            pixels,
+            largeur,
+            hauteur,
+            pas,
+            echelle: entiere.echelle,
+            ox: entiere.ox - x0 as f32,
+            oy: -(y0 as f32),
+        }
+    }
+
     #[cfg(test)]
     /// Un morceau d'image en 1080p dont le coin haut gauche est en (`x`, `y`) (pour les tests).
     pub fn morceau(pixels: &'a [u8], largeur: usize, hauteur: usize, x: i32, y: i32) -> Vue<'a> {
@@ -958,6 +993,34 @@ mod tests {
         (0..19)
             .map(|k| lire_ligne(&vue, k).map(|l| texte(&l)))
             .collect()
+    }
+
+    #[test]
+    fn la_zone_lue_donne_la_meme_lecture_que_l_image_entiere() {
+        // La photo 4 replacée dans une image 1080p, puis lue sur la seule zone copiée.
+        let (morceau, l, h) = photo(4);
+        let (lj, hj) = (1920usize, 1080usize);
+        let mut entiere = vec![0u8; lj * hj * 4];
+        for y in 0..h {
+            let cible = ((200 + y) * lj + 40) * 4;
+            entiere[cible..cible + l * 4].copy_from_slice(&morceau[y * l * 4..(y + 1) * l * 4]);
+        }
+        let (x0, y0, x1, y1) = Vue::zone_lue(lj as u32, hj as u32);
+        let (lz, hz) = ((x1 - x0) as usize, (y1 - y0) as usize);
+        let mut zone = Vec::with_capacity(lz * hz * 4);
+        for y in y0 as usize..y1 as usize {
+            let debut = (y * lj + x0 as usize) * 4;
+            zone.extend_from_slice(&entiere[debut..debut + lz * 4]);
+        }
+        let vue_entiere = Vue::jeu(&entiere, lj, hj, lj * 4);
+        let vue_zone = Vue::zone(&zone, (lj as u32, hj as u32), (lz, hz), lz * 4);
+        let lire = |v: &Vue| -> Vec<_> {
+            (0..19)
+                .map(|k| lire_ligne(v, k).map(|l| texte(&l)))
+                .collect()
+        };
+        assert_eq!(lire(&vue_zone), lire(&vue_entiere));
+        assert_eq!(lire(&vue_zone), lire_photo(4));
     }
 
     #[test]

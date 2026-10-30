@@ -666,6 +666,9 @@ mod capture_windows {
             son: Option<Option<u64>>,
             /// Combo réussi : quand arrêter, et ce qu'on écrira dans le `.json`.
             fin: Option<(Instant, Box<InfosClip>)>,
+            /// Taille des images de la vidéo.
+            largeur: u32,
+            hauteur: u32,
             /// Pour trouver d'où viennent les saccades : heure de la dernière image, images
             /// qui manquent (trous de plus d'une image), images traitées trop lentement.
             derniere_image: i64,
@@ -834,19 +837,35 @@ mod capture_windows {
             }
         }
 
-        /// Lit l'historique d'inputs du jeu sur l'image, et la copie dans le tampon
-        /// (pour filmer un peu avant la 1re étape).
-        fn lire_image(&mut self, frame: &mut Frame, temps: i64) -> Result<(), Erreur> {
+        /// Lit l'historique d'inputs du jeu sur l'image. Si l'image entière est utile (tampon
+        /// des images d'avant la 1re étape, ou vidéo en cours), elle est copiée en mémoire et
+        /// renvoyée ; sinon, seule la partie lue est copiée depuis la carte graphique.
+        fn lire_image(&mut self, frame: &mut Frame, temps: i64) -> Result<Option<Image>, Erreur> {
             let (largeur, hauteur) = (frame.width(), frame.height());
+            let garder = self.tampon.actif() || !matches!(self.etat, Etat::Attente);
+            if !garder {
+                if !self.config.historique {
+                    return Ok(None);
+                }
+                let (x0, y0, x1, y1) = crate::ecran::Vue::zone_lue(largeur, hauteur);
+                let mut morceau = frame.buffer_crop(x0, y0, x1, y1)?;
+                let pas = morceau.row_pitch() as usize;
+                let brut = morceau.as_raw_buffer();
+                let vue = crate::ecran::Vue::zone(
+                    brut,
+                    (largeur, hauteur),
+                    ((x1 - x0) as usize, (y1 - y0) as usize),
+                    pas,
+                );
+                crate::ecran::lire_image(&mut self.lecteur, &vue, temps);
+                return Ok(None);
+            }
             let mut image = frame.buffer()?;
             let pas = image.row_pitch() as usize;
             let brut = image.as_raw_buffer();
             if self.config.historique {
                 let vue = crate::ecran::Vue::jeu(brut, largeur as usize, hauteur as usize, pas);
                 crate::ecran::lire_image(&mut self.lecteur, &vue, temps);
-            }
-            if !self.tampon.actif() {
-                return Ok(());
             }
             let mut pixels = self.tampon.place();
             retourner_lignes(
@@ -856,17 +875,16 @@ mod capture_windows {
                 hauteur as usize,
                 &mut pixels,
             );
-            self.tampon.ajouter(Image {
+            Ok(Some(Image {
                 temps,
                 largeur,
                 hauteur,
                 pixels,
-            });
-            Ok(())
+            }))
         }
 
         /// Démarre la vidéo : d'abord les images du tampon, puis l'image actuelle.
-        fn commencer(&mut self, frame: &Frame, temps: i64) {
+        fn commencer(&mut self, frame: &Frame, temps: i64, actuelle: Option<Image>) {
             let (largeur, hauteur) = (frame.width(), frame.height());
             let Pret {
                 mut encodeur,
@@ -902,9 +920,18 @@ mod capture_windows {
                 if let Some(p) = precedente {
                     manquees += images_manquees(temps - p);
                 }
-                if let Err(e) = encodeur.send_frame(frame) {
+                let envoi = match &actuelle {
+                    Some(image) if image.largeur == largeur && image.hauteur == hauteur => {
+                        encodeur.send_frame_buffer(&image.pixels, temps)
+                    }
+                    _ => encodeur.send_frame(frame),
+                };
+                if let Err(e) = envoi {
                     eprintln!("Vidéo : image perdue ({e}).");
                 }
+            }
+            if let Some(image) = actuelle {
+                self.tampon.recycler(image.pixels);
             }
             let premier = premier.unwrap_or(temps);
             // Le son commence à l'heure de la 1re image : il est calé dessus.
@@ -917,6 +944,8 @@ mod capture_windows {
                 premier,
                 son,
                 fin: None,
+                largeur,
+                hauteur,
                 derniere_image: temps,
                 manquees,
                 lentes: 0,
@@ -1015,10 +1044,18 @@ mod capture_windows {
             let temps = frame.timestamp()?.Duration;
             // L'heure de chaque image sert aussi à caler nos frames sur celles du jeu.
             crate::horloge::image_du_jeu(temps);
-            if (self.tampon.actif() || self.config.historique)
-                && let Err(e) = self.lire_image(frame, temps)
+            let mut image = match self.lire_image(frame, temps) {
+                Ok(image) => image,
+                Err(e) => {
+                    eprintln!("Vidéo : image non lue ({e}).");
+                    None
+                }
+            };
+            // Pas de vidéo en cours : l'image va dans le tampon des dernières images.
+            if matches!(self.etat, Etat::Attente)
+                && let Some(image) = image.take()
             {
-                eprintln!("Vidéo : image non lue ({e}).");
+                self.tampon.ajouter(image);
             }
 
             // 3. Selon l'état : préparer, commencer, ou continuer à filmer.
@@ -1040,20 +1077,33 @@ mod capture_windows {
                         }
                     }
                 }
-                Etat::Demande => self.commencer(frame, temps),
+                Etat::Demande => self.commencer(frame, temps, image.take()),
                 Etat::Filme {
                     encodeur,
                     debut,
                     fin,
                     premier,
                     son,
+                    largeur,
+                    hauteur,
                     derniere_image,
                     manquees,
                     ..
                 } => {
                     *manquees += images_manquees(temps - *derniere_image);
                     *derniere_image = temps;
-                    if let Err(e) = encodeur.send_frame(frame) {
+                    // L'image copiée en mémoire, pas la texture de la capture : Windows réutilise
+                    // cette texture pour l'image suivante avant que l'encodeur l'ait lue, et la
+                    // vidéo montrait alors des images répétées (saccades).
+                    let envoi = match &image {
+                        Some(i) if i.largeur == *largeur && i.hauteur == *hauteur => {
+                            encodeur.send_frame_buffer(&i.pixels, temps)
+                        }
+                        // La fenêtre a changé de taille : image sautée.
+                        Some(_) => Ok(()),
+                        None => encodeur.send_frame(frame),
+                    };
+                    if let Err(e) = envoi {
                         eprintln!("Vidéo : image perdue ({e}).");
                     }
                     envoyer_son(encodeur, son, *premier, temps);
@@ -1063,6 +1113,9 @@ mod capture_windows {
                         None => debut.elapsed() > Duration::from_secs(self.config.duree_max_s),
                     };
                 }
+            }
+            if let Some(image) = image {
+                self.tampon.recycler(image.pixels);
             }
             if let Etat::Filme { lentes, .. } = &mut self.etat
                 && arrivee.elapsed() > Duration::from_millis(14)
