@@ -460,7 +460,8 @@ pub fn lire_degats(vue: &Vue) -> Option<LectureDegats> {
     for dy in 0..DEGATS_H {
         for dx in 0..largeur {
             let p = vue.rgb(DEGATS_X0 + dx as i32, DEGATS_Y + dy);
-            if p.iter().all(|&c| c > 180) {
+            // Le texte est à ~240 ; le décor vu à travers le bandeau ne dépasse pas ~205.
+            if p.iter().all(|&c| c > 225) {
                 blancs[dy as usize * largeur + dx] = true;
                 colonnes[dx] = true;
             }
@@ -484,10 +485,24 @@ pub fn lire_degats(vue: &Vue) -> Option<LectureDegats> {
     if !(5..=14).contains(&signes.len()) || !(770..=790).contains(&fin_texte) {
         return None;
     }
-    // Le premier nombre : les signes jusqu'au premier grand espace (avant « ( »).
-    let mut fin = 1;
-    while fin < signes.len() && signes[fin].0 - signes[fin - 1].1 < 6 {
-        fin += 1;
+    // Chaque signe doit avoir la forme d'un caractère : 3 à 11 px de large, du haut
+    // (lignes 0-3) au bas (lignes 15-19) du texte. Une tache du décor est refusée.
+    // Les parenthèses dépassent : de la ligne 0 à la ligne 18 (les chiffres : 1 à 17).
+    let mut parentheses = Vec::new();
+    for &(x0, x1) in &signes {
+        let lignes: Vec<usize> = (0..DEGATS_H as usize)
+            .filter(|&dy| (x0..x1).any(|x| blancs[dy * largeur + x]))
+            .collect();
+        let (haut, bas) = (*lignes.first()?, *lignes.last()?);
+        if !(3..=11).contains(&(x1 - x0)) || haut > 3 || bas < 15 {
+            return None;
+        }
+        parentheses.push(x1 - x0 <= 5 && haut == 0 && bas >= 18);
+    }
+    // Le premier nombre : les signes avant « ( », suivi d'un nombre et de « ) ».
+    let fin = parentheses.iter().position(|&p| p)?;
+    if fin == 0 || !parentheses[parentheses.len() - 1] {
+        return None;
     }
     let (x0, x1) = (signes[0].0, signes[fin - 1].1);
     let mut empreinte: u64 = 0xcbf2_9ce4_8422_2325;
