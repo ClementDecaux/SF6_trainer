@@ -65,6 +65,8 @@ pub struct Interface {
     overlay: Arc<Mutex<Overlay>>,
     fenetre_overlay: egui::ViewportBuilder,
     overlay_ouvert: bool,
+    /// Quand la fenêtre de l'overlay a été (ré)ouverte.
+    overlay_ouvert_a: std::time::Instant,
     combos: Vec<ComboFichier>,
     onglet: Onglet,
     recherche: String,
@@ -105,6 +107,7 @@ impl Interface {
             overlay: Arc::new(Mutex::new(overlay)),
             fenetre_overlay: overlay::fenetre(config_overlay),
             overlay_ouvert: false,
+            overlay_ouvert_a: std::time::Instant::now(),
             combos,
             onglet: Onglet::Combos,
             recherche: String::new(),
@@ -124,7 +127,27 @@ impl Interface {
     }
 
     /// Affiche (ou cache) la fenêtre de l'overlay.
-    fn fenetre_overlay(&mut self, ctx: &egui::Context, visible: bool) {
+    fn fenetre_overlay(&mut self, ctx: &egui::Context, mut visible: bool) {
+        // Parfois la fenêtre de l'overlay n'est plus jamais redessinée (figée : pas
+        // cliquable, F8 et F9 sans effet visible). Fermer puis rouvrir la fenêtre la
+        // répare : on le fait tout seul quand elle n'a pas été dessinée depuis 1 s.
+        if visible && self.overlay_ouvert {
+            // Invisible (hors du jeu) : pas besoin, et la recréer pourrait voler le focus.
+            let fige = self.overlay.lock().is_ok_and(|o| {
+                if o.invisible() {
+                    return false;
+                }
+                let depuis = o.dernier_dessin.unwrap_or(self.overlay_ouvert_a);
+                depuis.max(self.overlay_ouvert_a).elapsed() > std::time::Duration::from_secs(1)
+            });
+            if fige {
+                eprintln!("Overlay figé : fenêtre recréée.");
+                visible = false;
+            }
+        }
+        if visible && !self.overlay_ouvert {
+            self.overlay_ouvert_a = std::time::Instant::now();
+        }
         if visible {
             if !self.overlay_ouvert
                 && let Ok(mut o) = self.overlay.lock()

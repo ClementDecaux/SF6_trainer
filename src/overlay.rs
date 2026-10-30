@@ -118,6 +118,8 @@ pub struct Overlay {
     /// Dans combien d'images régler la fenêtre côté Windows (0 = rien à faire).
     /// Au démarrage, et juste après chaque changement du mode déplacement.
     regler_dans: u8,
+    /// Dernière fois que l'overlay a été dessiné (il l'est au moins 10 fois par seconde).
+    pub dernier_dessin: Option<std::time::Instant>,
     /// Mode déplacement actuellement appliqué à la fenêtre.
     deplacement: bool,
     /// La souris est au-dessus de l'overlay : la fenêtre la garde (clics, molette).
@@ -253,6 +255,7 @@ impl Overlay {
             deplacement: false,
             survol: false,
             cache: false,
+            dernier_dessin: None,
             historique_ouvert: config.historique_ouvert,
             hauteur_ouverte: config.hauteur,
             attendre_hauteur: None,
@@ -267,12 +270,19 @@ impl Overlay {
         self.cache || (!self.deplacement && !self.survol && self.glisse.is_none())
     }
 
+    /// L'overlay est rendu invisible (pas dans SF6, ou pas en mode entraînement).
+    pub fn invisible(&self) -> bool {
+        self.cache
+    }
+
     /// Montre ou rend invisible l'overlay. Vrai si ça change (il faut alors le redessiner).
     pub fn montrer(&mut self, oui: bool) -> bool {
         if self.cache != oui {
             return false;
         }
         self.cache = !oui;
+        // Il a une seconde pour se redessiner avant d'être jugé figé.
+        self.dernier_dessin = Some(std::time::Instant::now());
         // Réglé tout de suite, sans attendre que l'overlay soit redessiné : invisible, il
         // ne l'était plus, et il ne réapparaissait jamais.
         let opacite = if self.cache { 0 } else { self.opacite_fenetre };
@@ -377,6 +387,7 @@ impl Overlay {
 
     /// Dessine l'overlay dans sa fenêtre.
     pub fn dessiner(&mut self, ui: &mut egui::Ui) {
+        self.dernier_dessin = Some(std::time::Instant::now());
         // On verrouille le partage le temps de dessiner (quelques microsecondes).
         let mut partage = match self.partage.lock() {
             Ok(p) => p,
