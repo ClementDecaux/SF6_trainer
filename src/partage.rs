@@ -68,6 +68,8 @@ pub struct Partage {
     pub hits_direct: u32,
     /// Nombre de lignes ajoutées à l'historique depuis le lancement.
     pub lignes_total: u64,
+    /// Bouton photo cliqué sur l'overlay (le thread de la manette prend la photo).
+    pub photo_demandee: bool,
 }
 
 impl Partage {
@@ -90,6 +92,7 @@ impl Partage {
             hits: None,
             hits_direct: 0,
             lignes_total: 0,
+            photo_demandee: false,
         }
     }
 

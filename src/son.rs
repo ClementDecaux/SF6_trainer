@@ -1,4 +1,5 @@
-//! Un petit « ding » quand un combo est réussi.
+//! Un petit « ding » quand un combo est réussi, et un « tic » à chaque étape validée
+//! (de plus en plus aigu au fil du combo).
 //!
 //! Le son est fabriqué par le programme (deux notes, comme un carillon) : pas de fichier
 //! audio à fournir. Il est joué par Windows (`PlaySoundW`), sans bloquer la lecture de la manette.
@@ -18,6 +19,32 @@ static ACTIF: AtomicBool = AtomicBool::new(true);
 
 pub fn activer(oui: bool) {
     ACTIF.store(oui, Ordering::Relaxed);
+}
+
+pub fn actif() -> bool {
+    ACTIF.load(Ordering::Relaxed)
+}
+
+/// Nombre d'étapes qui ont chacune leur note (au-delà, la dernière note est reprise).
+const NOTES_ETAPES: usize = 16;
+
+/// Joue le « tic » de l'étape `numero` (1 = première) : un ton plus haut à chaque étape.
+pub fn etape(numero: usize) {
+    if !actif() {
+        return;
+    }
+    static WAVS: OnceLock<Vec<Vec<u8>>> = OnceLock::new();
+    let wavs = WAVS.get_or_init(|| {
+        (0..NOTES_ETAPES)
+            .map(|i| {
+                // La (440 Hz) puis un ton (2 demi-tons) de plus par étape.
+                let frequence = 440.0 * 2f32.powf(2.0 * i as f32 / 12.0);
+                fabriquer_wav(&[(frequence, 0.07)])
+            })
+            .collect()
+    });
+    let i = numero.saturating_sub(1).min(NOTES_ETAPES - 1);
+    jouer(&wavs[i]);
 }
 
 /// Joue le son du combo réussi (Windows seulement).

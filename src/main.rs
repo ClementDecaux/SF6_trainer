@@ -79,6 +79,8 @@ fn lancer() -> Result<(), String> {
             // Le thread de la manette reçoit une copie du `Context` pour demander
             // à l'overlay de se redessiner quand quelque chose change.
             let ctx = cc.egui_ctx.clone();
+            // Pour afficher les icônes SVG des boutons.
+            egui_extras::install_image_loaders(&ctx);
             let partage_manette = Arc::clone(&partage);
             std::thread::spawn(move || {
                 entrees::boucle(controles, trial, timings, capture, partage_manette, ctx)

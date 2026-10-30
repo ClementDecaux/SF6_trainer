@@ -325,6 +325,21 @@ pub fn boucle(
         if f10.appuyee() {
             capture.photo();
         }
+        // Les boutons cliquables de l'overlay.
+        if let Ok(mut p) = partage.try_lock() {
+            if p.enregistrement != capture.enregistre {
+                capture.enregistre = p.enregistrement;
+                let texte = if capture.enregistre {
+                    "      ● vidéos activées"
+                } else {
+                    "      ○ vidéos coupées"
+                };
+                println!("{}", texte.cyan());
+            }
+            if std::mem::take(&mut p.photo_demandee) {
+                capture.photo();
+            }
+        }
         if select_appuye {
             select_appuye = false;
             confirmer(&mut trial, &mut timings, &mut a_confirmer, frame, &partage);
@@ -439,6 +454,7 @@ fn resultat_trial(
     }
     match resultat {
         Resultat::Avance => {
+            crate::son::etape(trial.index);
             // Nouvel essai : on efface le raté d'avant.
             if trial.index == 1 {
                 p.message = None;
@@ -446,6 +462,7 @@ fn resultat_trial(
             println!("{}", affichage::trial(trial));
         }
         Resultat::Reussi => {
+            crate::son::etape(trial.etapes.len());
             return Some(Fin {
                 ecarts: trial.ecarts.clone(),
                 erreurs: trial.erreurs_timing.clone(),

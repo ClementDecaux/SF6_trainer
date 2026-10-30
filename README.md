@@ -114,3 +114,5 @@ Notation reconnue : directions `b f d u db df cr. st.` ou chiffres numpad, mouve
 - Tests : les blocs `#[cfg(test)]` en bas de chaque fichier
 - Threads et `Arc<Mutex<_>>` : `main.rs`, `partage.rs`
 - Canal entre threads (`mpsc`) et code pour Windows seulement (`#[cfg(windows)]`) : `capture.rs`
+
+Icônes : Material Design Icons (Pictogrammers, licence Apache 2.0), via Iconify.

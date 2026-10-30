@@ -96,8 +96,9 @@ pub struct Overlay {
     deplacement: bool,
     /// La souris est au-dessus de l'historique : la fenêtre la garde (pour la molette).
     survol: bool,
-    /// Où est l'historique à l'écran (en points), pour savoir si la souris le survole.
-    zone_historique: Option<egui::Rect>,
+    /// Où sont l'historique et les boutons à l'écran (en points) : quand la souris les
+    /// survole, la fenêtre la garde (molette, clics).
+    zones: Vec<egui::Rect>,
     /// Nombre de lignes déjà vues : une nouvelle ligne ramène l'historique en haut.
     lignes_vues: u64,
 }
@@ -112,7 +113,7 @@ impl Overlay {
             regler_dans: 1,
             deplacement: false,
             survol: false,
-            zone_historique: None,
+            zones: Vec::new(),
             lignes_vues: 0,
         }
     }
@@ -137,7 +138,7 @@ impl eframe::App for Overlay {
 
     fn ui(&mut self, ui: &mut egui::Ui, frame: &mut eframe::Frame) {
         // On verrouille le partage le temps de dessiner (quelques microsecondes).
-        let partage = match self.partage.lock() {
+        let mut partage = match self.partage.lock() {
             Ok(p) => p,
             Err(_) => return,
         };
@@ -151,7 +152,7 @@ impl eframe::App for Overlay {
                 enregistrer_position(ui.ctx());
             }
         }
-        self.survol = souris_sur(ui.ctx(), self.zone_historique);
+        self.survol = self.zones.iter().any(|&z| souris_sur(ui.ctx(), Some(z)));
         if self.traversant() != traversant_avant {
             ui.ctx()
                 .send_viewport_cmd(egui::ViewportCommand::MousePassthrough(self.traversant()));
@@ -193,6 +194,11 @@ impl eframe::App for Overlay {
                             .strong(),
                     );
                 }
+                let fenetre = ui.ctx().input(|i| i.viewport().inner_rect);
+                let ecran = |r: egui::Rect| fenetre.map(|f| r.translate(f.min.to_vec2()));
+                self.zones.clear();
+                let barre = boutons(ui, &mut partage);
+                self.zones.extend(ecran(barre));
                 entete(ui, &partage);
                 ui.add_space(8.0);
                 etapes(ui, &partage);
@@ -219,9 +225,7 @@ impl eframe::App for Overlay {
                     )
                     .auto_shrink([false, false])
                     .show(ui, |ui| historique(ui, &partage.lignes));
-                let fenetre = ui.ctx().input(|i| i.viewport().inner_rect);
-                self.zone_historique =
-                    fenetre.map(|f| sortie.inner_rect.translate(f.min.to_vec2()));
+                self.zones.extend(ecran(sortie.inner_rect));
             });
 
         // Mode déplacement : cliquer-glisser n'importe où déplace la fenêtre.
@@ -241,6 +245,80 @@ impl eframe::App for Overlay {
             ui.ctx().request_repaint_after(Duration::from_millis(100));
         }
     }
+}
+
+/// Les boutons cliquables : son, vidéos, déplacement, photo. Renvoie leur zone.
+fn boutons(ui: &mut egui::Ui, p: &mut Partage) -> egui::Rect {
+    let icone = |octets: &'static [u8], nom: &'static str| {
+        egui::Image::from_bytes(nom, octets).fit_to_exact_size(egui::vec2(20.0, 20.0))
+    };
+    let couleur = |actif: bool| if actif { Color32::WHITE } else { GRIS };
+    ui.horizontal(|ui| {
+        let son = crate::son::actif();
+        let image = if son {
+            icone(
+                include_bytes!("../assets/icones/volume-high.svg"),
+                "bytes://son.svg",
+            )
+        } else {
+            icone(
+                include_bytes!("../assets/icones/volume-off.svg"),
+                "bytes://muet.svg",
+            )
+        };
+        if ui
+            .add(egui::Button::image(image.tint(couleur(son))).frame(false))
+            .on_hover_text("Son (étapes et combo réussi)")
+            .clicked()
+        {
+            crate::son::activer(!son);
+        }
+
+        let image = if p.enregistrement {
+            icone(
+                include_bytes!("../assets/icones/video.svg"),
+                "bytes://video.svg",
+            )
+        } else {
+            icone(
+                include_bytes!("../assets/icones/video-off.svg"),
+                "bytes://sans-video.svg",
+            )
+        };
+        if ui
+            .add(egui::Button::image(image.tint(couleur(p.enregistrement))).frame(false))
+            .on_hover_text("Garder les vidéos des combos réussis (F9)")
+            .clicked()
+        {
+            p.enregistrement = !p.enregistrement;
+        }
+
+        let image = icone(
+            include_bytes!("../assets/icones/cursor-move.svg"),
+            "bytes://deplacer.svg",
+        );
+        if ui
+            .add(egui::Button::image(image.tint(couleur(p.deplacement))).frame(false))
+            .on_hover_text("Déplacer l'overlay (F8)")
+            .clicked()
+        {
+            p.deplacement = !p.deplacement;
+        }
+
+        let image = icone(
+            include_bytes!("../assets/icones/camera.svg"),
+            "bytes://photo.svg",
+        );
+        if ui
+            .add(egui::Button::image(image.tint(Color32::WHITE)).frame(false))
+            .on_hover_text("Photo du jeu en PNG (F10)")
+            .clicked()
+        {
+            p.photo_demandee = true;
+        }
+    })
+    .response
+    .rect
 }
 
 fn entete(ui: &mut egui::Ui, p: &Partage) {
@@ -485,7 +563,7 @@ fn regler_fenetre_windows(frame: &eframe::Frame, opacite: u8, traversant: bool) 
     use windows_sys::Win32::Foundation::HWND;
     use windows_sys::Win32::UI::WindowsAndMessaging::{
         GWL_EXSTYLE, GetWindowLongPtrW, LWA_ALPHA, SetLayeredWindowAttributes, SetWindowLongPtrW,
-        WS_EX_LAYERED, WS_EX_TRANSPARENT,
+        WS_EX_LAYERED, WS_EX_NOACTIVATE, WS_EX_TRANSPARENT,
     };
 
     let Ok(handle) = frame.window_handle() else {
@@ -496,7 +574,9 @@ fn regler_fenetre_windows(frame: &eframe::Frame, opacite: u8, traversant: bool) 
     };
     let hwnd = win32.hwnd.get() as HWND;
     unsafe {
-        let mut style = GetWindowLongPtrW(hwnd, GWL_EXSTYLE) | WS_EX_LAYERED as isize;
+        // NOACTIVATE : cliquer sur l'overlay ne prend pas le focus à SF6.
+        let mut style =
+            GetWindowLongPtrW(hwnd, GWL_EXSTYLE) | (WS_EX_LAYERED | WS_EX_NOACTIVATE) as isize;
         if traversant {
             style |= WS_EX_TRANSPARENT as isize;
         } else {
