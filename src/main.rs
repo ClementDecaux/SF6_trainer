@@ -16,6 +16,7 @@ mod combo;
 mod controles;
 mod ecran;
 mod ecran_modeles;
+mod entrainement;
 mod entrees;
 mod horloge;
 mod interface;
@@ -59,6 +60,7 @@ fn lancer() -> Result<(), String> {
     let mut etat = Partage::new(&trial.nom, trial.etapes.clone());
     etat.combos = combos.iter().map(|c| c.nom.clone()).collect();
     etat.combo_index = choisi;
+    etat.entrainement = entrainement::charger();
     etat.syntaxe = config.syntaxe;
     etat.seulement_jeu = config.seulement_jeu;
     etat.liaisons = config.liaisons;

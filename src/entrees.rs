@@ -19,7 +19,7 @@ use colored::Colorize;
 use eframe::egui;
 use std::collections::{BTreeSet, HashMap, VecDeque};
 use std::sync::{Arc, Mutex};
-use std::time::Duration;
+use std::time::{Duration, Instant};
 
 /// Une direction prise moins de 10 ms après un bouton a pu être vue avec lui par le jeu.
 const MARGE_DIRECTION: i64 = 100_000;
@@ -45,7 +45,7 @@ pub fn boucle(
     for nom in manette.noms() {
         println!("Manette détectée : {nom}");
     }
-    println!("Ctrl+C pour quitter. Joueur à gauche de l'écran (b = 4 = vers la gauche).\n");
+    println!("Ctrl+C pour quitter. Côté de l'écran : réglable dans l'onglet Entraînement.\n");
     println!("{}  {}", trial.nom.bold(), affichage::trial(&trial));
     match trial.hits {
         Some(hits) => println!("Combo validé par les hits du jeu : {hits} attendus."),
@@ -117,17 +117,22 @@ pub fn boucle(
             if direction != etat.direction {
                 historique.ajouter(frame, direction);
                 // Drive Rush par dash (66) : seulement si c'est ce que le trial attend.
-                if direction == 6
+                // À droite de l'écran, le dash avant est un 44 (le trial le retourne).
+                let dash = match direction {
+                    6 if historique.dash(frame) => Some("DR"),
+                    4 if historique.dash_arriere(frame) => Some("44"),
+                    _ => None,
+                };
+                if let Some(dash) = dash
                     && trial.attendu() == "DR"
-                    && historique.dash(frame)
                     && !juge.source_jeu()
                 {
                     let fin = resultat_trial(
                         &mut trial,
                         &mut capture,
                         &mut juge,
-                        &["DR".to_string()],
-                        "66 (DR)",
+                        &[dash.to_string()],
+                        if dash == "DR" { "66 (DR)" } else { "44 (DR)" },
                         (frame, temps_etat),
                         &partage,
                     );
@@ -373,6 +378,14 @@ pub fn boucle(
             if std::mem::take(&mut p.photo_demandee) {
                 capture.photo();
             }
+            // Auto-advance : le combo suivant, une fois « COMBO RÉUSSI » affiché un moment.
+            if let Some((quand, i)) = p.avance_prevue
+                && Instant::now() >= quand
+            {
+                p.avance_prevue = None;
+                p.combo_demande = Some(i);
+            }
+            trial.cote = p.entrainement.cote;
             // Un autre combo choisi sur l'overlay.
             if let Some(i) = p.combo_demande.take()
                 && let Some(choisi) = combos.get(i)
@@ -391,6 +404,9 @@ pub fn boucle(
                         p.etape_cassee = None;
                         p.hits = None;
                         p.message = None;
+                        p.reussites_combo = 0;
+                        p.serie = 0;
+                        p.avance_prevue = None;
                         println!();
                         println!("{}  {}", trial.nom.bold(), affichage::trial(&trial));
                     }
@@ -411,6 +427,7 @@ pub fn boucle(
             capture.annuler();
             if let Ok(mut p) = partage.lock() {
                 p.index = 0;
+                p.echec();
                 p.message("Trop lent, on recommence".to_string(), false);
             }
             change = true;
@@ -797,11 +814,13 @@ fn conclure(
             p.marquer_cassee(temps);
         }
         if fin.erreurs.is_empty() {
-            p.reussites += 1;
+            p.reussite();
             p.message(format!("COMBO RÉUSSI !{hits}"), true);
         } else if lache {
+            p.echec();
             p.message(fin.erreurs.join(", "), false);
         } else {
+            p.echec();
             p.message(format!("Timing : {}", fin.erreurs.join(", ")), false);
         }
     }
@@ -1150,9 +1169,14 @@ impl Juge {
             }
             self.mouvements.ajouter(e.frame, e.direction);
             let temps = e.vu - latence;
-            if e.direction == 6 && self.mouvements.dash(e.frame) {
+            let dash = match e.direction {
+                6 if self.mouvements.dash(e.frame) => Some("DR"),
+                4 if self.mouvements.dash_arriere(e.frame) => Some("44"),
+                _ => None,
+            };
+            if let Some(dash) = dash {
                 coups.push(CoupJeu {
-                    candidats: vec!["DR".to_string()],
+                    candidats: vec![dash.to_string()],
                     temps,
                     vu: e.vu,
                     dash: true,

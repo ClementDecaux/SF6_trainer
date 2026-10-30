@@ -25,7 +25,8 @@ cargo test         # lance les tests
 - La **languette** en bas de l'overlay déplie ou replie l'historique d'inputs.
 - **F9** pour garder ou non les vidéos des combos réussis (`REC` dans l'overlay). Coupé au
   lancement, sauf si `enregistrer = true` dans `capture.toml`.
-- L'outil suppose que tu joues à gauche de l'écran (b = 4 = vers la gauche).
+- Côté de l'écran : par défaut l'outil le reconnaît au 1er coup de chaque essai (un combo joué
+  à droite est retourné : 214 à l'écran = 236). On peut le forcer dans l'onglet Entraînement.
 
 ## L'interface
 
@@ -38,6 +39,10 @@ Au lancement, une fenêtre normale s'ouvre en plus de l'overlay. Deux onglets :
   x0.1), et place chaque étape du combo sur la barre de temps : cliquer une étape y amène. À
   droite, l'historique du jeu tel qu'il était à cette image. **Plein écran** agrandit le
   lecteur (Échap pour sortir).
+- **Entraînement** : le côté de l'écran, et l'**auto-advance** : coche les combos qui
+  t'intéressent (par catégorie ou un par un), choisis après combien de réussites (d'affilée ou
+  au total) on passe au suivant, dans l'ordre ou au hasard. L'overlay affiche la progression
+  (« auto 2/3 d'affilée »). Réglages gardés dans `entrainement.toml`.
 - **Réglages** : afficher ou cacher l'overlay, le déplacer, son opacité, le son, les vidéos,
   et la façon d'écrire les coups.
 
@@ -141,6 +146,7 @@ Notation reconnue : directions `b f d u db df cr. st.` ou chiffres numpad, mouve
 | `src/main.rs` | Lancement : charge les configs, ouvre l'interface, démarre le thread de la manette |
 | `src/interface.rs` | Fenêtre principale : combos, lecteur vidéo, réglages ; ouvre l'overlay |
 | `src/syntaxe.rs` | Les syntaxes des coups (numpad, anglais, flèches, icônes SF6) et leur dessin |
+| `src/entrainement.rs` | Auto-advance : sélection de combos et passage au suivant |
 | `src/video.rs` | Décodage des vidéos MP4 image par image (Media Foundation) |
 | `src/entrees.rs` | Thread de la manette : lit les inputs, reconnaît les coups, fait avancer le trial |
 | `src/manette.rs` | Lecture de la manette : XInput toutes les millisecondes sous Windows |

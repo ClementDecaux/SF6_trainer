@@ -8,7 +8,7 @@
 use crate::combo::Etape;
 use crate::controles::Action;
 use std::collections::VecDeque;
-use std::time::Instant;
+use std::time::{Duration, Instant};
 
 /// Nombre de lignes d'historique gardées pour l'overlay.
 const LIGNES_MAX: usize = 100;
@@ -52,6 +52,15 @@ pub struct Partage {
     pub lignes: VecDeque<Ligne>,
     /// Nombre de combos réussis depuis le lancement.
     pub reussites: u32,
+    /// Réussites sur le combo en cours.
+    pub reussites_combo: u32,
+    /// Réussites d'affilée sur le combo en cours (un raté remet à zéro).
+    pub serie: u32,
+    /// Réglages de l'auto-advance (et du côté de l'écran).
+    pub entrainement: crate::entrainement::Entrainement,
+    /// Auto-advance : combo suivant demandé, à lancer à cette heure (le temps de voir
+    /// « COMBO RÉUSSI »).
+    pub avance_prevue: Option<(Instant, usize)>,
     /// Écart en frames de chaque étape avec la précédente (essai en cours ou dernier essai).
     pub ecarts: Vec<u64>,
     /// Mode déplacement (F8) : l'overlay peut être glissé à la souris.
@@ -115,6 +124,10 @@ impl Partage {
             message: None,
             lignes: VecDeque::new(),
             reussites: 0,
+            reussites_combo: 0,
+            serie: 0,
+            entrainement: crate::entrainement::Entrainement::default(),
+            avance_prevue: None,
             ecarts: Vec::new(),
             deplacement: false,
             enregistrement: false,
@@ -209,8 +222,26 @@ impl Partage {
         });
     }
 
+    /// Un combo réussi : compteurs, et passage au suivant si l'auto-advance le demande.
+    pub fn reussite(&mut self) {
+        self.reussites += 1;
+        self.reussites_combo += 1;
+        self.serie += 1;
+        if self.entrainement.atteint(self.reussites_combo, self.serie)
+            && let Some(i) = self.entrainement.suivant(self.combo_index, &self.combos)
+        {
+            self.avance_prevue = Some((Instant::now() + Duration::from_millis(1500), i));
+        }
+    }
+
+    /// Un essai raté : la série repart de zéro.
+    pub fn echec(&mut self) {
+        self.serie = 0;
+    }
+
     /// « Raté : attendu X, reçu Y ».
     pub fn message_rate(&mut self, attendu: &str, recu: &str) {
+        self.echec();
         self.message(format!("Raté : attendu {attendu}, reçu {recu}"), false);
         if let Some(m) = &mut self.message {
             m.rate = Some((attendu.to_string(), recu.to_string()));

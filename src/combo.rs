@@ -242,6 +242,46 @@ pub struct Trial {
     /// Dégâts du combo complet (combos.toml, ou appris avec Select).
     pub degats: Option<u32>,
     pub degats_fixe: bool,
+    /// De quel côté de l'écran on joue (réglage).
+    pub cote: Cote,
+    /// Essai en cours joué à droite : les coups sont retournés (4 <-> 6) avant d'être comparés.
+    pub miroir: bool,
+}
+
+/// Le côté de l'écran du joueur. À droite, « avant » est vers la gauche : un 236 fait au
+/// stick est un 214 à l'écran.
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, serde::Serialize, Deserialize)]
+#[serde(rename_all = "lowercase")]
+pub enum Cote {
+    Gauche,
+    Droite,
+    /// Le premier coup de chaque essai dit de quel côté on est.
+    #[default]
+    Auto,
+}
+
+/// Le coup vu de l'autre côté de l'écran : 1 <-> 3, 4 <-> 6, 7 <-> 9 (236 <-> 214...).
+/// Le dash avant (DR) devient un dash arrière (44), et inversement.
+pub fn miroir(coup: &str) -> String {
+    match coup {
+        "DR" => return "44".to_string(),
+        "44" => return "DR".to_string(),
+        _ => {}
+    }
+    let chiffres = coup.chars().take_while(|c| c.is_ascii_digit()).count();
+    let retourne: String = coup[..chiffres]
+        .chars()
+        .map(|c| match c {
+            '1' => '3',
+            '3' => '1',
+            '4' => '6',
+            '6' => '4',
+            '7' => '9',
+            '9' => '7',
+            _ => c,
+        })
+        .collect();
+    format!("{retourne}{}", &coup[chiffres..])
 }
 
 impl Trial {
@@ -256,6 +296,8 @@ impl Trial {
             hits: None,
             hits_fixe: false,
             degats: None,
+            cote: Cote::Auto,
+            miroir: false,
             degats_fixe: false,
         }
     }
@@ -264,6 +306,19 @@ impl Trial {
     fn nouvel_essai(&mut self) {
         self.ecarts.clear();
         self.intercales = 0;
+    }
+
+    /// Début d'un essai : de quel côté joue-t-on ? En auto, le côté où le coup est le bon.
+    fn choisir_cote(&mut self, bruts: &[String], retournes: &[String]) {
+        let attendu = self.attendu();
+        self.miroir = match self.cote {
+            Cote::Gauche => false,
+            Cote::Droite => true,
+            Cote::Auto => {
+                !bruts.iter().any(|c| self.accepte(c, attendu))
+                    && retournes.iter().any(|c| self.accepte(c, attendu))
+            }
+        };
     }
 
     pub fn attendu(&self) -> &str {
@@ -276,6 +331,13 @@ impl Trial {
         // Pas de fenêtre de timing : le coup attendu fait avancer, quel que soit le moment.
         // Ce sont les hits lus dans le jeu qui disent si le combo est passé.
         let ecart = frame.saturating_sub(self.derniere_frame);
+
+        // Joué à droite : on compare les coups retournés.
+        let retournes: Vec<String> = candidats.iter().map(|c| miroir(c)).collect();
+        if self.index == 0 {
+            self.choisir_cote(candidats, &retournes);
+        }
+        let candidats: &[String] = if self.miroir { &retournes } else { candidats };
 
         if candidats.iter().any(|c| self.accepte(c, self.attendu())) {
             if self.index == 0 {
@@ -325,7 +387,14 @@ impl Trial {
         }
         let attendu = self.attendu().to_string();
         self.index = 0;
-        // Ce coup raté est peut-être le début d'un nouvel essai.
+        // Ce coup raté est peut-être le début d'un nouvel essai (peut-être de l'autre côté).
+        let (bruts, retournes): (Vec<String>, Vec<String>) = if self.miroir {
+            (retournes_de(candidats), candidats.to_vec())
+        } else {
+            (candidats.to_vec(), retournes_de(candidats))
+        };
+        self.choisir_cote(&bruts, &retournes);
+        let candidats: &[String] = if self.miroir { &retournes } else { &bruts };
         if candidats.iter().any(|c| self.accepte(c, self.attendu())) {
             self.nouvel_essai();
             self.index = 1;
@@ -362,6 +431,10 @@ pub fn correspond(coup: &str, attendu: &str) -> bool {
     coup == attendu || (attendu == "DR" && coup == "DP")
 }
 
+fn retournes_de(coups: &[String]) -> Vec<String> {
+    coups.iter().map(|c| miroir(c)).collect()
+}
+
 /// Un coup normal : une direction et un bouton (« 4MK »), pas un mouvement spécial.
 fn normal(notation: &str) -> bool {
     let chiffres = notation.chars().take_while(|c| c.is_ascii_digit()).count();
@@ -379,6 +452,38 @@ mod tests {
 
     fn c(s: &str) -> Vec<String> {
         vec![s.to_string()]
+    }
+
+    #[test]
+    fn miroir_des_coups() {
+        assert_eq!(miroir("236MK"), "214MK");
+        assert_eq!(miroir("63214MP"), "41236MP");
+        assert_eq!(miroir("4HP"), "6HP");
+        assert_eq!(miroir("2MK"), "2MK");
+        assert_eq!(miroir("DR"), "44");
+        assert_eq!(miroir("44"), "DR");
+        assert_eq!(miroir("DI"), "DI");
+    }
+
+    #[test]
+    fn combo_joue_a_droite() {
+        let etapes = parser("4HP xx DR xx 4MK xx 236MK").unwrap();
+        // Auto : le 1er coup (6HP à l'écran = 4HP vu de droite) dit qu'on est à droite.
+        let mut t = Trial::new("test", etapes.clone());
+        assert_eq!(t.coup(&c("6HP"), 10), Resultat::Avance);
+        assert!(t.miroir);
+        assert_eq!(t.coup(&c("44"), 20), Resultat::Avance);
+        assert_eq!(t.coup(&c("6MK"), 30), Resultat::Avance);
+        assert_eq!(t.coup(&c("214MK"), 40), Resultat::Reussi);
+        // Forcé à gauche : 6HP ne commence rien.
+        let mut t = Trial::new("test", etapes.clone());
+        t.cote = Cote::Gauche;
+        assert_eq!(t.coup(&c("6HP"), 10), Resultat::Ignore);
+        // Forcé à droite : 4HP ne commence rien, 6HP oui.
+        let mut t = Trial::new("test", etapes);
+        t.cote = Cote::Droite;
+        assert_eq!(t.coup(&c("4HP"), 10), Resultat::Ignore);
+        assert_eq!(t.coup(&c("6HP"), 12), Resultat::Avance);
     }
 
     #[test]

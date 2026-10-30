@@ -24,6 +24,8 @@ pub enum Motion {
     M214,
     /// Dash avant (sert au Drive Rush). Pas de bouton : il n'est pas dans `TOUS`.
     M66,
+    /// Dash arrière : le dash avant quand on joue à droite de l'écran. Pas dans `TOUS`.
+    M44,
 }
 
 impl Motion {
@@ -51,6 +53,7 @@ impl Motion {
             Motion::M236 => &[2, 3, 6],
             Motion::M214 => &[2, 1, 4],
             Motion::M66 => &[6, 5, 6],
+            Motion::M44 => &[4, 5, 4],
         }
     }
 
@@ -59,7 +62,7 @@ impl Motion {
     pub fn fenetre(self) -> u64 {
         match self {
             Motion::M41236 | Motion::M63214 => 25,
-            Motion::M66 => 12,
+            Motion::M66 | Motion::M44 => 12,
             _ => 18,
         }
     }
@@ -74,6 +77,7 @@ impl Motion {
             Motion::M236 => "236",
             Motion::M214 => "214",
             Motion::M66 => "66",
+            Motion::M44 => "44",
         }
     }
 }
@@ -121,6 +125,11 @@ impl Historique {
     /// Vrai si on vient de faire un dash avant (6, 5, 6).
     pub fn dash(&self, frame: u64) -> bool {
         self.contient(Motion::M66, frame)
+    }
+
+    /// Vrai si on vient de faire un dash arrière (4, 5, 4).
+    pub fn dash_arriere(&self, frame: u64) -> bool {
+        self.contient(Motion::M44, frame)
     }
 
     fn contient(&self, motion: Motion, frame: u64) -> bool {

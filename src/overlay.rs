@@ -814,7 +814,36 @@ fn statistiques(ui: &mut egui::Ui, p: &Partage) {
         if p.degats_visibles {
             chiffre(ui, p.hits_direct, "hits", ROUGE);
         }
-        chiffre(ui, p.reussites, "réussi(s)", VERT);
+        chiffre(ui, p.reussites_combo, "réussi(s)", VERT);
+        if p.serie > 1 {
+            chiffre(ui, p.serie, "d'affilée", VERT);
+        }
+        // Auto-advance : où on en est avant le combo suivant.
+        if p.avance_prevue.is_some() {
+            ui.label(
+                RichText::new("combo suivant…")
+                    .color(CYAN)
+                    .size(13.0)
+                    .strong(),
+            );
+            ui.add_space(8.0);
+        } else if p.entrainement.actif && !p.entrainement.combos.is_empty() {
+            let e = &p.entrainement;
+            let mot = match e.mode {
+                crate::entrainement::Mode::Affilee => "d'affilée",
+                crate::entrainement::Mode::Total => "réussis",
+            };
+            ui.label(
+                RichText::new(format!(
+                    "auto {}/{} {mot}",
+                    e.compte(p.reussites_combo, p.serie).min(e.nombre),
+                    e.nombre
+                ))
+                .color(CYAN)
+                .size(13.0),
+            );
+            ui.add_space(8.0);
+        }
         // D'où viennent les frames : l'historique du jeu (exact) ou notre estimation.
         let (texte, couleur) = if p.historique_jeu {
             ("frames du jeu".to_string(), VERT)
