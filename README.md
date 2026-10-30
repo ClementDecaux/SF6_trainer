@@ -18,12 +18,25 @@ cargo test         # lance les tests
 
 - SF6 doit être en **plein écran fenêtré** (borderless), sinon rien ne peut s'afficher par-dessus.
 - Le contrôleur doit être en mode **XInput** (mode manette Xbox).
-- Ctrl+C dans le terminal pour fermer l'overlay.
+- Fermer la fenêtre de l'interface (ou Ctrl+C dans le terminal) ferme l'outil.
 - **F8** pour déplacer l'overlay : glisse-le à la souris, puis F8 à nouveau. La position est
   enregistrée dans `overlay.toml`. Reclique ensuite dans le jeu pour lui rendre le focus.
 - **F9** pour garder ou non les vidéos des combos réussis (`● REC` dans l'overlay). Coupé au
   lancement, sauf si `enregistrer = true` dans `capture.toml`.
 - L'outil suppose que tu joues à gauche de l'écran (b = 4 = vers la gauche).
+
+## L'interface
+
+Au lancement, une fenêtre normale s'ouvre en plus de l'overlay. Trois onglets :
+
+- **Combos** : la liste rangée par catégorie, avec une recherche. Clique un combo pour voir
+  ses étapes, ses hits et dégâts, puis **Travailler ce combo** pour le passer dans l'overlay.
+- **Vidéos** : les combos réussis filmés. Le lecteur avance image par image (← →, ou les
+  boutons), lit au ralenti (x0.5, x0.25, x0.1), et place chaque étape du combo sur la barre de
+  temps : cliquer une étape y amène. À droite, l'historique du jeu tel qu'il était à cette image.
+- **Réglages** : afficher ou cacher l'overlay, le déplacer, son opacité, le son, les vidéos.
+
+Le bouton en haut à droite cache ou réaffiche l'overlay. Fermer l'interface ferme l'outil.
 
 ## Fichiers de config
 
@@ -38,7 +51,8 @@ cargo test         # lance les tests
 ## Choisir le combo
 
 Les combos sont dans `combos.toml` (une liste de combos Dhalsim est créée au premier lancement).
-Les flèches ‹ › de l'overlay passent au combo précédent ou suivant ; `cargo run -- 5` lance
+Le plus simple : l'onglet **Combos** de l'interface. Les flèches ‹ › de l'overlay passent
+aussi au combo précédent ou suivant ; `cargo run -- 5` lance
 directement le 5e. La liste numérotée s'affiche dans le terminal au lancement.
 
 ## Validation d'un combo
@@ -90,9 +104,10 @@ Il garde toujours en mémoire les dernières images du jeu (`avant_ms`, 0,7 s pa
 commence donc un peu avant la 1re étape. Elle est jetée si le combo est raté, et gardée dans
 `clips/` s'il est réussi. L'overlay n'apparaît pas dans la vidéo.
 
-À côté de chaque vidéo, un `.json` donne le combo, le personnage, la date et la frame de chaque
-étape (comptée depuis la 1re étape). Les vidéos sont en H.264 à 60 fps : on peut les avancer image
-par image, par exemple dans VLC (touche `E`) ou mpv (touche `.`).
+À côté de chaque vidéo, un `.json` donne le combo, le personnage, la date, l'heure de chaque
+étape et l'historique du jeu pendant la vidéo : c'est ce qui permet au lecteur de l'interface
+(onglet Vidéos) de placer les étapes à la bonne image. Les vidéos sont en H.264 à 60 fps ; le
+lecteur les décode avec Windows (Media Foundation), en 960 pixels de large au plus.
 
 Notation reconnue : directions `b f d u db df cr. st.` ou chiffres numpad, mouvements
 `qcf qcb hcf hcb dp` ou `236 214 41236 63214 623 421`, `DI` (HP+HK), `DP` (MP+MK),
@@ -102,7 +117,9 @@ Notation reconnue : directions `b f d u db df cr. st.` ou chiffres numpad, mouve
 
 | Fichier | Rôle |
 | --- | --- |
-| `src/main.rs` | Lancement : charge les configs, ouvre l'overlay, démarre le thread de la manette |
+| `src/main.rs` | Lancement : charge les configs, ouvre l'interface, démarre le thread de la manette |
+| `src/interface.rs` | Fenêtre principale : combos, lecteur vidéo, réglages ; ouvre l'overlay |
+| `src/video.rs` | Décodage des vidéos MP4 image par image (Media Foundation) |
 | `src/entrees.rs` | Thread de la manette : lit les inputs, reconnaît les coups, fait avancer le trial |
 | `src/manette.rs` | Lecture de la manette : XInput toutes les millisecondes sous Windows |
 | `src/ecran.rs` | Lecture de l'historique d'inputs affiché par SF6 (frames exactes) |

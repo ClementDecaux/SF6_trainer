@@ -77,11 +77,11 @@ pub fn charger() -> Result<Config, String> {
 /// Combien de temps le message « réussi » ou « raté » reste affiché.
 const DUREE_MESSAGE: Duration = Duration::from_millis(2000);
 
-const VERT: Color32 = Color32::from_rgb(110, 230, 120);
-const JAUNE: Color32 = Color32::from_rgb(255, 210, 60);
-const ROUGE: Color32 = Color32::from_rgb(255, 100, 100);
-const CYAN: Color32 = Color32::from_rgb(100, 220, 230);
-const GRIS: Color32 = Color32::from_rgb(150, 150, 150);
+pub(crate) const VERT: Color32 = Color32::from_rgb(110, 230, 120);
+pub(crate) const JAUNE: Color32 = Color32::from_rgb(255, 210, 60);
+pub(crate) const ROUGE: Color32 = Color32::from_rgb(255, 100, 100);
+pub(crate) const CYAN: Color32 = Color32::from_rgb(100, 220, 230);
+pub(crate) const GRIS: Color32 = Color32::from_rgb(150, 150, 150);
 
 pub struct Overlay {
     partage: Arc<Mutex<Partage>>,
@@ -190,10 +190,31 @@ impl Overlay {
     }
 }
 
-impl eframe::App for Overlay {
+/// Le titre de la fenêtre de l'overlay (sert aussi à la retrouver côté Windows).
+pub const TITRE: &str = "SF6 Trainer - overlay";
+
+/// L'identifiant egui de la fenêtre de l'overlay.
+pub fn id() -> egui::ViewportId {
+    egui::ViewportId::from_hash_of("overlay")
+}
+
+/// La fenêtre de l'overlay, telle qu'elle est créée.
+pub fn fenetre(config: &Config) -> egui::ViewportBuilder {
+    egui::ViewportBuilder::default()
+        .with_title(TITRE)
+        .with_transparent(config.transparence)
+        .with_decorations(false)
+        .with_always_on_top()
+        .with_mouse_passthrough(true)
+        .with_taskbar(false)
+        .with_position([config.x, config.y])
+        .with_inner_size([config.largeur, config.hauteur])
+}
+
+impl Overlay {
     /// Fond de la fenêtre : entièrement transparent (seul notre cadre se voit),
     /// ou gris très sombre si la transparence est désactivée.
-    fn clear_color(&self, _visuals: &egui::Visuals) -> [f32; 4] {
+    pub fn fond(&self) -> [f32; 4] {
         if self.transparence {
             [0.0, 0.0, 0.0, 0.0]
         } else {
@@ -201,7 +222,34 @@ impl eframe::App for Overlay {
         }
     }
 
-    fn ui(&mut self, ui: &mut egui::Ui, frame: &mut eframe::Frame) {
+    /// Opacité du fond du cadre (0 à 255), réglable dans l'interface.
+    pub fn opacite_fond(&self) -> u8 {
+        self.opacite_fond
+    }
+
+    pub fn regler_opacite_fond(&mut self, opacite: u8) {
+        self.opacite_fond = opacite;
+    }
+
+    /// Opacité de toute la fenêtre (0 à 255), réglable dans l'interface.
+    pub fn opacite_fenetre(&self) -> u8 {
+        self.opacite_fenetre
+    }
+
+    pub fn regler_opacite_fenetre(&mut self, opacite: u8) {
+        if opacite != self.opacite_fenetre {
+            self.opacite_fenetre = opacite;
+            self.regler_dans = 1;
+        }
+    }
+
+    /// La fenêtre vient d'être (re)créée : il faut la régler de nouveau côté Windows.
+    pub fn fenetre_recreee(&mut self) {
+        self.regler_dans = 2;
+    }
+
+    /// Dessine l'overlay dans sa fenêtre.
+    pub fn dessiner(&mut self, ui: &mut egui::Ui) {
         // On verrouille le partage le temps de dessiner (quelques microsecondes).
         let mut partage = match self.partage.lock() {
             Ok(p) => p,
@@ -231,9 +279,7 @@ impl eframe::App for Overlay {
             self.regler_dans -= 1;
             if self.regler_dans == 0 {
                 #[cfg(windows)]
-                regler_fenetre_windows(frame, self.opacite_fenetre, self.traversant());
-                #[cfg(not(windows))]
-                let _ = (frame, self.opacite_fenetre);
+                regler_fenetre_windows(self.opacite_fenetre, self.traversant());
             } else {
                 ui.ctx().request_repaint();
             }
@@ -714,7 +760,7 @@ fn ligne_historique(ui: &mut egui::Ui, ligne: &Ligne) {
 }
 
 /// Une flèche dans la direction numpad (un point pour le neutre).
-fn dessiner_direction(ui: &mut egui::Ui, direction: u8, couleur: Color32) {
+pub(crate) fn dessiner_direction(ui: &mut egui::Ui, direction: u8, couleur: Color32) {
     let (rect, _) = ui.allocate_exact_size(egui::vec2(20.0, 20.0), egui::Sense::hover());
     let centre = rect.center();
     // Sur l'écran, y augmente vers le bas : « haut » = y négatif.
@@ -801,21 +847,18 @@ fn remplacer_position(texte: &str, rect: egui::Rect) -> String {
 
 /// `traversant` : les clics passent au travers de la fenêtre (sauf en mode déplacement).
 #[cfg(windows)]
-fn regler_fenetre_windows(frame: &eframe::Frame, opacite: u8, traversant: bool) {
-    use raw_window_handle::{HasWindowHandle, RawWindowHandle};
-    use windows_sys::Win32::Foundation::HWND;
+fn regler_fenetre_windows(opacite: u8, traversant: bool) {
     use windows_sys::Win32::UI::WindowsAndMessaging::{
-        GWL_EXSTYLE, GetWindowLongPtrW, LWA_ALPHA, SetLayeredWindowAttributes, SetWindowLongPtrW,
-        WS_EX_LAYERED, WS_EX_NOACTIVATE, WS_EX_TRANSPARENT,
+        FindWindowW, GWL_EXSTYLE, GetWindowLongPtrW, LWA_ALPHA, SetLayeredWindowAttributes,
+        SetWindowLongPtrW, WS_EX_LAYERED, WS_EX_NOACTIVATE, WS_EX_TRANSPARENT,
     };
 
-    let Ok(handle) = frame.window_handle() else {
+    // La fenêtre de l'overlay, retrouvée par son titre.
+    let titre: Vec<u16> = TITRE.encode_utf16().chain([0]).collect();
+    let hwnd = unsafe { FindWindowW(std::ptr::null(), titre.as_ptr()) };
+    if hwnd.is_null() {
         return;
-    };
-    let RawWindowHandle::Win32(win32) = handle.as_raw() else {
-        return;
-    };
-    let hwnd = win32.hwnd.get() as HWND;
+    }
     unsafe {
         // NOACTIVATE : cliquer sur l'overlay ne prend pas le focus à SF6.
         let mut style =
@@ -852,7 +895,7 @@ fn souris_sur(_ctx: &egui::Context, _zone: Option<egui::Rect>) -> bool {
 }
 
 /// Mêmes couleurs que dans le terminal : poings en bleu, pieds en rouge...
-fn couleur_bouton(action: Action) -> Color32 {
+pub(crate) fn couleur_bouton(action: Action) -> Color32 {
     match action {
         Action::LP | Action::MP | Action::HP => Color32::from_rgb(100, 160, 255),
         Action::LK | Action::MK | Action::HK => Color32::from_rgb(255, 100, 100),

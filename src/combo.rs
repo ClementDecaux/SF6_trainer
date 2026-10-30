@@ -41,6 +41,9 @@ pub struct ComboFichier {
     /// c'est eux qui valident le combo (sinon appris avec Select).
     #[serde(default)]
     pub degats: Option<u32>,
+    /// Le groupe du combo dans la liste de l'interface (« Drive Rush », « OD »...).
+    #[serde(default)]
+    pub categorie: String,
 }
 
 #[derive(Debug, Deserialize)]

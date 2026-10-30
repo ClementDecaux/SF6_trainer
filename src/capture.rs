@@ -94,7 +94,7 @@ pub fn charger() -> Result<Config, String> {
 }
 
 /// Ce qui est écrit dans le `.json` à côté de la vidéo.
-#[derive(Debug, Clone, Serialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct InfosClip {
     pub personnage: String,
     pub combo: String,
@@ -104,12 +104,24 @@ pub struct InfosClip {
     pub fps: u32,
     /// Chaque étape validée, avec sa frame comptée depuis la 1re étape.
     pub etapes: Vec<EtapeClip>,
+    /// Heure (horloge de la capture, unités de 100 ns) de la 1re image de la vidéo.
+    #[serde(default)]
+    pub debut_video: i64,
+    /// Délai entre un appui et son affichage dans l'historique du jeu (100 ns).
+    #[serde(default)]
+    pub latence: i64,
+    /// Les lignes de l'historique d'inputs du jeu pendant la vidéo.
+    #[serde(default)]
+    pub lignes: Vec<crate::ecran::EntreeJeu>,
 }
 
-#[derive(Debug, Clone, PartialEq, Serialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct EtapeClip {
     pub notation: String,
     pub frame: u64,
+    /// Heure de l'appui (horloge de la capture, 100 ns).
+    #[serde(default)]
+    pub temps: i64,
 }
 
 /// Les ordres envoyés au thread de capture.
@@ -137,6 +149,8 @@ pub struct Capture {
     etapes: Vec<EtapeClip>,
     /// Vidéos gardées ou non (F9). Coupé, le jeu reste capté pour caler les frames.
     pub enregistre: bool,
+    /// Délai d'affichage des appuis dans le jeu (écrit dans le `.json`).
+    pub latence: i64,
 }
 
 impl Capture {
@@ -156,6 +170,7 @@ impl Capture {
             debut: 0,
             etapes: Vec::new(),
             enregistre: false,
+            latence: 0,
         }
     }
 
@@ -169,10 +184,11 @@ impl Capture {
     }
 
     /// Une étape vient d'être validée.
-    pub fn etape(&mut self, notation: &str, frame: u64) {
+    pub fn etape(&mut self, notation: &str, frame: u64, temps: i64) {
         self.etapes.push(EtapeClip {
             notation: notation.to_string(),
             frame: frame.saturating_sub(self.debut),
+            temps,
         });
     }
 
@@ -184,6 +200,9 @@ impl Capture {
             date: chrono::Local::now().format("%Y-%m-%d %H:%M:%S").to_string(),
             fps: 60,
             etapes: std::mem::take(&mut self.etapes),
+            debut_video: 0,
+            latence: self.latence,
+            lignes: Vec::new(),
         };
         self.envoyer(Ordre::Garder(infos));
     }
@@ -495,8 +514,10 @@ mod capture_windows {
             encodeur: Box<VideoEncoder>,
             chemin: PathBuf,
             debut: Instant,
+            /// Heure de la 1re image de la vidéo (horloge de la capture).
+            premier: i64,
             /// Combo réussi : quand arrêter, et ce qu'on écrira dans le `.json`.
-            fin: Option<(Instant, InfosClip)>,
+            fin: Option<(Instant, Box<InfosClip>)>,
         },
     }
 
@@ -528,7 +549,7 @@ mod capture_windows {
                         fin: fin @ None, ..
                     } => {
                         let quand = Instant::now() + Duration::from_millis(self.config.apres_ms);
-                        *fin = Some((quand, infos));
+                        *fin = Some((quand, Box::new(infos)));
                     }
                     Etat::Demande => self.etat = Etat::Attente,
                     _ => {}
@@ -545,6 +566,7 @@ mod capture_windows {
                 encodeur,
                 chemin,
                 fin,
+                premier,
                 ..
             } = etat
             else {
@@ -556,7 +578,12 @@ mod capture_windows {
                 return;
             }
             match fin {
-                Some((_, infos)) => self.ranger(&chemin, &infos),
+                Some((_, mut infos)) => {
+                    // Pour le lecteur : où commence la vidéo, et l'historique du jeu pendant.
+                    infos.debut_video = premier;
+                    infos.lignes = crate::ecran::entrees_depuis(premier);
+                    self.ranger(&chemin, &infos)
+                }
                 None => {
                     let _ = std::fs::remove_file(&chemin);
                 }
@@ -665,8 +692,10 @@ mod capture_windows {
                 }
             };
             let mut image_actuelle_envoyee = false;
+            let mut premier = None;
             for image in self.tampon.prendre() {
                 if image.largeur == largeur && image.hauteur == hauteur {
+                    premier.get_or_insert(image.temps);
                     if let Err(e) = encodeur.send_frame_buffer(&image.pixels, image.temps) {
                         eprintln!("Vidéo : image perdue ({e}).");
                     }
@@ -681,6 +710,7 @@ mod capture_windows {
                 encodeur: Box::new(encodeur),
                 chemin,
                 debut: Instant::now(),
+                premier: premier.unwrap_or(temps),
                 fin: None,
             };
         }
@@ -836,8 +866,8 @@ mod tests {
     fn frames_comptees_depuis_la_premiere_etape() {
         let (mut capture, reception) = capture_de_test();
         capture.debut_essai(1000);
-        capture.etape("4HP", 1000);
-        capture.etape("DI", 1012);
+        capture.etape("4HP", 1000, 0);
+        capture.etape("DI", 1012, 0);
         capture.reussi();
 
         assert!(matches!(reception.try_recv(), Ok(Ordre::Demarrer)));
@@ -850,11 +880,13 @@ mod tests {
             vec![
                 EtapeClip {
                     notation: "4HP".into(),
-                    frame: 0
+                    frame: 0,
+                    temps: 0,
                 },
                 EtapeClip {
                     notation: "DI".into(),
-                    frame: 12
+                    frame: 12,
+                    temps: 0,
                 },
             ]
         );
@@ -864,9 +896,9 @@ mod tests {
     fn nouvel_essai_efface_les_etapes() {
         let (mut capture, _reception) = capture_de_test();
         capture.debut_essai(10);
-        capture.etape("4HP", 10);
+        capture.etape("4HP", 10, 0);
         capture.debut_essai(500);
-        capture.etape("4HP", 500);
+        capture.etape("4HP", 500, 0);
         assert_eq!(capture.etapes.len(), 1);
         assert_eq!(capture.etapes[0].frame, 0);
     }
@@ -880,6 +912,9 @@ mod tests {
             date: "2026-10-29 21:03:05".into(),
             fps: 60,
             etapes: vec![],
+            debut_video: 0,
+            latence: 0,
+            lignes: vec![],
         };
         assert_eq!(
             nom_fichier(&infos),

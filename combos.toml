@@ -1,8 +1,243 @@
 # Tes combos. Écris-les comme sur les forums, l'outil les comprend :
-# b/f/d/u/db/df = directions, qcf/qcb/hcf/hcb/dp = mouvements, xx ou > = cancel, "," = link.
-# Le premier combo de la liste est lancé (ou : cargo run -- 2 pour le deuxième).
+# b/f/d/u/db/df (ou d/b) = directions, cr./st. = accroupi/debout,
+# qcf/qcb/hcf/hcb/dp = mouvements, pp/kk = version OD, xx ou > = cancel, "," = link.
+# Les remarques entre parenthèses, comme (pc), sont ignorées.
+# Change de combo avec les flèches de l'overlay (ou : cargo run -- 2 pour le deuxième au lancement).
+#
+# hits   : coups qui touchent quand le combo passe (sinon appris avec Select).
+# degats : dégâts du combo complet (panneau « Combo Damage » du training).
+# Le combo est validé si les hits OU les dégâts sont atteints.
+# categorie : le groupe dans la liste des combos de l'interface.
 personnage = "Dhalsim"
 
+# --- Drive Rush ---
+
 [[combo]]
-nom = "Drive Impact, Yoga Flame"
-inputs = "b+hp xx DI xx b+mk xx qcf+mk, b+mk xx hcb+mp"
+nom = "Drive Rush, Yoga Flame"
+categorie = "Drive Rush"
+inputs = "b+hp xx DR xx b+mk xx qcf+mk, b+mk xx hcb+mp"
+hits = 6
+degats = 2346
+
+[[combo]]
+nom = "b+mk DR d/b+hp, Yoga Flame"
+categorie = "Drive Rush"
+inputs = "b+mk xx DR xx d/b+hp, b+mk xx hcb+mp"
+degats = 2218
+
+[[combo]]
+nom = "b+mp DR d/b+hp, Yoga Flame"
+categorie = "Drive Rush"
+inputs = "b+mp xx DR xx d/b+hp, b+mk xx hcb+mp"
+degats = 2318
+
+[[combo]]
+nom = "d/b+hp DR d/b+hp, Yoga Flame"
+categorie = "Drive Rush"
+inputs = "d/b+hp xx DR xx d/b+hp, b+mk xx hcb+mp"
+degats = 2418
+
+[[combo]]
+nom = "st.lp x2 DR, Yoga Blast"
+categorie = "Drive Rush"
+inputs = "st. lp, st. lp xx DR xx st. lp, b+mp xx hcb+hk"
+degats = 1578
+
+# --- Sans jauge ---
+
+[[combo]]
+nom = "d/b+lk, cr.lp, Yoga Fire"
+categorie = "Sans jauge"
+inputs = "d/b+lk, cr. lp xx qcf+lp"
+degats = 860
+
+[[combo]]
+nom = "b+mk, Yoga Flame"
+categorie = "Sans jauge"
+inputs = "b+mk xx hcb+mp"
+degats = 1500
+
+[[combo]]
+nom = "b+mp, Yoga Blast"
+categorie = "Sans jauge"
+inputs = "b+mp xx hcb+hk"
+degats = 1900
+
+[[combo]]
+nom = "d/b+hp, Yoga Flame HP"
+categorie = "Sans jauge"
+inputs = "d/b+hp xx hcb+hp"
+degats = 2000
+
+[[combo]]
+nom = "cr.mk, b+mk, Yoga Flame (bout de portée)"
+categorie = "Sans jauge"
+inputs = "cr. mk, b+mk xx hcb+mp"
+degats = 1610
+
+[[combo]]
+nom = "Yoga Fire MK, cr.mk, b+mk, Yoga Flame"
+categorie = "Sans jauge"
+inputs = "qcf+mk, cr. mk, b+mk xx hcb+mp"
+degats = 1940
+
+[[combo]]
+nom = "Yoga Fire MK, cr.mk, d/b+hp, Yoga Flame HP"
+categorie = "Sans jauge"
+inputs = "qcf+mk, cr. mk, d/b+hp xx hcb+hp"
+degats = 2260
+
+# --- OD ---
+
+[[combo]]
+nom = "d/b+lk, cr.lp, Yoga Fire OD"
+categorie = "OD"
+inputs = "d/b+lk, cr. lp xx qcf+pp"
+degats = 1140
+
+[[combo]]
+nom = "d/b+lk, cr.lp, Yoga Blast OD (adversaire debout)"
+categorie = "OD"
+inputs = "d/b+lk, cr. lp xx hcb+kk"
+degats = 1140
+
+[[combo]]
+nom = "b+mk, Yoga Flame OD, cr.hk"
+categorie = "OD"
+inputs = "b+mk xx hcb+pp, cr. hk"
+degats = 2120
+
+[[combo]]
+nom = "b+mp, Yoga Flame OD, Yoga Blast (coin)"
+categorie = "OD"
+inputs = "b+mp xx hcb+pp, hcb+hk"
+degats = 2460
+
+# --- Punitions (dégâts en Punish Counter : non fixés, appris avec Select) ---
+
+[[combo]]
+nom = "Punition 4f : cr.lp, b+mk, Yoga Flame"
+categorie = "Punitions"
+inputs = "cr. lp (pc), b+mk xx hcb+mp"
+
+[[combo]]
+nom = "Punition 4f : cr.lp, b+mp, Yoga Blast"
+categorie = "Punitions"
+inputs = "cr. lp (pc), b+mp xx hcb+hk"
+
+[[combo]]
+nom = "Punition 7f : b+mk, b+mk, Yoga Flame"
+categorie = "Punitions"
+inputs = "b+mk, b+mk xx hcb+mp"
+
+[[combo]]
+nom = "Punition 9f : st.lk DR d/b+hp, Yoga Flame HP"
+categorie = "Punitions"
+inputs = "st. lk xx DR xx d/b+hp xx hcb+hp"
+
+[[combo]]
+nom = "Punition 10f : d/b+hp, DI"
+categorie = "Punitions"
+inputs = "d/b+hp xx DI"
+
+[[combo]]
+nom = "Punition 10f : d/b+hp, b+mk, Yoga Flame"
+categorie = "Punitions"
+inputs = "d/b+hp, b+mk xx hcb+mp"
+
+[[combo]]
+nom = "Punition 12f : cr.mp DR d/b+hp, Yoga Flame HP"
+categorie = "Punitions"
+inputs = "cr. mp xx DR xx d/b+hp xx hcb+hp"
+
+[[combo]]
+nom = "Punition 17f : st.hk, DI"
+categorie = "Punitions"
+inputs = "st. hk xx DI"
+
+[[combo]]
+nom = "Punition 17f : st.hk, Yoga Flame HP"
+categorie = "Punitions"
+inputs = "st. hk xx hcb+hp"
+
+[[combo]]
+nom = "Punition 17f : st.hk DR cr.hk"
+categorie = "Punitions"
+inputs = "st. hk xx DR xx cr. hk"
+
+[[combo]]
+nom = "Punition 17f : st.hk, DR d/b+hp, Yoga Flame HP"
+categorie = "Punitions"
+inputs = "st. hk, dr xx d/b+hp xx hcb+hp"
+
+# --- Après un Drive Impact ---
+
+[[combo]]
+nom = "DI (crumple), d/b+hp, Yoga Flame HP"
+categorie = "Après un Drive Impact"
+inputs = "DI, d/b+hp xx hcb+hp"
+degats = 2440
+
+[[combo]]
+nom = "DI (crumple), d/b+hp, DI"
+categorie = "Après un Drive Impact"
+inputs = "DI, d/b+hp xx DI"
+
+[[combo]]
+nom = "DI (crumple), b+hp, Yoga Flame HP"
+categorie = "Après un Drive Impact"
+inputs = "DI, b+hp xx hcb+hp"
+degats = 2520
+
+[[combo]]
+nom = "DI (mur), d/b+hp, Yoga Blast"
+categorie = "Après un Drive Impact"
+inputs = "DI, d/b+hp xx hcb+hk"
+degats = 1600
+
+# --- Drive Rush courts (pas de dégâts donnés : hits appris avec Select) ---
+
+[[combo]]
+nom = "st.lp DR st.lp"
+categorie = "Drive Rush courts"
+inputs = "st. lp xx DR xx st. lp"
+
+[[combo]]
+nom = "cr.mp DR st.lp"
+categorie = "Drive Rush courts"
+inputs = "cr. mp xx DR xx st. lp"
+
+[[combo]]
+nom = "st.lk DR st.lp"
+categorie = "Drive Rush courts"
+inputs = "st. lk xx DR xx st. lp"
+
+[[combo]]
+nom = "d/b+mk DR st.lp"
+categorie = "Drive Rush courts"
+inputs = "d/b+mk xx DR xx st. lp"
+
+[[combo]]
+nom = "st.hk DR d/b+hk"
+categorie = "Drive Rush courts"
+inputs = "st. hk xx DR xx d/b+hk"
+
+[[combo]]
+nom = "b+hp DR d/b+hk"
+categorie = "Drive Rush courts"
+inputs = "b+hp xx DR xx d/b+hk"
+
+[[combo]]
+nom = "b+mk DR d/b+hp"
+categorie = "Drive Rush courts"
+inputs = "b+mk xx DR xx d/b+hp"
+
+[[combo]]
+nom = "b+mp DR d/b+hp"
+categorie = "Drive Rush courts"
+inputs = "b+mp xx DR xx d/b+hp"
+
+[[combo]]
+nom = "d/b+hp DR cr.hk"
+categorie = "Drive Rush courts"
+inputs = "d/b+hp xx DR xx cr. hk"

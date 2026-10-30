@@ -3,7 +3,7 @@
 //! Lance avec `cargo run` (ou `cargo run -- 2` pour le 2e combo de `combos.toml`).
 //! Deux threads :
 //! - celui de la manette (`entrees.rs`) lit les inputs et fait avancer le trial ;
-//! - le thread principal dessine l'overlay (`overlay.rs`).
+//! - le thread principal dessine l'interface (`interface.rs`) et l'overlay (`overlay.rs`).
 //!
 //! Ils partagent l'état du trial à travers un `Arc<Mutex<Partage>>` (`partage.rs`).
 //! Un troisième thread (`capture.rs`, Windows) filme SF6 et garde les combos réussis.
@@ -18,6 +18,7 @@ mod ecran;
 mod ecran_modeles;
 mod entrees;
 mod horloge;
+mod interface;
 mod manette;
 mod motion;
 mod notation;
@@ -25,6 +26,7 @@ mod overlay;
 mod partage;
 mod son;
 mod timings;
+mod video;
 
 use eframe::egui;
 use partage::Partage;
@@ -48,7 +50,9 @@ fn lancer() -> Result<(), String> {
     let inputs = combos[choisi].inputs.clone();
     let config = overlay::charger()?;
     son::activer(config.son);
-    let capture = capture::lancer(capture::charger()?, &personnage, &trial.nom, &inputs);
+    let config_capture = capture::charger()?;
+    let (dossier_clips, avant_ms) = (config_capture.dossier.clone(), config_capture.avant_ms);
+    let capture = capture::lancer(config_capture, &personnage, &trial.nom, &inputs);
 
     let mut etat = Partage::new(&trial.nom, trial.etapes.clone());
     etat.combos = combos.iter().map(|c| c.nom.clone()).collect();
@@ -56,17 +60,13 @@ fn lancer() -> Result<(), String> {
     etat.enregistrement = capture.enregistre;
     let partage = Arc::new(Mutex::new(etat));
 
-    // La fenêtre : sans bordure, au premier plan, les clics passent au travers,
-    // et transparente si `transparence = true` dans overlay.toml.
+    // La fenêtre principale : l'interface (combos, vidéos, réglages).
+    // L'overlay est une 2e fenêtre, ouverte par l'interface (`overlay::fenetre`).
     let options = eframe::NativeOptions {
         viewport: egui::ViewportBuilder::default()
             .with_title("SF6 Trainer")
-            .with_transparent(config.transparence)
-            .with_decorations(false)
-            .with_always_on_top()
-            .with_mouse_passthrough(true)
-            .with_position([config.x, config.y])
-            .with_inner_size([config.largeur, config.hauteur]),
+            .with_inner_size([1200.0, 800.0])
+            .with_min_inner_size([700.0, 450.0]),
         ..Default::default()
     };
 
@@ -80,6 +80,7 @@ fn lancer() -> Result<(), String> {
             // Pour afficher les icônes SVG des boutons.
             egui_extras::install_image_loaders(&ctx);
             let partage_manette = Arc::clone(&partage);
+            let combos_interface = combos.clone();
             std::thread::spawn(move || {
                 entrees::boucle(
                     controles,
@@ -90,10 +91,18 @@ fn lancer() -> Result<(), String> {
                     ctx,
                 )
             });
-            Ok(Box::new(overlay::Overlay::new(partage, &config)))
+            let overlay = overlay::Overlay::new(Arc::clone(&partage), &config);
+            Ok(Box::new(interface::Interface::new(
+                partage,
+                overlay,
+                &config,
+                combos_interface,
+                &dossier_clips,
+                avant_ms,
+            )))
         }),
     )
-    .map_err(|e| format!("erreur de l'overlay : {e}"))
+    .map_err(|e| format!("erreur de la fenêtre : {e}"))
 }
 
 /// Charge `combos.toml` et prend le combo demandé (`cargo run -- 2`), le premier par défaut.

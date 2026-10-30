@@ -20,6 +20,8 @@ raw-window-handle = "0.6"
 windows-sys = { version = "0.61", features = ["Win32_Foundation", "Win32_Media", "Win32_Media_Audio", "Win32_System_Performance", "Win32_UI_Input_KeyboardAndMouse", "Win32_UI_Input_XboxController", "Win32_UI_WindowsAndMessaging"] }
 # Capture vidéo de la fenêtre de SF6 et encodage MP4 par Windows (étape 7).
 windows-capture = "2.0"
+# Lecture des vidéos dans l'interface (décodage par Media Foundation, inclus dans Windows).
+windows = { version = "0.62", features = ["Win32_Media_MediaFoundation", "Win32_System_Com"] }
 
 # Hors Windows (Linux, pour développer) : la manette est lue par gilrs.
 [target.'cfg(not(windows))'.dependencies]

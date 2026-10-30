@@ -329,7 +329,7 @@ pub fn lire_lignes(vue: &Vue) -> Vec<LigneJeu> {
 }
 
 /// Une nouvelle ligne apparue dans l'historique du jeu.
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
 pub struct EntreeJeu {
     /// Heure (unités de 100 ns, horloge de la capture) de la première image qui la montre.
     pub vu: i64,
@@ -685,6 +685,18 @@ pub fn lire_image(lecteur: &mut Lecteur, vue: &Vue, temps: i64) {
 pub fn historique_visible(maintenant: i64) -> bool {
     let derniere = DERNIERE_LECTURE.load(Ordering::Relaxed);
     derniere > 0 && maintenant - derniere < 10_000_000
+}
+
+/// Les lignes du journal apparues depuis `temps` (pour le `.json` d'une vidéo).
+pub fn entrees_depuis(temps: i64) -> Vec<EntreeJeu> {
+    let Ok(journal) = JOURNAL.lock() else {
+        return Vec::new();
+    };
+    journal
+        .iter()
+        .map(|(_, e)| *e)
+        .filter(|e| e.vu >= temps)
+        .collect()
 }
 
 /// Les entrées arrivées dans le journal depuis le dernier appel (`dernier` = dernier numéro lu).

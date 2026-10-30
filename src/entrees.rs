@@ -288,6 +288,7 @@ pub fn boucle(
         // L'historique du jeu lu à l'écran : ses nouvelles lignes, et le verdict
         // d'un combo fini s'il attendait les frames exactes.
         let nouveau_jeu = juge.lire_journal(temps);
+        capture.latence = juge.latence.valeur().unwrap_or(LATENCE_DEFAUT);
         // Historique du jeu visible : les coups sont lus dans ses lignes (ce que le jeu a
         // vraiment pris en compte), et donnés au trial.
         for coup_jeu in juge.coups_du_jeu() {
@@ -418,6 +419,7 @@ pub fn boucle(
         // Prévenir l'overlay qu'il y a du nouveau à dessiner.
         if change {
             ctx.request_repaint();
+            ctx.request_repaint_of(crate::overlay::id());
         }
 
         // On regarde la manette toutes les millisecondes (largement plus vite qu'une frame).
@@ -543,7 +545,7 @@ fn resultat_trial(
 ) -> Option<Fin> {
     let attendue = trial.index;
     let resultat = trial.coup(candidats, frame);
-    suivre_video(trial, capture, &resultat, frame);
+    suivre_video(trial, capture, &resultat, (frame, temps));
     // Les appuis des étapes, pour les retrouver ensuite dans l'historique du jeu.
     match resultat {
         Resultat::Avance | Resultat::Rate { .. } if trial.index == 1 => {
@@ -1497,25 +1499,30 @@ fn confirmer(
 }
 
 /// La vidéo suit le trial : on filme dès la 1re étape, on garde si c'est réussi.
-fn suivre_video(trial: &Trial, capture: &mut Capture, resultat: &Resultat, frame: u64) {
+fn suivre_video(
+    trial: &Trial,
+    capture: &mut Capture,
+    resultat: &Resultat,
+    (frame, temps): (u64, i64),
+) {
     match resultat {
         Resultat::Avance => {
             if trial.index == 1 {
                 capture.debut_essai(frame);
             }
-            capture.etape(&trial.etapes[trial.index - 1].notation, frame);
+            capture.etape(&trial.etapes[trial.index - 1].notation, frame, temps);
         }
         // Gardée ou non : décidé par `conclure`, une fois les frames du jeu connues.
         Resultat::Reussi => {
             if let Some(derniere) = trial.etapes.last() {
-                capture.etape(&derniere.notation, frame);
+                capture.etape(&derniere.notation, frame, temps);
             }
         }
         Resultat::Rate { .. } => {
             // Le coup raté peut être le début d'un nouvel essai (index revenu à 1).
             if trial.index == 1 {
                 capture.debut_essai(frame);
-                capture.etape(&trial.etapes[0].notation, frame);
+                capture.etape(&trial.etapes[0].notation, frame, temps);
             } else {
                 capture.annuler();
             }

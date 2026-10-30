@@ -94,6 +94,8 @@ pub struct Partage {
     pub combos: Vec<String>,
     pub combo_index: usize,
     pub combo_demande: Option<usize>,
+    /// L'overlay est affiché (bouton de l'interface).
+    pub overlay_visible: bool,
 }
 
 impl Partage {
@@ -127,6 +129,7 @@ impl Partage {
             combos: Vec::new(),
             combo_index: 0,
             combo_demande: None,
+            overlay_visible: true,
         }
     }
 
