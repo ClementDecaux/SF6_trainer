@@ -254,6 +254,11 @@ pub struct Trial {
     pub cote: Cote,
     /// Essai en cours joué à droite : les coups sont retournés (4 <-> 6) avant d'être comparés.
     pub miroir: bool,
+    /// Les appuis qui ont validé une étape dans l'essai en cours (lectures, frame).
+    appuis: Vec<(Vec<String>, u64)>,
+    /// Après un raté : l'essai a été recalé sur un nouveau départ pris parmi les appuis de
+    /// l'essai raté (le numéro du premier appui gardé). Voir [`Trial::coup`].
+    pub reprise: Option<usize>,
 }
 
 /// Le côté de l'écran du joueur. À droite, « avant » est vers la gauche : un 236 fait au
@@ -308,7 +313,20 @@ impl Trial {
             cote: Cote::Auto,
             miroir: false,
             degats_fixe: false,
+            appuis: Vec::new(),
+            reprise: None,
         }
+    }
+
+    /// Le même trial, sans essai en cours.
+    fn vierge(&self) -> Trial {
+        let mut t = Trial::new(&self.nom, self.etapes.clone());
+        t.hits = self.hits;
+        t.hits_fixe = self.hits_fixe;
+        t.degats = self.degats;
+        t.degats_fixe = self.degats_fixe;
+        t.cote = self.cote;
+        t
     }
 
     /// Un nouvel essai commence (1re étape validée).
@@ -336,7 +354,61 @@ impl Trial {
 
     /// Un coup vient d'être fait. `candidats` = toutes les lectures possibles
     /// (ex. « 236MK » et « 41236MK » pour le même input).
+    /// Un coup (toutes ses lectures possibles) donné au trial.
+    ///
+    /// Sur un raté, on regarde si les derniers appuis forment le début du combo : c'est
+    /// qu'on a recommencé le combo avec un coup qui revient plus loin dedans (« b+MK, DR,
+    /// d/b+HP, b+MK… » : le b+MK du nouveau départ ressemble à la 4e étape). Le trial est
+    /// alors recalé sur ce nouveau départ (`reprise`), et le raté de l'ancien essai reste.
     pub fn coup(&mut self, candidats: &[String], frame: u64) -> Resultat {
+        self.reprise = None;
+        let avant = std::mem::take(&mut self.appuis);
+        let resultat = self.coup_simple(candidats, frame);
+        let appui = (candidats.to_vec(), frame);
+        match &resultat {
+            Resultat::Avance if self.index == 1 => self.appuis = vec![appui],
+            Resultat::Avance => {
+                self.appuis = avant;
+                self.appuis.push(appui);
+            }
+            Resultat::Ignore => self.appuis = avant,
+            Resultat::Reussi => {}
+            Resultat::Rate { .. } => {
+                if let Some((debut, trial)) = self.recaler(&avant, &appui) {
+                    let (cote, miroir) = (self.cote, trial.miroir);
+                    *self = trial;
+                    self.cote = cote;
+                    self.miroir = miroir;
+                    self.reprise = Some(debut);
+                } else if self.index == 1 {
+                    self.appuis = vec![appui];
+                }
+            }
+        }
+        resultat
+    }
+
+    /// Le plus long nouveau départ possible parmi les appuis de l'essai raté (sans le 1er) :
+    /// rejoués avec l'appui raté, ils doivent tous valider une étape.
+    fn recaler(
+        &self,
+        avant: &[(Vec<String>, u64)],
+        rate: &(Vec<String>, u64),
+    ) -> Option<(usize, Trial)> {
+        (1..avant.len()).find_map(|debut| {
+            let mut essai = self.vierge();
+            let appuis: Vec<_> = avant[debut..].iter().chain([rate]).cloned().collect();
+            for (candidats, frame) in &appuis {
+                if essai.coup_simple(candidats, *frame) != Resultat::Avance {
+                    return None;
+                }
+            }
+            essai.appuis = appuis;
+            Some((debut, essai))
+        })
+    }
+
+    fn coup_simple(&mut self, candidats: &[String], frame: u64) -> Resultat {
         // Pas de fenêtre de timing : le coup attendu fait avancer, quel que soit le moment.
         // Ce sont les hits lus dans le jeu qui disent si le combo est passé.
         let ecart = frame.saturating_sub(self.derniere_frame);
@@ -695,6 +767,33 @@ mod tests {
         assert_eq!(t.index, 1);
         assert_eq!(t.coup(&c("DR"), 215), Resultat::Avance);
         assert_eq!(t.coup(&c("5LP"), 235), Resultat::Reussi);
+    }
+
+    #[test]
+    fn recommencer_avec_un_coup_qui_revient_dans_le_combo() {
+        // b+MK xx DR xx d/b+HP, b+MK xx qcb+MP : arrêté après d/b+HP, on recommence.
+        let mut t = Trial::new("test", parser("4MK xx DR xx 1HP, 4MK xx 63214MP").unwrap());
+        assert_eq!(t.coup(&c("4MK"), 100), Resultat::Avance);
+        assert_eq!(t.coup(&c("DR"), 115), Resultat::Avance);
+        assert_eq!(t.coup(&c("1HP"), 135), Resultat::Avance);
+        // Le b+MK du nouveau départ passe pour la 4e étape…
+        assert_eq!(t.coup(&c("4MK"), 300), Resultat::Avance);
+        // … mais le DR qui suit montre qu'on a recommencé : recalé à l'étape 3.
+        assert!(matches!(t.coup(&c("DR"), 315), Resultat::Rate { .. }));
+        assert_eq!((t.index, t.reprise), (2, Some(3)));
+        assert_eq!(t.ecarts, vec![15]);
+        assert_eq!(t.coup(&c("1HP"), 335), Resultat::Avance);
+        assert_eq!(t.coup(&c("4MK"), 360), Resultat::Avance);
+        assert_eq!(t.coup(&c("63214MP"), 380), Resultat::Reussi);
+    }
+
+    #[test]
+    fn un_vrai_rate_ne_recale_pas() {
+        let mut t = Trial::new("test", parser("4MK xx DR xx 1HP, 4MK xx 63214MP").unwrap());
+        t.coup(&c("4MK"), 100);
+        t.coup(&c("DR"), 115);
+        assert!(matches!(t.coup(&c("5LP"), 130), Resultat::Rate { .. }));
+        assert_eq!((t.index, t.reprise), (0, None));
     }
 
     #[test]

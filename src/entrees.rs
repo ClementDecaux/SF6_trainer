@@ -604,6 +604,15 @@ fn resultat_trial(
             juge.etapes.clear();
             juge.etape(temps, appui_etape(&trial.etapes[0].notation, candidats));
         }
+        // Recalé sur un nouveau départ pris dans l'essai raté : on garde ses appuis.
+        Resultat::Rate { .. } if let Some(debut) = trial.reprise => {
+            let garder = juge.etapes.split_off(debut.min(juge.etapes.len()));
+            juge.etapes = garder;
+            juge.etape(
+                temps,
+                appui_etape(&trial.etapes[trial.index - 1].notation, candidats),
+            );
+        }
         Resultat::Avance => juge.etape(
             temps,
             appui_etape(&trial.etapes[trial.index - 1].notation, candidats),
@@ -667,6 +676,21 @@ fn resultat_trial(
             println!("{}", affichage::trial(trial));
             p.message_rate(&attendu, coup);
             p.etape_cassee = Some(attendue);
+            if trial.reprise.is_some() {
+                // Pas un vrai raté à montrer : le combo a été recommencé.
+                p.message = None;
+                p.etape_cassee = None;
+                p.ligne_cassee_a_venir = false;
+                println!(
+                    "{}",
+                    format!(
+                        "      ↺ tu as recommencé le combo : on reprend à l'étape {}",
+                        trial.index + 1
+                    )
+                    .cyan()
+                );
+                println!("{}", affichage::trial(trial));
+            }
             // Le mauvais coup sera sur la prochaine ligne de l'historique.
             p.ligne_cassee_a_venir = true;
         }
