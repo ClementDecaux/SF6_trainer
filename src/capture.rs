@@ -707,6 +707,8 @@ mod capture_windows {
         pret: Option<Box<Pret>>,
         /// Si la préparation a échoué, on ne réessaie qu'au prochain essai (pas à chaque image).
         echec_preparation: bool,
+        /// Encodeur en cours de création sur un fil à part (voir `preparer`).
+        preparation: Option<Receiver<Result<Pret, String>>>,
         tampon: Tampon,
         /// Pour donner un nom différent à chaque vidéo en cours.
         numero: u32,
@@ -769,90 +771,83 @@ mod capture_windows {
                 let silence = vec![0u8; (taux / 10 * 4) as usize];
                 let _ = envoi.send(Envoi::Son(silence));
             }
-            // Plus rien à envoyer : le fil de l'encodeur termine la vidéo.
+            // Plus rien à envoyer : le fil de l'encodeur termine la vidéo. On ne l'attend pas
+            // ici : finir l'encodage prend du temps, et la capture était bloquée pendant ce
+            // temps (images perdues au début de l'essai suivant). La fin se fait à part.
             drop(envoi);
-            if !fil.join().unwrap_or(false) {
-                let _ = std::fs::remove_file(&chemin);
-                return;
+            let dossier = self.config.dossier.clone();
+            let diagnostic = Diagnostic {
+                manquees,
+                lentes,
+                pire_ms,
+                avant,
+                trous,
+                demarrage_ms,
+                encodeurs: self.numero,
+            };
+            std::thread::spawn(move || {
+                if !fil.join().unwrap_or(false) {
+                    let _ = std::fs::remove_file(&chemin);
+                    return;
+                }
+                finir_clip(&dossier, &chemin, fin, premier, diagnostic);
+            });
+        }
+
+        /// Lance la création d'un encodeur sur un fil à part : la créer prend des dizaines
+        /// de ms, et faite pendant la capture, elle faisait perdre des images juste avant
+        /// l'essai suivant. Le résultat arrive dans `preparation`.
+        fn preparer(&mut self, largeur: u32, hauteur: u32) {
+            if let Some(ancien) = self.pret.take() {
+                jeter_a_part(*ancien);
             }
-            match fin {
-                Some((_, mut infos)) => {
-                    // Pour le lecteur : où commence la vidéo, et l'historique du jeu pendant.
-                    infos.debut_video = premier;
-                    infos.lignes = crate::ecran::entrees_depuis(premier);
-                    self.ranger(&chemin, &infos);
-                    if manquees > 0 || lentes > 0 {
-                        let liste: Vec<String> = trous
-                            .iter()
-                            .take(40)
-                            .map(|&(t, n)| {
-                                format!("à {:.2} s : {n}", (t - premier) as f64 / 10_000_000.0)
-                            })
-                            .collect();
-                        println!(
-                            "      Vidéo : {manquees} image(s) manquante(s) (saccades), \
-                             {lentes} image(s) traitée(s) en plus de 14 ms (pire : {pire_ms} \
-                             ms), démarrage en {demarrage_ms} ms. Avant la 1re étape : {} \
-                             manquante(s), {} lente(s) (pire : {} ms). Encodeurs créés : {}. \
-                             Trous : {}",
-                            avant.0,
-                            avant.1,
-                            avant.2,
-                            self.numero,
-                            liste.join(", ")
-                        );
+            self.numero += 1;
+            let dossier = self.config.dossier.clone();
+            let debit = self.config.debit_mbps;
+            let numero = self.numero;
+            let taux = self.taux_son();
+            let (envoi, reception) = std::sync::mpsc::channel();
+            std::thread::spawn(move || {
+                // Les objets Windows de l'encodeur demandent que COM soit prêt sur ce fil.
+                unsafe {
+                    let _ = windows::Win32::System::Com::CoInitializeEx(
+                        None,
+                        windows::Win32::System::Com::COINIT_MULTITHREADED,
+                    );
+                }
+                let resultat = creer_encodeur(&dossier, debit, numero, largeur, hauteur, taux)
+                    .map_err(|e| e.to_string());
+                let _ = envoi.send(resultat);
+            });
+            self.preparation = Some(reception);
+        }
+
+        /// Récupère l'encodeur en préparation s'il est prêt (`attendre` : l'attend).
+        fn recevoir_preparation(&mut self, attendre: bool) {
+            let Some(reception) = &self.preparation else {
+                return;
+            };
+            let resultat = if attendre {
+                reception.recv().map_err(|_| ())
+            } else {
+                match reception.try_recv() {
+                    Err(std::sync::mpsc::TryRecvError::Empty) => return,
+                    autre => autre.map_err(|_| ()),
+                }
+            };
+            self.preparation = None;
+            match resultat {
+                Ok(Ok(pret)) => {
+                    if let Some(ancien) = self.pret.replace(Box::new(pret)) {
+                        jeter_a_part(*ancien);
                     }
                 }
-                None => {
-                    let _ = std::fs::remove_file(&chemin);
+                Ok(Err(e)) => {
+                    eprintln!("Vidéo : impossible de préparer l'encodage ({e}).");
+                    self.echec_preparation = true;
                 }
+                Err(()) => self.echec_preparation = true,
             }
-        }
-
-        /// Renomme la vidéo et y range ses infos.
-        fn ranger(&self, en_cours: &Path, infos: &InfosClip) {
-            // Un seul exemplaire par combo : l'ancien clip laisse la place au nouveau.
-            supprimer_anciens(Path::new(&self.config.dossier), infos);
-            let base = Path::new(&self.config.dossier).join(nom_fichier(infos));
-            let video = base.with_extension("mp4");
-            let _ = std::fs::remove_file(&video);
-            if let Err(e) = std::fs::rename(en_cours, &video) {
-                eprintln!("Vidéo : impossible de ranger le clip ({e}).");
-                return;
-            }
-            if let Err(e) = ecrire_infos(&video, infos) {
-                eprintln!("Vidéo : impossible d'y ranger les infos du clip ({e}).");
-            }
-            println!("      🎬 clip enregistré : {}", video.display());
-            super::CLIPS_RANGES.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
-        }
-
-        fn creer_encodeur(&mut self, largeur: u32, hauteur: u32) -> Result<Pret, Erreur> {
-            std::fs::create_dir_all(&self.config.dossier)?;
-            self.numero += 1;
-            let chemin =
-                Path::new(&self.config.dossier).join(format!("en_cours_{}.mp4", self.numero));
-            let video = VideoSettingsBuilder::new(largeur, hauteur)
-                .sub_type(VideoSettingsSubType::H264)
-                .frame_rate(60)
-                .bitrate(self.config.debit_mbps.saturating_mul(1_000_000));
-            let taux = self.taux_son();
-            let son = match taux {
-                Some(taux) => AudioSettingsBuilder::default()
-                    .sample_rate(taux)
-                    .channel_count(2)
-                    .bit_per_sample(16),
-                None => AudioSettingsBuilder::default().disabled(true),
-            };
-            let encodeur =
-                VideoEncoder::new(video, son, ContainerSettingsBuilder::default(), &chemin)?;
-            Ok(Pret {
-                encodeur,
-                chemin,
-                largeur,
-                hauteur,
-                taux,
-            })
         }
 
         /// Le son écouté, s'il est demandé et prêt.
@@ -866,6 +861,8 @@ mod capture_windows {
 
         /// Un encodeur à la bonne taille : celui préparé à l'avance, sinon un nouveau.
         fn prendre_encodeur(&mut self, largeur: u32, hauteur: u32) -> Result<Pret, Erreur> {
+            // Presque toujours déjà prêt : la préparation commence dès la fin de l'essai.
+            self.recevoir_preparation(true);
             match self.pret.take() {
                 Some(pret)
                     if pret.largeur == largeur
@@ -876,9 +873,17 @@ mod capture_windows {
                 }
                 autre => {
                     if let Some(pret) = autre {
-                        jeter(*pret);
+                        jeter_a_part(*pret);
                     }
-                    self.creer_encodeur(largeur, hauteur)
+                    self.numero += 1;
+                    creer_encodeur(
+                        &self.config.dossier,
+                        self.config.debit_mbps,
+                        self.numero,
+                        largeur,
+                        hauteur,
+                        self.taux_son(),
+                    )
                 }
             }
         }
@@ -1000,6 +1005,76 @@ mod capture_windows {
         }
     }
 
+    /// Ce qu'on a mesuré pendant le film, pour trouver d'où viennent les saccades.
+    struct Diagnostic {
+        manquees: u32,
+        lentes: u32,
+        pire_ms: u32,
+        avant: (u32, u32, u32),
+        trous: Vec<(i64, u32)>,
+        demarrage_ms: u128,
+        encodeurs: u32,
+    }
+
+    /// La vidéo est encodée : gardée et rangée si le combo a été réussi, jetée sinon.
+    fn finir_clip(
+        dossier: &str,
+        chemin: &Path,
+        fin: Option<(Instant, Box<InfosClip>)>,
+        premier: i64,
+        d: Diagnostic,
+    ) {
+        let Some((_, mut infos)) = fin else {
+            let _ = std::fs::remove_file(chemin);
+            return;
+        };
+        // Pour le lecteur : où commence la vidéo, et l'historique du jeu pendant.
+        infos.debut_video = premier;
+        infos.lignes = crate::ecran::entrees_depuis(premier);
+        ranger(dossier, chemin, &infos);
+        if d.manquees > 0 || d.lentes > 0 {
+            let liste: Vec<String> = d
+                .trous
+                .iter()
+                .take(40)
+                .map(|&(t, n)| format!("à {:.2} s : {n}", (t - premier) as f64 / 10_000_000.0))
+                .collect();
+            println!(
+                "      Vidéo : {} image(s) manquante(s) (saccades), {} image(s) traitée(s) en \
+                 plus de 14 ms (pire : {} ms), démarrage en {} ms. Avant la 1re étape : {} \
+                 manquante(s), {} lente(s) (pire : {} ms). Encodeurs créés : {}. Trous : {}",
+                d.manquees,
+                d.lentes,
+                d.pire_ms,
+                d.demarrage_ms,
+                d.avant.0,
+                d.avant.1,
+                d.avant.2,
+                d.encodeurs,
+                liste.join(", ")
+            );
+        }
+    }
+
+    /// Renomme la vidéo et y range ses infos.
+    fn ranger(dossier: &str, en_cours: &Path, infos: &InfosClip) {
+        // Un seul exemplaire par combo : l'ancien clip laisse la place au nouveau.
+        supprimer_anciens(Path::new(dossier), infos);
+        let video = Path::new(dossier)
+            .join(nom_fichier(infos))
+            .with_extension("mp4");
+        let _ = std::fs::remove_file(&video);
+        if let Err(e) = std::fs::rename(en_cours, &video) {
+            eprintln!("Vidéo : impossible de ranger le clip ({e}).");
+            return;
+        }
+        if let Err(e) = ecrire_infos(&video, infos) {
+            eprintln!("Vidéo : impossible d'y ranger les infos du clip ({e}).");
+        }
+        println!("      🎬 clip enregistré : {}", video.display());
+        super::CLIPS_RANGES.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
+    }
+
     /// Ce qu'on donne au fil de l'encodeur.
     enum Envoi {
         Image(Image),
@@ -1064,6 +1139,42 @@ mod capture_windows {
         ((ecart + IMAGE / 2) / IMAGE - 1).max(0) as u32
     }
 
+    fn creer_encodeur(
+        dossier: &str,
+        debit_mbps: u32,
+        numero: u32,
+        largeur: u32,
+        hauteur: u32,
+        taux: Option<u32>,
+    ) -> Result<Pret, Erreur> {
+        std::fs::create_dir_all(dossier)?;
+        let chemin = Path::new(dossier).join(format!("en_cours_{numero}.mp4"));
+        let video = VideoSettingsBuilder::new(largeur, hauteur)
+            .sub_type(VideoSettingsSubType::H264)
+            .frame_rate(60)
+            .bitrate(debit_mbps.saturating_mul(1_000_000));
+        let son = match taux {
+            Some(taux) => AudioSettingsBuilder::default()
+                .sample_rate(taux)
+                .channel_count(2)
+                .bit_per_sample(16),
+            None => AudioSettingsBuilder::default().disabled(true),
+        };
+        let encodeur = VideoEncoder::new(video, son, ContainerSettingsBuilder::default(), &chemin)?;
+        Ok(Pret {
+            encodeur,
+            chemin,
+            largeur,
+            hauteur,
+            taux,
+        })
+    }
+
+    /// Comme `jeter`, mais sans bloquer la capture.
+    fn jeter_a_part(pret: Pret) {
+        std::thread::spawn(move || jeter(pret));
+    }
+
     /// Ferme un encodeur qui n'a pas servi et supprime son fichier.
     fn jeter(pret: Pret) {
         let _ = pret.encodeur.finish();
@@ -1082,6 +1193,7 @@ mod capture_windows {
                 etat: Etat::Attente,
                 pret: None,
                 echec_preparation: false,
+                preparation: None,
                 tampon,
                 numero: 0,
                 photo: false,
@@ -1150,18 +1262,13 @@ mod capture_windows {
             let mut terminer = false;
             match &mut self.etat {
                 Etat::Attente => {
+                    self.recevoir_preparation(false);
                     let (largeur, hauteur) = (frame.width(), frame.height());
                     let a_jour = self.pret.as_ref().is_some_and(|p| {
                         p.largeur == largeur && p.hauteur == hauteur && p.taux == self.taux_son()
                     });
-                    if !a_jour && !self.echec_preparation {
-                        match self.prendre_encodeur(largeur, hauteur) {
-                            Ok(pret) => self.pret = Some(Box::new(pret)),
-                            Err(e) => {
-                                eprintln!("Vidéo : impossible de préparer l'encodage ({e}).");
-                                self.echec_preparation = true;
-                            }
-                        }
+                    if !a_jour && !self.echec_preparation && self.preparation.is_none() {
+                        self.preparer(largeur, hauteur);
                     }
                 }
                 Etat::Demande => self.commencer(frame, temps, image.take()),
@@ -1226,6 +1333,7 @@ mod capture_windows {
         /// SF6 a été fermé : la vidéo en cours est terminée (gardée si réussie).
         fn on_closed(&mut self) -> Result<(), Self::Error> {
             self.arreter();
+            self.recevoir_preparation(true);
             if let Some(pret) = self.pret.take() {
                 jeter(*pret);
             }
