@@ -485,8 +485,12 @@ impl Interface {
 
         let images_avant = self.images_avant;
         let syntaxe = self.syntaxe();
+        let liaisons = self
+            .partage
+            .lock()
+            .map_or(Default::default(), |p| p.liaisons);
         egui::CentralPanel::default().show(ui, |ui| match &mut self.lecteur {
-            Some(lecteur) => lecteur.afficher(ui, images_avant, syntaxe),
+            Some(lecteur) => lecteur.afficher(ui, images_avant, (syntaxe, liaisons)),
             None => {
                 ui.label("Choisis une vidéo dans la liste.");
             }
@@ -495,7 +499,12 @@ impl Interface {
 }
 
 impl Lecteur {
-    fn afficher(&mut self, ui: &mut egui::Ui, images_avant: usize, syntaxe: Syntaxe) {
+    fn afficher(
+        &mut self,
+        ui: &mut egui::Ui,
+        images_avant: usize,
+        (syntaxe, liaisons): (Syntaxe, StyleLiaison),
+    ) {
         let Ok(decodage) = self.video.decodage.lock() else {
             return;
         };
@@ -649,9 +658,21 @@ impl Lecteur {
 
                 // Les étapes : cliquer dessus y amène.
                 ui.add_space(6.0);
+                // Les liaisons (cancel / link), relues dans les inputs du combo.
+                let liens: Vec<crate::combo::Liaison> = self
+                    .infos
+                    .as_ref()
+                    .and_then(|infos| crate::combo::parser(&infos.inputs).ok())
+                    .map(|e| e.iter().map(|e| e.liaison).collect())
+                    .unwrap_or_default();
                 ui.horizontal_wrapped(|ui| {
                     ui.label(RichText::new("Étapes :").color(GRIS));
-                    for (i, notation) in &etapes {
+                    for (k, (i, notation)) in etapes.iter().enumerate() {
+                        if k > 0
+                            && let Some(&liaison) = liens.get(k)
+                        {
+                            syntaxe::dessiner_liaison(ui, liaison, liaisons, 14.0, false);
+                        }
                         let faite = *i <= self.image;
                         let couleur = if faite { VERT } else { Color32::WHITE };
                         if syntaxe::bouton_coup(ui, notation, syntaxe, 16.0, couleur)
@@ -939,7 +960,7 @@ impl Interface {
 
 /// Remplace la valeur de quelques clés (`cle = valeur`) dans un fichier de réglages,
 /// sans toucher au reste (commentaires compris). Une clé absente est ajoutée à la fin.
-fn ecrire_cles(fichier: &str, valeurs: &[(&str, String)]) {
+pub(crate) fn ecrire_cles(fichier: &str, valeurs: &[(&str, String)]) {
     let Ok(texte) = std::fs::read_to_string(fichier) else {
         return;
     };

@@ -19,9 +19,11 @@ cargo test         # lance les tests
 - SF6 doit être en **plein écran fenêtré** (borderless), sinon rien ne peut s'afficher par-dessus.
 - Le contrôleur doit être en mode **XInput** (mode manette Xbox).
 - Fermer la fenêtre de l'interface (ou Ctrl+C dans le terminal) ferme l'outil.
-- **F8** pour déplacer l'overlay : glisse-le à la souris, puis F8 à nouveau. La position est
-  enregistrée dans `overlay.toml`. Reclique ensuite dans le jeu pour lui rendre le focus.
-- **F9** pour garder ou non les vidéos des combos réussis (`● REC` dans l'overlay). Coupé au
+- Pour **déplacer** l'overlay, glisse la petite bande en haut. **F8** active en plus le
+  redimensionnement par les bords et les coins (F8 à nouveau pour finir). La place est
+  enregistrée dans `overlay.toml`.
+- La **languette** en bas de l'overlay déplie ou replie l'historique d'inputs.
+- **F9** pour garder ou non les vidéos des combos réussis (`REC` dans l'overlay). Coupé au
   lancement, sauf si `enregistrer = true` dans `capture.toml`.
 - L'outil suppose que tu joues à gauche de l'écran (b = 4 = vers la gauche).
 

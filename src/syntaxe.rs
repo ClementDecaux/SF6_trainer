@@ -297,8 +297,8 @@ impl StyleLiaison {
     /// Largeur de la colonne des liaisons, pour que tous les coups soient alignés.
     fn largeur(self, taille: f32) -> f32 {
         let l = match self {
-            StyleLiaison::Pastilles => 4.6,
-            StyleLiaison::Mots => 3.6,
+            StyleLiaison::Pastilles => 3.7,
+            StyleLiaison::Mots => 3.0,
             StyleLiaison::Symboles => 1.7,
             StyleLiaison::Courts => 1.2,
             StyleLiaison::Aucune => 0.0,
@@ -326,7 +326,7 @@ pub fn dessiner_liaison(
         Liaison::Debut => {
             if colonne && style != StyleLiaison::Aucune {
                 ui.allocate_exact_size(
-                    egui::vec2(style.largeur(taille), taille),
+                    egui::vec2(style.largeur(taille), (taille * 2.0).round()),
                     egui::Sense::hover(),
                 );
             }
@@ -361,7 +361,17 @@ pub fn dessiner_liaison(
                 2.0
             }
     };
-    let (rect, _) = ui.allocate_exact_size(egui::vec2(largeur, taille * 1.2), egui::Sense::hover());
+    let (rect, _) = ui.allocate_exact_size(
+        egui::vec2(
+            largeur,
+            if colonne {
+                (taille * 2.0).round()
+            } else {
+                (taille * 1.2).round()
+            },
+        ),
+        egui::Sense::hover(),
+    );
     let centre = rect.center();
     if style == StyleLiaison::Pastilles {
         let cadre = egui::Rect::from_center_size(

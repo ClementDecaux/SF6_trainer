@@ -67,6 +67,9 @@ pub struct Config {
     /// Affichage des liaisons (cancel / link).
     #[serde(default)]
     pub liaisons: crate::syntaxe::StyleLiaison,
+    /// L'historique est déplié (languette en bas de l'overlay).
+    #[serde(default = "vrai")]
+    pub historique_ouvert: bool,
 }
 
 fn vrai() -> bool {
@@ -110,11 +113,10 @@ pub struct Overlay {
     regler_dans: u8,
     /// Mode déplacement actuellement appliqué à la fenêtre.
     deplacement: bool,
-    /// La souris est au-dessus de l'historique : la fenêtre la garde (pour la molette).
+    /// La souris est au-dessus de l'overlay : la fenêtre la garde (clics, molette).
     survol: bool,
-    /// Où sont l'historique et les boutons à l'écran (en points) : quand la souris les
-    /// survole, la fenêtre la garde (molette, clics).
-    zones: Vec<egui::Rect>,
+    /// L'historique est déplié (languette en bas).
+    historique_ouvert: bool,
     /// Nombre de lignes déjà vues : une nouvelle ligne ramène l'historique en haut.
     lignes_vues: u64,
     /// Mode déplacement : la fenêtre en train d'être glissée ou redimensionnée.
@@ -126,6 +128,8 @@ struct Glisse {
     curseur: egui::Pos2,
     fenetre: egui::Rect,
     bords: Bords,
+    /// La dernière place demandée pour la fenêtre.
+    place: egui::Rect,
 }
 
 /// Les bords de la fenêtre sous la souris (pour la redimensionner).
@@ -139,15 +143,56 @@ struct Bords {
 
 impl Bords {
     /// Largeur (en points) de la bande, le long des bords, qui redimensionne.
-    const BANDE: f32 = 12.0;
+    const BANDE: f32 = 8.0;
+    /// Taille des coins.
+    const COIN: f32 = 16.0;
 
-    fn sous(souris: egui::Pos2, fenetre: egui::Rect) -> Bords {
-        Bords {
-            gauche: souris.x < fenetre.min.x + Self::BANDE,
-            droite: souris.x > fenetre.max.x - Self::BANDE,
-            haut: souris.y < fenetre.min.y + Self::BANDE,
-            bas: souris.y > fenetre.max.y - Self::BANDE,
-        }
+    /// Les zones qui redimensionnent : les 4 côtés et les 4 coins, chacune avec ses bords.
+    fn zones(f: egui::Rect) -> Vec<(egui::Rect, Bords)> {
+        let (b, c) = (Self::BANDE, Self::COIN);
+        let bords = |gauche, droite, haut, bas| Bords {
+            gauche,
+            droite,
+            haut,
+            bas,
+        };
+        let r = |x0: f32, y0: f32, x1: f32, y1: f32| {
+            egui::Rect::from_min_max(egui::pos2(x0, y0), egui::pos2(x1, y1))
+        };
+        vec![
+            (
+                r(f.min.x, f.min.y + c, f.min.x + b, f.max.y - c),
+                bords(true, false, false, false),
+            ),
+            (
+                r(f.max.x - b, f.min.y + c, f.max.x, f.max.y - c),
+                bords(false, true, false, false),
+            ),
+            (
+                r(f.min.x + c, f.min.y, f.max.x - c, f.min.y + b),
+                bords(false, false, true, false),
+            ),
+            (
+                r(f.min.x + c, f.max.y - b, f.max.x - c, f.max.y),
+                bords(false, false, false, true),
+            ),
+            (
+                r(f.min.x, f.min.y, f.min.x + c, f.min.y + c),
+                bords(true, false, true, false),
+            ),
+            (
+                r(f.max.x - c, f.min.y, f.max.x, f.min.y + c),
+                bords(false, true, true, false),
+            ),
+            (
+                r(f.min.x, f.max.y - c, f.min.x + c, f.max.y),
+                bords(true, false, false, true),
+            ),
+            (
+                r(f.max.x - c, f.max.y - c, f.max.x, f.max.y),
+                bords(false, true, false, true),
+            ),
+        ]
     }
 
     fn curseur(self) -> egui::CursorIcon {
@@ -194,7 +239,7 @@ impl Overlay {
             regler_dans: 1,
             deplacement: false,
             survol: false,
-            zones: Vec::new(),
+            historique_ouvert: config.historique_ouvert,
             lignes_vues: 0,
             glisse: None,
         }
@@ -203,7 +248,7 @@ impl Overlay {
     /// Les clics et la molette passent au jeu, sauf en mode déplacement (F8)
     /// et quand la souris est au-dessus de l'historique (pour le faire défiler).
     fn traversant(&self) -> bool {
-        !self.deplacement && !self.survol
+        !self.deplacement && !self.survol && self.glisse.is_none()
     }
 }
 
@@ -282,7 +327,10 @@ impl Overlay {
                 enregistrer_position(ui.ctx());
             }
         }
-        self.survol = self.zones.iter().any(|&z| souris_sur(ui.ctx(), Some(z)));
+        // La souris au-dessus de l'overlay : la fenêtre la garde (boutons, molette, bande
+        // du haut). Sinon elle irait au jeu, qui cache le curseur.
+        let rect_fenetre = ui.ctx().input(|i| i.viewport().inner_rect);
+        self.survol = souris_sur(ui.ctx(), rect_fenetre);
         if self.traversant() != traversant_avant {
             ui.ctx()
                 .send_viewport_cmd(egui::ViewportCommand::MousePassthrough(self.traversant()));
@@ -307,77 +355,96 @@ impl Overlay {
         } else {
             egui::Stroke::NONE
         };
+        let tout = ui.max_rect();
+        let mut deplacer = None;
+        let mut basculer_historique = false;
         egui::Frame::new()
             .fill(Color32::from_rgba_unmultiplied(0, 0, 0, self.opacite_fond))
             .stroke(bordure)
             .corner_radius(10)
-            .inner_margin(14)
+            .inner_margin(egui::Margin {
+                left: 10,
+                right: 10,
+                top: 4,
+                bottom: 0,
+            })
             .show(ui, |ui| {
                 ui.set_width(ui.available_width());
+                // La bande du haut : on y attrape l'overlay pour le déplacer.
+                deplacer = Some(poignee(ui, self.deplacement || self.glisse.is_some()));
                 if self.deplacement {
                     ui.label(
-                        RichText::new("Glisse-moi, tire un bord pour la taille, F8 pour finir")
-                            .color(JAUNE)
-                            .size(16.0)
-                            .strong(),
-                    );
-                }
-                let fenetre = ui.ctx().input(|i| i.viewport().inner_rect);
-                let ecran = |r: egui::Rect| fenetre.map(|f| r.translate(f.min.to_vec2()));
-                self.zones.clear();
-                let barre = boutons(ui, &mut partage);
-                self.zones.extend(ecran(barre));
-                entete(ui, &partage);
-                ui.add_space(8.0);
-                etapes(ui, &partage);
-                if let Some(raison) = &partage.raison_estimee {
-                    ui.label(
-                        RichText::new(format!("frames estimées : {raison}"))
+                        RichText::new("Tire un bord pour la taille, F8 pour finir")
                             .color(JAUNE)
                             .size(13.0),
                     );
                 }
-                ui.add_space(8.0);
+                boutons(ui, &mut partage);
+                ui.add_space(2.0);
+                choix_combo(ui, &mut partage);
+                ui.add_space(4.0);
+                etapes(ui, &partage);
+                ui.add_space(4.0);
                 message(ui, &partage);
-                ui.separator();
-                // L'historique défile à la molette ; une nouvelle ligne le ramène en haut.
-                let mut defilement = egui::ScrollArea::vertical();
-                // Historique du jeu visible : on recopie ses lignes (ce que le jeu a pris
-                // en compte). Sinon, celles de notre manette.
-                let du_jeu = partage.historique_jeu && partage.ligne_jeu_en_cours.is_some();
-                let total = if du_jeu {
-                    partage.lignes_jeu_total
-                } else {
-                    partage.lignes_total
-                };
-                if total != self.lignes_vues {
-                    self.lignes_vues = total;
-                    defilement = defilement.vertical_scroll_offset(0.0);
-                }
-                let sortie = defilement
-                    .scroll_source(
-                        egui::scroll_area::ScrollSource::MOUSE_WHEEL
-                            | egui::scroll_area::ScrollSource::SCROLL_BAR,
-                    )
-                    .auto_shrink([false, false])
-                    .show(ui, |ui| {
-                        if du_jeu {
-                            historique_du_jeu(ui, &partage);
-                        } else {
-                            historique(ui, &partage.lignes, partage.syntaxe);
-                        }
-                    });
-                self.zones.extend(ecran(sortie.inner_rect));
-            });
+                statistiques(ui, &partage);
 
-        // Mode déplacement : cliquer-glisser au milieu déplace la fenêtre, sur un bord
-        // ou un coin il la redimensionne. On bouge la fenêtre nous-mêmes en suivant la
-        // souris à l'écran : le glisser de Windows ne marche pas sur une fenêtre qui ne
-        // prend pas le focus (pour le laisser à SF6).
+                if self.historique_ouvert {
+                    ui.separator();
+                    // L'historique défile à la molette ; une nouvelle ligne le ramène en haut.
+                    let mut defilement = egui::ScrollArea::vertical();
+                    // Historique du jeu visible : on recopie ses lignes (ce que le jeu a pris
+                    // en compte). Sinon, celles de notre manette.
+                    let du_jeu = partage.historique_jeu && partage.ligne_jeu_en_cours.is_some();
+                    let total = if du_jeu {
+                        partage.lignes_jeu_total
+                    } else {
+                        partage.lignes_total
+                    };
+                    if total != self.lignes_vues {
+                        self.lignes_vues = total;
+                        defilement = defilement.vertical_scroll_offset(0.0);
+                    }
+                    defilement
+                        .scroll_source(
+                            egui::scroll_area::ScrollSource::MOUSE_WHEEL
+                                | egui::scroll_area::ScrollSource::SCROLL_BAR,
+                        )
+                        .auto_shrink([false, false])
+                        .max_height((ui.available_height() - LANGUETTE).max(40.0))
+                        .show(ui, |ui| {
+                            if du_jeu {
+                                historique_du_jeu(ui, &partage);
+                            } else {
+                                historique(ui, &partage.lignes, partage.syntaxe);
+                            }
+                        });
+                }
+                basculer_historique = languette(ui, self.historique_ouvert);
+            });
+        if basculer_historique {
+            self.historique_ouvert = !self.historique_ouvert;
+            crate::interface::ecrire_cles(
+                FICHIER,
+                &[("historique_ouvert", self.historique_ouvert.to_string())],
+            );
+        }
+
+        // On bouge la fenêtre nous-mêmes en suivant la souris à l'écran : le glisser de
+        // Windows ne marche pas sur une fenêtre qui ne prend pas le focus (pour le laisser
+        // à SF6). La bande du haut déplace ; en mode F8, les bords redimensionnent.
+        let ctx = ui.ctx().clone();
+        let mut fini = None;
+        if let Some(bande) = deplacer {
+            fini = fini.or(suivre(&ctx, &mut self.glisse, &bande, Bords::default()));
+        }
         if self.deplacement {
-            glisser(ui, &mut self.glisse);
-        } else {
-            self.glisse = None;
+            for (k, (rect, bords)) in Bords::zones(tout).into_iter().enumerate() {
+                let zone = ui.interact(rect, ui.scope_id().with(("bord", k)), egui::Sense::drag());
+                fini = fini.or(suivre(&ctx, &mut self.glisse, &zone, bords));
+            }
+        }
+        if let Some(rect) = fini {
+            enregistrer_rect(rect);
         }
 
         // Redessiner un peu plus tard pour faire disparaître le message à temps.
@@ -387,40 +454,107 @@ impl Overlay {
     }
 }
 
-/// Mode déplacement : suit la souris pour déplacer ou redimensionner la fenêtre.
-fn glisser(ui: &mut egui::Ui, glisse: &mut Option<Glisse>) {
-    let ctx = ui.ctx().clone();
-    let zone = ui.interact(
-        ui.max_rect(),
-        egui::Id::unique("deplacer"),
-        egui::Sense::click_and_drag(),
+/// Hauteur de la languette de l'historique, en bas.
+const LANGUETTE: f32 = 20.0;
+
+/// La bande du haut, avec sa petite poignée : on la glisse pour déplacer l'overlay.
+fn poignee(ui: &mut egui::Ui, active: bool) -> egui::Response {
+    let (rect, reponse) =
+        ui.allocate_exact_size(egui::vec2(ui.available_width(), 12.0), egui::Sense::drag());
+    let vive = active || reponse.hovered() || reponse.dragged();
+    let couleur = if vive {
+        JAUNE
+    } else {
+        Color32::from_white_alpha(60)
+    };
+    let trait_ = egui::Rect::from_center_size(rect.center(), egui::vec2(46.0, 4.0));
+    ui.painter().rect_filled(trait_, 2, couleur);
+    reponse.on_hover_text("Glisser pour déplacer l'overlay")
+}
+
+/// La languette centrée en bas : ouvre ou ferme l'historique. Vrai si on a cliqué.
+fn languette(ui: &mut egui::Ui, ouvert: bool) -> bool {
+    let (ligne, _) = ui.allocate_exact_size(
+        egui::vec2(ui.available_width(), LANGUETTE),
+        egui::Sense::hover(),
     );
-    let Some(fenetre) = ctx.input(|i| i.viewport().outer_rect) else {
-        return;
+    let rect = egui::Rect::from_center_size(ligne.center(), egui::vec2(110.0, LANGUETTE - 2.0));
+    let reponse = ui.interact(rect, ui.scope_id().with("languette"), egui::Sense::click());
+    let couleur = if reponse.hovered() {
+        Color32::WHITE
+    } else {
+        GRIS
     };
-    let bords = match glisse {
-        Some(g) => g.bords,
-        None => zone
-            .hover_pos()
-            .map(|p| Bords::sous(p, ui.max_rect()))
-            .unwrap_or_default(),
+    ui.painter().rect_filled(
+        rect,
+        egui::CornerRadius {
+            nw: 6,
+            ne: 6,
+            sw: 0,
+            se: 0,
+        },
+        Color32::from_white_alpha(if reponse.hovered() { 40 } else { 20 }),
+    );
+    // Petit triangle : vers le haut pour fermer, vers le bas pour ouvrir.
+    let c = egui::pos2(rect.left() + 14.0, rect.center().y);
+    let (a, b, d) = if ouvert {
+        (
+            c + egui::vec2(-5.0, 3.0),
+            c + egui::vec2(5.0, 3.0),
+            c + egui::vec2(0.0, -3.0),
+        )
+    } else {
+        (
+            c + egui::vec2(-5.0, -3.0),
+            c + egui::vec2(5.0, -3.0),
+            c + egui::vec2(0.0, 3.0),
+        )
     };
-    if zone.hovered() || glisse.is_some() {
+    ui.painter().add(egui::Shape::convex_polygon(
+        vec![a, b, d],
+        couleur,
+        egui::Stroke::NONE,
+    ));
+    ui.painter().text(
+        egui::pos2(rect.left() + 24.0, rect.center().y),
+        egui::Align2::LEFT_CENTER,
+        "Historique",
+        egui::FontId::proportional(13.0),
+        couleur,
+    );
+    reponse.clicked()
+}
+
+/// Un glisser sur `zone` : déplace (aucun bord) ou redimensionne la fenêtre.
+/// Renvoie la nouvelle place de la fenêtre quand le glisser se termine.
+fn suivre(
+    ctx: &egui::Context,
+    glisse: &mut Option<Glisse>,
+    zone: &egui::Response,
+    bords: Bords,
+) -> Option<egui::Rect> {
+    let fenetre = ctx.input(|i| i.viewport().outer_rect)?;
+    let a_moi = glisse.as_ref().is_some_and(|g| g.bords == bords);
+    if zone.hovered() || a_moi {
         ctx.set_cursor_icon(bords.curseur());
     }
     if zone.drag_started()
-        && let Some(curseur) = curseur_ecran(&ctx)
+        && let Some(curseur) = curseur_ecran(ctx)
     {
         *glisse = Some(Glisse {
             curseur,
             fenetre,
             bords,
+            place: fenetre,
         });
+        return None;
     }
-    if let Some(g) = glisse {
-        if zone.dragged()
-            && let Some(curseur) = curseur_ecran(&ctx)
-        {
+    if !a_moi {
+        return None;
+    }
+    let g = glisse.as_mut()?;
+    if zone.dragged() {
+        if let Some(curseur) = curseur_ecran(ctx) {
             let r = g.bords.appliquer(g.fenetre, curseur - g.curseur);
             if r.min != fenetre.min {
                 ctx.send_viewport_cmd(egui::ViewportCommand::OuterPosition(r.min));
@@ -428,10 +562,14 @@ fn glisser(ui: &mut egui::Ui, glisse: &mut Option<Glisse>) {
             if r.size() != fenetre.size() {
                 ctx.send_viewport_cmd(egui::ViewportCommand::InnerSize(r.size()));
             }
+            g.place = r;
             ctx.request_repaint();
-        } else {
-            *glisse = None;
         }
+        None
+    } else {
+        let place = g.place;
+        *glisse = None;
+        Some(place)
     }
 }
 
@@ -457,8 +595,8 @@ fn curseur_ecran(ctx: &egui::Context) -> Option<egui::Pos2> {
     })
 }
 
-/// Les boutons cliquables : son, vidéos, déplacement, photo. Renvoie leur zone.
-fn boutons(ui: &mut egui::Ui, p: &mut Partage) -> egui::Rect {
+/// Les boutons cliquables : son, vidéos, déplacement, photo (et REC à droite).
+fn boutons(ui: &mut egui::Ui, p: &mut Partage) {
     let icone = |octets: &'static [u8], nom: &'static str| {
         egui::Image::from_bytes(nom, octets).fit_to_exact_size(egui::vec2(20.0, 20.0))
     };
@@ -515,40 +653,6 @@ fn boutons(ui: &mut egui::Ui, p: &mut Partage) -> egui::Rect {
             p.deplacement = !p.deplacement;
         }
 
-        // Choix du combo : précédent / suivant dans combos.toml.
-        let total = p.combos.len();
-        if total > 1 {
-            ui.add_space(10.0);
-            let image = icone(
-                include_bytes!("../assets/icones/chevron-left.svg"),
-                "bytes://precedent.svg",
-            );
-            if ui
-                .add(egui::Button::image(image.tint(Color32::WHITE)).frame(false))
-                .on_hover_text("Combo précédent")
-                .clicked()
-            {
-                p.combo_demande = Some((p.combo_index + total - 1) % total);
-            }
-            ui.label(
-                RichText::new(format!("{}/{total}", p.combo_index + 1))
-                    .color(GRIS)
-                    .size(14.0),
-            );
-            let image = icone(
-                include_bytes!("../assets/icones/chevron-right.svg"),
-                "bytes://suivant.svg",
-            );
-            if ui
-                .add(egui::Button::image(image.tint(Color32::WHITE)).frame(false))
-                .on_hover_text("Combo suivant")
-                .clicked()
-            {
-                p.combo_demande = Some((p.combo_index + 1) % total);
-            }
-            ui.add_space(10.0);
-        }
-
         let image = icone(
             include_bytes!("../assets/icones/camera.svg"),
             "bytes://photo.svg",
@@ -560,44 +664,110 @@ fn boutons(ui: &mut egui::Ui, p: &mut Partage) -> egui::Rect {
         {
             p.photo_demandee = true;
         }
-    })
-    .response
-    .rect
+
+        if p.enregistrement {
+            ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
+                // De droite à gauche : le texte, puis le point rouge devant.
+                ui.label(RichText::new("REC").color(ROUGE).size(13.0).strong());
+                let (rect, _) =
+                    ui.allocate_exact_size(egui::vec2(10.0, 10.0), egui::Sense::hover());
+                ui.painter().circle_filled(rect.center(), 4.0, ROUGE);
+            });
+        }
+    });
 }
 
-fn entete(ui: &mut egui::Ui, p: &Partage) {
+/// Le combo en cours, avec ‹ › pour passer au précédent ou au suivant de combos.toml.
+fn choix_combo(ui: &mut egui::Ui, p: &mut Partage) {
+    let icone = |octets: &'static [u8], nom: &'static str| {
+        egui::Image::from_bytes(nom, octets).fit_to_exact_size(egui::vec2(18.0, 18.0))
+    };
+    let total = p.combos.len();
     ui.horizontal(|ui| {
-        ui.label(RichText::new(&p.nom).color(GRIS).size(15.0));
-        ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
-            ui.label(
-                RichText::new(format!("{} réussi(s)", p.reussites))
-                    .color(VERT)
-                    .size(15.0),
+        if total > 1 {
+            let image = icone(
+                include_bytes!("../assets/icones/chevron-left.svg"),
+                "bytes://precedent.svg",
             );
-            if p.enregistrement {
-                // De droite à gauche : le texte, puis le point rouge devant.
-                ui.label(RichText::new("REC").color(ROUGE).size(15.0).strong());
-                let (rect, _) =
-                    ui.allocate_exact_size(egui::vec2(12.0, 12.0), egui::Sense::hover());
-                ui.painter().circle_filled(rect.center(), 5.0, ROUGE);
+            if ui
+                .add(egui::Button::image(image.tint(Color32::WHITE)).frame(false))
+                .on_hover_text("Combo précédent")
+                .clicked()
+            {
+                p.combo_demande = Some((p.combo_index + total - 1) % total);
             }
-            // D'où viennent les frames : l'historique du jeu (exact) ou notre estimation.
-            let (texte, couleur) = if p.historique_jeu {
-                ("frames du jeu", VERT)
-            } else {
-                ("frames estimées", JAUNE)
-            };
-            ui.label(RichText::new(texte).color(couleur).size(13.0));
-            // Compteur de hits en direct, lu sur le panneau des dégâts du jeu.
-            if p.degats_visibles {
+        }
+        ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
+            if total > 1 {
+                let image = icone(
+                    include_bytes!("../assets/icones/chevron-right.svg"),
+                    "bytes://suivant.svg",
+                );
+                if ui
+                    .add(egui::Button::image(image.tint(Color32::WHITE)).frame(false))
+                    .on_hover_text("Combo suivant")
+                    .clicked()
+                {
+                    p.combo_demande = Some((p.combo_index + 1) % total);
+                }
                 ui.label(
-                    RichText::new(format!("{} hits", p.hits_direct))
-                        .color(ROUGE)
-                        .size(15.0)
-                        .strong(),
+                    RichText::new(format!("{}/{total}", p.combo_index + 1))
+                        .color(GRIS)
+                        .size(12.0),
                 );
             }
+            // Le nom prend la place qui reste, coupé avec « … » s'il est trop long.
+            ui.with_layout(egui::Layout::left_to_right(egui::Align::Center), |ui| {
+                ui.add(
+                    egui::Label::new(
+                        RichText::new(&p.nom)
+                            .color(Color32::WHITE)
+                            .size(16.0)
+                            .strong(),
+                    )
+                    .truncate(),
+                )
+                .on_hover_text(&p.nom);
+            });
         });
+    });
+}
+
+/// En bas : les résultats (hits en direct, réussites) puis l'état de la lecture du jeu.
+/// Passe à la ligne si l'overlay est étroit.
+fn statistiques(ui: &mut egui::Ui, p: &Partage) {
+    ui.horizontal_wrapped(|ui| {
+        let chiffre = |ui: &mut egui::Ui, n: u32, mot: &str, couleur: Color32| {
+            ui.label(
+                RichText::new(n.to_string())
+                    .color(couleur)
+                    .size(16.0)
+                    .strong(),
+            );
+            ui.label(RichText::new(mot).color(GRIS).size(13.0));
+            ui.add_space(8.0);
+        };
+        // Compteur de hits en direct, lu sur le panneau des dégâts du jeu.
+        if p.degats_visibles {
+            chiffre(ui, p.hits_direct, "hits", ROUGE);
+        }
+        chiffre(ui, p.reussites, "réussi(s)", VERT);
+        // D'où viennent les frames : l'historique du jeu (exact) ou notre estimation.
+        let (texte, couleur) = if p.historique_jeu {
+            ("frames du jeu".to_string(), VERT)
+        } else {
+            match &p.raison_estimee {
+                Some(raison) => (format!("frames estimées : {raison}"), JAUNE),
+                None => ("frames estimées".to_string(), JAUNE),
+            }
+        };
+        let (rect, _) = ui.allocate_exact_size(egui::vec2(8.0, 8.0), egui::Sense::hover());
+        ui.painter().circle_filled(rect.center(), 3.0, couleur);
+        ui.label(
+            RichText::new(texte)
+                .color(couleur.gamma_multiply(0.85))
+                .size(12.0),
+        );
     });
 }
 
@@ -624,18 +794,33 @@ fn etapes(ui: &mut egui::Ui, p: &Partage) {
             .fill(fond)
             .stroke(bord)
             .corner_radius(6)
-            .inner_margin(egui::Margin::symmetric(8, 3))
+            .inner_margin(egui::Margin::symmetric(6, 2))
             .show(ui, |ui| {
                 ui.set_width(ui.available_width());
                 ui.horizontal(|ui| {
-                    dessiner_coche(ui, i < p.index);
                     crate::syntaxe::dessiner_liaison(ui, etape.liaison, p.liaisons, 15.0, true);
-                    crate::syntaxe::dessiner(ui, &etape.notation, p.syntaxe, 24.0, couleur);
-                    timing(ui, p, i);
+                    // Le coup à gauche (il passe à la ligne s'il est trop long), l'écart
+                    // « +x f » dans sa colonne à droite : ils ne se chevauchent jamais.
+                    let place = (ui.available_width() - TIMING).max(60.0);
+                    ui.allocate_ui_with_layout(
+                        egui::vec2(place, 30.0),
+                        egui::Layout::left_to_right(egui::Align::Center).with_main_wrap(true),
+                        |ui| {
+                            crate::syntaxe::dessiner(ui, &etape.notation, p.syntaxe, 24.0, couleur);
+                        },
+                    );
+                    ui.allocate_ui_with_layout(
+                        egui::vec2(ui.available_width(), 30.0),
+                        egui::Layout::right_to_left(egui::Align::Center),
+                        |ui| timing(ui, p, i),
+                    );
                 });
             });
     }
 }
+
+/// Largeur de la colonne de l'écart « +x f », à droite des étapes.
+const TIMING: f32 = 58.0;
 
 /// À droite d'une étape : son écart avec la précédente (« +14 f »), pour information.
 fn timing(ui: &mut egui::Ui, p: &Partage, i: usize) {
@@ -643,7 +828,7 @@ fn timing(ui: &mut egui::Ui, p: &Partage, i: usize) {
         return;
     }
     let ecart = p.ecarts.get(i - 1).copied();
-    ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
+    {
         if let Some(ecart) = ecart {
             // « ~ » : écart estimé, pas encore vérifié sur l'historique du jeu.
             let approche = if p.ecarts_exacts { "" } else { "~" };
@@ -654,7 +839,7 @@ fn timing(ui: &mut egui::Ui, p: &Partage, i: usize) {
                     .monospace(),
             );
         }
-    });
+    }
 }
 
 /// « COMBO RÉUSSI » ou « attendu X, reçu Y », pendant 2 secondes.
@@ -817,18 +1002,6 @@ pub(crate) fn dessiner_direction(ui: &mut egui::Ui, direction: u8, couleur: Colo
     );
 }
 
-/// Une coche verte pour une étape réussie (ou un espace vide de la même taille).
-fn dessiner_coche(ui: &mut egui::Ui, visible: bool) {
-    let (rect, _) = ui.allocate_exact_size(egui::vec2(20.0, 20.0), egui::Sense::hover());
-    if visible {
-        let p = |x: f32, y: f32| rect.min + egui::vec2(x, y);
-        ui.painter().line(
-            vec![p(3.0, 10.0), p(8.0, 15.0), p(17.0, 4.0)],
-            egui::Stroke::new(3.0, VERT),
-        );
-    }
-}
-
 /// Windows : rend le contenu visible malgré « les clics passent au travers ».
 ///
 /// Pour laisser passer les clics, la fenêtre reçoit le style « layered » de Windows.
@@ -841,9 +1014,13 @@ fn dessiner_coche(ui: &mut egui::Ui, visible: bool) {
 /// Écrit la position actuelle de la fenêtre dans `overlay.toml` (lignes `x =` et `y =`),
 /// sans toucher au reste du fichier.
 fn enregistrer_position(ctx: &egui::Context) {
-    let Some(rect) = ctx.input(|i| i.viewport().outer_rect) else {
-        return;
-    };
+    if let Some(rect) = ctx.input(|i| i.viewport().outer_rect) {
+        enregistrer_rect(rect);
+    }
+}
+
+/// Écrit la place de la fenêtre dans `overlay.toml`.
+fn enregistrer_rect(rect: egui::Rect) {
     let Ok(texte) = std::fs::read_to_string(FICHIER) else {
         return;
     };
