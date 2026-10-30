@@ -301,7 +301,7 @@ pub fn boucle(
             if let Ok(mut p) = partage.lock() {
                 p.deplacement = !p.deplacement;
                 let texte = if p.deplacement {
-                    "      ✥ déplacement : glisse l'overlay à la souris, F8 pour finir"
+                    "      ✥ déplacement : glisse l'overlay, molette pour l'historique, F8 pour finir"
                 } else {
                     "      ✥ position enregistrée dans overlay.toml"
                 };

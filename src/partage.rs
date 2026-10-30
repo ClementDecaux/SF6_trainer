@@ -11,7 +11,7 @@ use std::collections::VecDeque;
 use std::time::Instant;
 
 /// Nombre de lignes d'historique gardées pour l'overlay.
-const LIGNES_MAX: usize = 14;
+const LIGNES_MAX: usize = 100;
 
 /// Une ligne de l'historique d'inputs (comme dans le terminal).
 #[derive(Debug, Clone)]

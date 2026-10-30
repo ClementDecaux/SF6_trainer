@@ -164,10 +164,12 @@ impl eframe::App for Overlay {
                 ui.set_width(ui.available_width());
                 if self.deplacement {
                     ui.label(
-                        RichText::new("Glisse-moi à la souris, F8 pour finir")
-                            .color(JAUNE)
-                            .size(16.0)
-                            .strong(),
+                        RichText::new(
+                            "Glisse-moi à la souris, molette pour l'historique, F8 pour finir",
+                        )
+                        .color(JAUNE)
+                        .size(16.0)
+                        .strong(),
                     );
                 }
                 entete(ui, &partage);
@@ -183,7 +185,15 @@ impl eframe::App for Overlay {
                 ui.add_space(8.0);
                 message(ui, &partage);
                 ui.separator();
-                historique(ui, &partage.lignes);
+                // L'historique défile à la molette. Les clics et la molette passent au jeu
+                // d'habitude : on ne peut donc le faire défiler qu'en mode déplacement (F8).
+                egui::ScrollArea::vertical()
+                    .scroll_source(
+                        egui::scroll_area::ScrollSource::MOUSE_WHEEL
+                            | egui::scroll_area::ScrollSource::SCROLL_BAR,
+                    )
+                    .auto_shrink([false, false])
+                    .show(ui, |ui| historique(ui, &partage.lignes));
             });
 
         // Mode déplacement : cliquer-glisser n'importe où déplace la fenêtre.
