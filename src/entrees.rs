@@ -203,7 +203,11 @@ pub fn boucle(
             boutons: tenus.iter().copied().collect(),
         };
         if nouvel_etat != etat || !appuyes.is_empty() {
-            if frame > debut || !nouveaux.is_empty() {
+            // Deux changements dans la même frame (direction puis bouton à quelques ms) :
+            // le jeu ne lit la manette qu'une fois par frame et n'en voit qu'un seul état.
+            // On fusionne donc l'état de 0 frame avec le suivant, au lieu d'afficher « 0 ».
+            let meme_frame = frame == debut;
+            if !meme_frame {
                 // En gris : où l'état a commencé dans sa frame (en ms), pour régler
                 // `decalage_ms` si une durée diffère d'une frame avec le jeu.
                 println!(
@@ -228,7 +232,10 @@ pub fn boucle(
             }
 
             // 3. Chaque bouton appuyé : toutes les lectures possibles, puis le trial.
-            coups.clear();
+            if !meme_frame {
+                coups.clear();
+                nouveaux.clear();
+            }
             for &action in &appuyes {
                 let candidats = lectures(
                     action,
@@ -271,9 +278,15 @@ pub fn boucle(
             }
 
             etat = nouvel_etat;
-            debut = frame;
-            debut_temps = temps;
-            nouveaux = appuyes;
+            if !meme_frame {
+                debut = frame;
+                debut_temps = temps;
+            }
+            for action in appuyes {
+                if !nouveaux.contains(&action) {
+                    nouveaux.push(action);
+                }
+            }
             change = true;
         }
 
