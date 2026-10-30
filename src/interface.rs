@@ -82,6 +82,8 @@ pub struct Interface {
     titre_jeu: String,
     /// L'overlay est montré (pas caché parce que SF6 n'est pas au premier plan).
     overlay_montre: bool,
+    /// Hits et dégâts tapés pour compléter un combo (nom du combo, hits, dégâts).
+    saisie: (String, u32, u32),
 }
 
 impl Interface {
@@ -111,6 +113,7 @@ impl Interface {
             lecteur: None,
             titre_jeu: titre_jeu.to_string(),
             overlay_montre: true,
+            saisie: (String::new(), 0, 0),
         }
     }
 
@@ -335,6 +338,7 @@ impl Interface {
                     }
                 }
                 let mut clic = None;
+                let appris = crate::timings::charger().unwrap_or_default();
                 egui::ScrollArea::vertical().show(ui, |ui| {
                     for categorie in categories {
                         let noms: Vec<&str> = self
@@ -393,11 +397,21 @@ impl Interface {
                                             entrainement.combos.retain(|n| n != &c.nom);
                                         }
                                     }
+                                    let complet = c.hits.is_some() || appris.hits(&c.nom).is_some();
                                     let mut texte = RichText::new(&c.nom);
                                     if i == en_cours {
                                         texte = texte.color(JAUNE);
+                                    } else if !complet {
+                                        texte = texte.color(GRIS).italics();
                                     }
-                                    if ui.selectable_label(i == self.choisi, texte).clicked() {
+                                    let mut reponse = ui.selectable_label(i == self.choisi, texte);
+                                    if !complet {
+                                        reponse = reponse.on_hover_text(
+                                            "Combo incomplet : hits attendus inconnus, il ne \
+                                             peut pas être validé",
+                                        );
+                                    }
+                                    if reponse.clicked() {
                                         clic = Some(i);
                                     }
                                 });
@@ -459,31 +473,27 @@ impl Interface {
             ui.add_space(12.0);
 
             // Ce qui valide le combo : du fichier, sinon appris avec Select.
-            let appris = crate::timings::charger().ok();
+            let appris = crate::timings::charger().unwrap_or_default();
+            let hits_connus = combo.hits.or_else(|| appris.hits(&combo.nom));
             let hits = combo
                 .hits
                 .map(|h| format!("{h}"))
-                .or_else(|| {
-                    appris
-                        .as_ref()
-                        .and_then(|t| t.hits(&combo.nom))
-                        .map(|h| format!("{h} (appris)"))
-                })
-                .unwrap_or_else(|| "pas encore appris (Select après un vrai combo)".into());
+                .or_else(|| appris.hits(&combo.nom).map(|h| format!("{h} (appris)")))
+                .unwrap_or_else(|| "inconnus".into());
             let degats = combo
                 .degats
                 .map(|d| format!("{d}"))
-                .or_else(|| {
-                    appris
-                        .as_ref()
-                        .and_then(|t| t.degats(&combo.nom))
-                        .map(|d| format!("{d} (appris)"))
-                })
-                .unwrap_or_else(|| "pas encore appris".into());
+                .or_else(|| appris.degats(&combo.nom).map(|d| format!("{d} (appris)")))
+                .unwrap_or_else(|| "inconnus".into());
             ui.add_space(6.0);
             ui.horizontal(|ui| {
+                let couleur = if hits_connus.is_some() {
+                    Color32::WHITE
+                } else {
+                    JAUNE
+                };
                 ui.label(RichText::new("Hits").color(GRIS));
-                ui.label(RichText::new(hits).strong());
+                ui.label(RichText::new(hits).strong().color(couleur));
                 ui.add_space(12.0);
                 ui.label(RichText::new("Dégâts").color(GRIS));
                 ui.label(RichText::new(degats).strong());
@@ -503,10 +513,71 @@ impl Interface {
                     p.combo_demande = Some(self.choisi);
                 }
             });
+            if combo.hits.is_none() {
+                self.completer_combo(ui, &combo.nom, hits_connus.is_none(), en_cours);
+            }
             ui.add_space(6.0);
             ui.separator();
             self.videos_du_combo(ui, &combo.nom);
         });
+    }
+}
+
+// ---------------------------------------------------------------- Combo incomplet
+
+impl Interface {
+    /// Saisie des hits (et dégâts) attendus d'un combo qui n'en a pas dans combos.toml.
+    /// `incomplet` : rien d'appris non plus, le combo ne peut pas être validé.
+    fn completer_combo(&mut self, ui: &mut egui::Ui, nom: &str, incomplet: bool, en_cours: usize) {
+        if self.saisie.0 != nom {
+            let appris = crate::timings::charger().unwrap_or_default();
+            self.saisie = (
+                nom.to_string(),
+                appris.hits(nom).unwrap_or(0),
+                appris.degats(nom).unwrap_or(0),
+            );
+        }
+        ui.add_space(6.0);
+        if incomplet {
+            ui.label(
+                RichText::new(
+                    "Combo incomplet : sans hits attendus, il ne peut pas être validé. \
+                     Fais-le en jeu puis Select pour les apprendre, ou tape-les ici \
+                     (panneau des dégâts du mode entraînement).",
+                )
+                .color(JAUNE),
+            );
+        }
+        let (_, hits, degats) = &mut self.saisie;
+        let mut enregistrer = false;
+        ui.horizontal(|ui| {
+            ui.label(if incomplet {
+                "Hits attendus"
+            } else {
+                "Corriger : hits"
+            });
+            ui.add(egui::DragValue::new(hits).range(0..=99));
+            ui.label("dégâts (0 = inconnus)");
+            ui.add(egui::DragValue::new(degats).range(0..=20000).speed(10));
+            enregistrer = ui
+                .add_enabled(*hits > 0, egui::Button::new("Enregistrer"))
+                .clicked();
+        });
+        if enregistrer {
+            let mut appris = crate::timings::charger().unwrap_or_default();
+            appris.fixer(nom, *hits, (*degats > 0).then_some(*degats));
+            match appris.enregistrer() {
+                Ok(()) => {
+                    // Le combo en cours est rechargé pour prendre les nouveaux hits.
+                    if self.choisi == en_cours
+                        && let Ok(mut p) = self.partage.lock()
+                    {
+                        p.combo_demande = Some(en_cours);
+                    }
+                }
+                Err(e) => eprintln!("{e}"),
+            }
+        }
     }
 }
 

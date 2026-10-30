@@ -810,6 +810,19 @@ fn statistiques(ui: &mut egui::Ui, p: &Partage) {
             ui.label(RichText::new(mot).color(GRIS).size(13.0));
             ui.add_space(8.0);
         };
+        // Sans hits attendus, le combo ne peut pas être validé.
+        if p.hits_attendus.is_none() {
+            ui.label(
+                RichText::new("combo incomplet (hits inconnus)")
+                    .color(JAUNE)
+                    .size(13.0)
+                    .strong(),
+            )
+            .on_hover_text(
+                "Réussis-le une fois en jeu puis Select, ou saisis ses hits dans l'interface",
+            );
+            ui.add_space(8.0);
+        }
         // Compteur de hits en direct, lu sur le panneau des dégâts du jeu.
         if p.degats_visibles {
             chiffre(ui, p.hits_direct, "hits", ROUGE);
@@ -939,7 +952,13 @@ fn message(ui: &mut egui::Ui, p: &Partage) {
     match &p.message {
         // Un raté reste affiché jusqu'au prochain essai : on a le temps de lire pourquoi.
         Some(m) if !m.reussi || m.quand.elapsed() < DUREE_MESSAGE => {
-            let couleur = if m.reussi { VERT } else { ROUGE };
+            let couleur = if m.reussi {
+                VERT
+            } else if m.attention {
+                JAUNE
+            } else {
+                ROUGE
+            };
             match &m.rate {
                 // « Raté : attendu X, reçu Y », les coups écrits dans la syntaxe choisie.
                 Some((attendu, recu)) => {
@@ -954,7 +973,8 @@ fn message(ui: &mut egui::Ui, p: &Partage) {
                     });
                 }
                 None => {
-                    ui.label(RichText::new(&m.texte).color(couleur).size(22.0).strong());
+                    let taille = if m.attention { 17.0 } else { 22.0 };
+                    ui.label(RichText::new(&m.texte).color(couleur).size(taille).strong());
                 }
             }
         }

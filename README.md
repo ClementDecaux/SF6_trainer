@@ -123,6 +123,12 @@ Les dégâts du combo complet (`degats` dans `combos.toml`, ou appris avec Selec
 le combo est validé si les hits **ou** les dégâts sont atteints. Deux coups qui touchent dans
 la même image ne comptent que pour un hit, mais les dégâts, eux, sont justes.
 
+**Combo incomplet.** Sans hits ni dégâts attendus (ni dans `combos.toml`, ni appris), un combo
+ne peut pas être validé : l'overlay affiche « combo incomplet (hits inconnus) » et, si les
+inputs sont bons, « Inputs bons, mais hits attendus inconnus : Select si le combo est passé ».
+Dans l'interface, ces combos sont en gris italique dans la liste ; la fiche du combo permet de
+taper les hits (et dégâts) et de les enregistrer dans `timings.toml`.
+
 ## Vidéos des combos réussis
 
 Rien à installer (pas d'OBS) : l'outil filme la fenêtre de SF6 avec l'API de capture de Windows.

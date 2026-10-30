@@ -8,9 +8,6 @@ use serde::{Deserialize, Serialize};
 
 const FICHIER: &str = "timings.toml";
 
-/// Nombre de vrais combos à confirmer avant de dire que le timing est appris.
-pub const ESSAIS_MIN: u32 = 3;
-
 const EN_TETE: &str = "# Appris sur tes vrais combos (Select après un combo passé).
 # hits : coups qui touchent quand le combo passe (c'est ce qui valide le combo).
 # min et max : frames vues entre l'étape d'avant et celle-ci (pour information).
@@ -97,6 +94,26 @@ impl Timings {
         }
     }
 
+    /// Fixe les hits (et dégâts) d'un combo, saisis à la main dans l'interface.
+    pub fn fixer(&mut self, nom: &str, hits: u32, degats: Option<u32>) {
+        if !self.combo.iter().any(|t| t.nom == nom) {
+            self.combo.push(TimingCombo {
+                nom: nom.to_string(),
+                essais: 0,
+                min: Vec::new(),
+                max: Vec::new(),
+                hits: None,
+                degats: None,
+            });
+        }
+        if let Some(t) = self.combo.iter_mut().find(|t| t.nom == nom) {
+            t.hits = Some(hits);
+            if degats.is_some() {
+                t.degats = degats;
+            }
+        }
+    }
+
     pub fn enregistrer(&self) -> Result<(), String> {
         let texte = toml::to_string(self).map_err(|e| format!("timings : {e}"))?;
         std::fs::write(FICHIER, format!("{EN_TETE}{texte}"))
@@ -115,6 +132,16 @@ pub fn charger() -> Result<Timings, String> {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn fixer_cree_ou_corrige_le_combo() {
+        let mut t = Timings::default();
+        t.fixer("combo", 5, None);
+        assert_eq!((t.hits("combo"), t.degats("combo")), (Some(5), None));
+        t.fixer("combo", 6, Some(2400));
+        assert_eq!((t.hits("combo"), t.degats("combo")), (Some(6), Some(2400)));
+        assert_eq!(t.combo.len(), 1);
+    }
 
     #[test]
     fn apprendre_elargit_la_fenetre() {

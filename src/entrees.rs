@@ -14,7 +14,7 @@ use crate::manette::{Evenement, Manette};
 use crate::motion::Historique;
 use crate::notation::Directions;
 use crate::partage::{Ligne, Partage};
-use crate::timings::{ESSAIS_MIN, Timings};
+use crate::timings::Timings;
 use colored::Colorize;
 use eframe::egui;
 use std::collections::{BTreeSet, HashMap, VecDeque};
@@ -390,6 +390,10 @@ pub fn boucle(
             if let Some(i) = p.combo_demande.take()
                 && let Some(choisi) = combos.get(i)
             {
+                // Relu : les hits ont pu être saisis dans l'interface.
+                if let Ok(t) = crate::timings::charger() {
+                    timings = t;
+                }
                 match crate::combo::creer_trial(choisi, &timings) {
                     Ok(nouveau) => {
                         trial = nouveau;
@@ -399,6 +403,7 @@ pub fn boucle(
                         p.nom = trial.nom.clone();
                         p.etapes = trial.etapes.clone();
                         p.combo_index = i;
+                        p.hits_attendus = trial.hits;
                         p.index = 0;
                         p.ecarts.clear();
                         p.etape_cassee = None;
@@ -785,7 +790,17 @@ fn conclure(
         format!(" ({})", infos.join(", "))
     };
     let lache = fin.hits.is_some() || fin.degats.is_some();
-    if fin.erreurs.is_empty() {
+    // Ni hits ni dégâts attendus : impossible de savoir si le combo est passé.
+    let incomplet =
+        fin.erreurs.is_empty() && fin.hits_attendus.is_none() && fin.degats_attendus.is_none();
+    if incomplet {
+        println!(
+            "{}",
+            format!("      ? inputs bons{hits}, mais combo incomplet : hits attendus inconnus. Select s'il est passé en jeu.")
+                .yellow()
+        );
+        capture.annuler();
+    } else if fin.erreurs.is_empty() {
         println!(
             "{}",
             format!("      ★ COMBO RÉUSSI ★{hits}")
@@ -816,7 +831,11 @@ fn conclure(
         {
             p.marquer_cassee(temps);
         }
-        if fin.erreurs.is_empty() {
+        if incomplet {
+            p.message_attention(format!(
+                "Inputs bons{hits}, mais hits attendus inconnus : Select si le combo est passé"
+            ));
+        } else if fin.erreurs.is_empty() {
             p.reussite();
             p.message(format!("COMBO RÉUSSI !{hits}"), true);
         } else if lache {
@@ -1492,6 +1511,10 @@ fn confirmer(
 ) {
     // 10 secondes pour confirmer, après, on ne sait plus de quel essai on parle.
     const DELAI_CONFIRMATION: u64 = 600;
+    // Relu : les hits ont pu être saisis dans l'interface entre-temps.
+    if let Ok(t) = crate::timings::charger() {
+        *timings = t;
+    }
     let texte = match a_confirmer.take() {
         Some(c) if frame.saturating_sub(c.frame) <= DELAI_CONFIRMATION => {
             let n = timings.apprendre(&trial.nom, &c.ecarts);
@@ -1507,14 +1530,17 @@ fn confirmer(
             if !trial.hits_fixe {
                 trial.hits = timings.hits(&trial.nom);
             }
-            let hits = trial.hits.map_or(String::new(), |h| format!(", {h} hits"));
             if let Err(e) = timings.enregistrer() {
                 eprintln!("{e}");
             }
-            if n < ESSAIS_MIN {
-                format!("Timing : {n}/{ESSAIS_MIN} vrais combos confirmés{hits}")
-            } else {
-                format!("Timing appris ({n} vrais combos{hits})")
+            if let Ok(mut p) = partage.lock() {
+                p.hits_attendus = trial.hits;
+            }
+            match (trial.hits, trial.degats) {
+                (Some(h), Some(d)) => format!("Appris : {h} hits, {d} dégâts ({n} confirmé(s))"),
+                (Some(h), None) => format!("Appris : {h} hits ({n} confirmé(s))"),
+                _ => "Confirmé, mais pas de hits lus : affiche les infos de dégâts du training"
+                    .to_string(),
             }
         }
         _ => "Select : rien à confirmer, finis d'abord le combo".to_string(),

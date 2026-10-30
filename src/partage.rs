@@ -39,6 +39,8 @@ pub struct Message {
     pub quand: Instant,
     /// Un raté : (coup attendu, coup reçu), dessinés dans la syntaxe choisie.
     pub rate: Option<(String, String)>,
+    /// Ni réussi ni raté : une information à lire (en jaune).
+    pub attention: bool,
 }
 
 #[derive(Debug)]
@@ -105,6 +107,9 @@ pub struct Partage {
     pub combos: Vec<String>,
     pub combo_index: usize,
     pub combo_demande: Option<usize>,
+    /// Hits attendus du combo en cours (combos.toml ou appris). Aucun : combo incomplet,
+    /// il ne peut pas être validé.
+    pub hits_attendus: Option<u32>,
     /// L'overlay est affiché (bouton de l'interface).
     pub overlay_visible: bool,
     /// Façon d'écrire les coups (overlay et interface).
@@ -151,6 +156,7 @@ impl Partage {
             combo_index: 0,
             combo_demande: None,
             overlay_visible: true,
+            hits_attendus: None,
             syntaxe: crate::syntaxe::Syntaxe::default(),
             seulement_jeu: true,
             liaisons: crate::syntaxe::StyleLiaison::default(),
@@ -219,7 +225,16 @@ impl Partage {
             reussi,
             quand: Instant::now(),
             rate: None,
+            attention: false,
         });
+    }
+
+    /// Un message ni réussi ni raté (en jaune), qui reste affiché.
+    pub fn message_attention(&mut self, texte: String) {
+        self.message(texte, false);
+        if let Some(m) = &mut self.message {
+            m.attention = true;
+        }
     }
 
     /// Un combo réussi : compteurs, et passage au suivant si l'auto-advance le demande.
