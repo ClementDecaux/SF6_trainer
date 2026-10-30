@@ -77,10 +77,139 @@ pub fn boucle(
     let mut f10 = Touche::f10();
     let mut juge = Juge::default();
 
+    // Le jeu ne lit la manette qu'une fois par frame. On fait pareil : les appuis et les
+    // changements d'une frame sont gardés, et traités ensemble quand la frame se termine,
+    // avec la direction tenue à la fin de la frame (comme le jeu la voit).
+    let mut frame_courante = debut;
+    let mut appuis_frame: Vec<(Action, i64)> = Vec::new();
+    let mut premier_changement: Option<i64> = None;
+    let mut dirs_avant = dirs.numpad();
+    let mut tenus_avant = tenus.clone();
+
     loop {
-        // 1. On lit TOUS les événements en attente avant de calculer quoi que ce soit :
-        //    une manette envoie souvent plusieurs changements en même temps.
-        let mut appuyes: Vec<Action> = Vec::new();
+        // Le numéro de frame, calé sur les images du jeu (voir horloge.rs).
+        // Il ne recule jamais, même quand le réglage automatique déplace les limites.
+        let temps = horloge::maintenant();
+        let frame = horloge::frame(temps).max(frame_courante);
+        if !synchro_annoncee && horloge::synchro_active() {
+            synchro_annoncee = true;
+            println!("{}", "      ✓ frames calées sur les images de SF6".green());
+        }
+        let mut change = false;
+
+        // 1. La frame d'avant est finie : on traite ce que le jeu y a vu.
+        if frame != frame_courante {
+            let frame = frame_courante;
+            let appuyes: Vec<(Action, i64)> = std::mem::take(&mut appuis_frame);
+            let temps_etat = premier_changement.take().unwrap_or(temps);
+            let direction = dirs.numpad();
+            if direction != etat.direction {
+                historique.ajouter(frame, direction);
+                // Drive Rush par dash (66) : seulement si c'est ce que le trial attend.
+                if direction == 6 && trial.attendu() == "DR" && historique.dash(frame) {
+                    let fin = resultat_trial(
+                        &mut trial,
+                        &mut capture,
+                        &mut juge,
+                        &["DR".to_string()],
+                        "66 (DR)",
+                        (frame, temps_etat),
+                        &partage,
+                    );
+                    if let Some(fin) = fin {
+                        a_confirmer = juge
+                            .finir(fin, temps, &trial)
+                            .map(|fin| conclure(&trial, &mut capture, fin, frame, &partage));
+                    }
+                }
+            }
+
+            // 2. Nouvel état (direction ou boutons différents, ou nouvel appui) :
+            //    on affiche l'ancien avec sa durée, puis on démarre le nouveau.
+            let nouvel_etat = Etat {
+                direction,
+                boutons: tenus.iter().copied().collect(),
+            };
+            if nouvel_etat != etat || !appuyes.is_empty() {
+                if frame > debut {
+                    // En gris : où l'état a commencé dans sa frame (en ms).
+                    println!(
+                        "{}  {}",
+                        affichage::ligne(&etat, frame - debut, &nouveaux, &coups),
+                        format!("@{:.1}", horloge::position_ms(debut_temps)).dimmed()
+                    );
+                    if let Ok(mut p) = partage.lock() {
+                        p.ajouter_ligne(Ligne {
+                            frames: frame - debut,
+                            direction: etat.direction,
+                            boutons: etat
+                                .boutons
+                                .iter()
+                                .map(|b| (*b, nouveaux.contains(b)))
+                                .collect(),
+                            coups: coups.clone(),
+                            debut: debut_temps,
+                            exact: false,
+                        });
+                    }
+                }
+
+                // 3. Chaque bouton appuyé : toutes les lectures possibles, puis le trial.
+                coups.clear();
+                nouveaux.clear();
+                for &(action, quand) in &appuyes {
+                    let candidats = lectures(
+                        action,
+                        direction,
+                        frame,
+                        &historique,
+                        &tenus,
+                        &derniers_appuis,
+                    );
+                    derniers_appuis.insert(action, frame);
+                    // On affiche la lecture attendue par le trial si elle y est, sinon la première.
+                    let coup = candidats
+                        .iter()
+                        .find(|c| correspond(c, trial.attendu()))
+                        .unwrap_or(&candidats[0])
+                        .clone();
+                    // Un nouvel essai commence : le verdict du précédent ne peut plus attendre.
+                    let nouvel_essai = trial.index == 0
+                        && candidats
+                            .iter()
+                            .any(|c| correspond(c, &trial.etapes[0].notation));
+                    if nouvel_essai && let Some(fin) = juge.forcer() {
+                        a_confirmer = Some(conclure(&trial, &mut capture, fin, frame, &partage));
+                    }
+                    let fin = resultat_trial(
+                        &mut trial,
+                        &mut capture,
+                        &mut juge,
+                        &candidats,
+                        &coup,
+                        (frame, quand),
+                        &partage,
+                    );
+                    if let Some(fin) = fin {
+                        a_confirmer = juge
+                            .finir(fin, temps, &trial)
+                            .map(|fin| conclure(&trial, &mut capture, fin, frame, &partage));
+                    }
+                    coups.push(coup);
+                    if !nouveaux.contains(&action) {
+                        nouveaux.push(action);
+                    }
+                }
+
+                etat = nouvel_etat;
+                debut = frame;
+                debut_temps = temps_etat;
+                change = true;
+            }
+            frame_courante = horloge::frame(temps).max(frame_courante);
+        }
+
+        // 4. On lit TOUS les événements en attente : ils comptent pour la frame en cours.
         for evenement in manette.lire() {
             match evenement {
                 Evenement::Appui("Select") => select_appuye = true,
@@ -89,7 +218,8 @@ pub fn boucle(
                         match controles.get(bouton) {
                             Some(&action) => {
                                 tenus.insert(action);
-                                appuyes.push(action);
+                                appuis_frame.push((action, temps));
+                                juge.appui(temps, action);
                             }
                             None => println!("     bouton {bouton} (pas dans controles.toml)"),
                         }
@@ -115,21 +245,17 @@ pub fn boucle(
                 Evenement::Deconnectee => println!("Manette déconnectée"),
             }
         }
-
-        // Le numéro de frame, calé sur les images du jeu (voir horloge.rs).
-        let temps = horloge::maintenant();
-        let frame = horloge::frame(temps);
-        if !synchro_annoncee && horloge::synchro_active() {
-            synchro_annoncee = true;
-            println!("{}", "      ✓ frames calées sur les images de SF6".green());
+        // Heure du premier changement de la frame : début du nouvel état.
+        if premier_changement.is_none()
+            && (dirs.numpad() != dirs_avant || tenus != tenus_avant || !appuis_frame.is_empty())
+        {
+            premier_changement = Some(temps);
         }
-        let mut change = false;
+        dirs_avant = dirs.numpad();
+        tenus_avant = tenus.clone();
 
-        // L'historique du jeu lu à l'écran : nos appuis, ses nouvelles lignes, et le verdict
+        // L'historique du jeu lu à l'écran : ses nouvelles lignes, et le verdict
         // d'un combo fini s'il attendait les frames exactes.
-        for &action in &appuyes {
-            juge.appui(temps, action);
-        }
         if juge.lire_journal(temps)
             && let Ok(mut p) = partage.lock()
         {
@@ -172,121 +298,6 @@ pub fn boucle(
         if select_appuye {
             select_appuye = false;
             confirmer(&mut trial, &mut timings, &mut a_confirmer, frame, &partage);
-            change = true;
-        }
-        let direction = dirs.numpad();
-        if direction != etat.direction {
-            historique.ajouter(frame, direction);
-            // Drive Rush par dash (66) : seulement si c'est ce que le trial attend.
-            if direction == 6 && trial.attendu() == "DR" && historique.dash(frame) {
-                let fin = resultat_trial(
-                    &mut trial,
-                    &mut capture,
-                    &mut juge,
-                    &["DR".to_string()],
-                    "66 (DR)",
-                    (frame, temps),
-                    &partage,
-                );
-                if let Some(fin) = fin {
-                    a_confirmer = juge
-                        .finir(fin, temps, &trial)
-                        .map(|fin| conclure(&trial, &mut capture, fin, frame, &partage));
-                }
-            }
-        }
-
-        // 2. Nouvel état (direction ou boutons différents, ou nouvel appui) :
-        //    on affiche l'ancien avec sa durée, puis on démarre le nouveau.
-        let nouvel_etat = Etat {
-            direction,
-            boutons: tenus.iter().copied().collect(),
-        };
-        if nouvel_etat != etat || !appuyes.is_empty() {
-            // Deux changements dans la même frame (direction puis bouton à quelques ms) :
-            // le jeu ne lit la manette qu'une fois par frame et n'en voit qu'un seul état.
-            // On fusionne donc l'état de 0 frame avec le suivant, au lieu d'afficher « 0 ».
-            let meme_frame = frame == debut;
-            if !meme_frame {
-                // En gris : où l'état a commencé dans sa frame (en ms), pour régler
-                // `decalage_ms` si une durée diffère d'une frame avec le jeu.
-                println!(
-                    "{}  {}",
-                    affichage::ligne(&etat, frame - debut, &nouveaux, &coups),
-                    format!("@{:.1}", horloge::position_ms(debut_temps)).dimmed()
-                );
-                if let Ok(mut p) = partage.lock() {
-                    p.ajouter_ligne(Ligne {
-                        frames: frame - debut,
-                        direction: etat.direction,
-                        boutons: etat
-                            .boutons
-                            .iter()
-                            .map(|b| (*b, nouveaux.contains(b)))
-                            .collect(),
-                        coups: coups.clone(),
-                        debut: debut_temps,
-                        exact: false,
-                    });
-                }
-            }
-
-            // 3. Chaque bouton appuyé : toutes les lectures possibles, puis le trial.
-            if !meme_frame {
-                coups.clear();
-                nouveaux.clear();
-            }
-            for &action in &appuyes {
-                let candidats = lectures(
-                    action,
-                    direction,
-                    frame,
-                    &historique,
-                    &tenus,
-                    &derniers_appuis,
-                );
-                derniers_appuis.insert(action, frame);
-                // On affiche la lecture attendue par le trial si elle y est, sinon la première.
-                let coup = candidats
-                    .iter()
-                    .find(|c| correspond(c, trial.attendu()))
-                    .unwrap_or(&candidats[0])
-                    .clone();
-                // Un nouvel essai commence : le verdict du précédent ne peut plus attendre.
-                let nouvel_essai = trial.index == 0
-                    && candidats
-                        .iter()
-                        .any(|c| correspond(c, &trial.etapes[0].notation));
-                if nouvel_essai && let Some(fin) = juge.forcer() {
-                    a_confirmer = Some(conclure(&trial, &mut capture, fin, frame, &partage));
-                }
-                let fin = resultat_trial(
-                    &mut trial,
-                    &mut capture,
-                    &mut juge,
-                    &candidats,
-                    &coup,
-                    (frame, temps),
-                    &partage,
-                );
-                if let Some(fin) = fin {
-                    a_confirmer = juge
-                        .finir(fin, temps, &trial)
-                        .map(|fin| conclure(&trial, &mut capture, fin, frame, &partage));
-                }
-                coups.push(coup);
-            }
-
-            etat = nouvel_etat;
-            if !meme_frame {
-                debut = frame;
-                debut_temps = temps;
-            }
-            for action in appuyes {
-                if !nouveaux.contains(&action) {
-                    nouveaux.push(action);
-                }
-            }
             change = true;
         }
 
@@ -568,6 +579,19 @@ impl Juge {
             self.latence.mesurer(&entree, &appuis);
             self.journal.push_back(entree);
             nouveau = true;
+        }
+        // Le moment où le jeu lit la manette, déduit de nos appuis : nos limites de frames
+        // se calent dessus (un appui juste avant compte pour la frame, juste après pour la
+        // suivante, comme dans le jeu).
+        if nouveau && let Some(delai) = self.latence.delai_lecture() {
+            let premier = !horloge::lecture_calee();
+            horloge::caler_lecture(delai);
+            if premier {
+                println!(
+                    "{}",
+                    "      ✓ frames calées sur le moment où SF6 lit la manette".green()
+                );
+            }
         }
         while self
             .journal

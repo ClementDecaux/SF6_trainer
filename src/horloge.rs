@@ -27,6 +27,29 @@ pub fn regler_decalage(ms: f64) {
     DECALAGE.store((ms * 10_000.0) as i64, Ordering::Relaxed);
 }
 
+/// Réglage automatique trouvé avec l'historique du jeu. -1 = pas encore.
+static LECTURE: AtomicI64 = AtomicI64::new(-1);
+
+/// Cale nos limites de frames sur le moment où le jeu lit la manette : `delai` = temps
+/// entre cette lecture et l'affichage de la frame (unités de 100 ns). Remplace `decalage_ms`.
+pub fn caler_lecture(delai: i64) {
+    // Limites à (image affichée - délai) : on recule la phase d'autant, ramené à moins
+    // d'une frame (vers l'avant, pour que les numéros de frame ne reculent pas).
+    let recul = delai.rem_euclid(FRAME as i64);
+    let ancien = LECTURE.load(Ordering::Relaxed);
+    // On ignore les petites variations (moins d'une demi-milliseconde).
+    if ancien >= 0 && (ancien - recul).abs() < 5_000 {
+        return;
+    }
+    LECTURE.store(recul, Ordering::Relaxed);
+    DECALAGE.store(-recul, Ordering::Relaxed);
+}
+
+/// Vrai si les limites de frames ont été calées sur la lecture de la manette par le jeu.
+pub fn lecture_calee() -> bool {
+    LECTURE.load(Ordering::Relaxed) >= 0
+}
+
 /// Vrai dès que les images du jeu arrivent (frames calées sur SF6).
 pub fn synchro_active() -> bool {
     PHASE.load(Ordering::Relaxed) >= 0

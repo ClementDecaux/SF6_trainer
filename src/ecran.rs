@@ -623,6 +623,19 @@ impl Latence {
         }
     }
 
+    /// Le délai entre la lecture de la manette par le jeu et l'affichage de cette frame.
+    /// Un appui fait juste avant la lecture s'affiche après ce délai exactement ; un appui
+    /// fait plus tôt attend en plus la lecture suivante. C'est donc le plus petit écart
+    /// mesuré (on prend le 10e pourcentile, pour ignorer une mesure aberrante).
+    pub fn delai_lecture(&self) -> Option<i64> {
+        if self.mesures.len() < 8 {
+            return None;
+        }
+        let mut triees: Vec<i64> = self.mesures.iter().copied().collect();
+        triees.sort();
+        Some(triees[triees.len() / 10])
+    }
+
     /// La latence estimée, s'il y a assez de mesures.
     pub fn valeur(&self) -> Option<i64> {
         if self.mesures.len() < 3 {
@@ -902,5 +915,11 @@ mod tests {
         assert_eq!(lat.valeur(), None);
         lat.mesurer(&entree(30_750_000, 0, LP, LP), &[(30_000_000, LP)]);
         assert_eq!(lat.valeur(), Some(750_000));
+        assert_eq!(lat.delai_lecture(), None);
+        for i in 0..10 {
+            let t = 100_000_000 + i * 10_000_000;
+            lat.mesurer(&entree(t + 600_000 + i * 10_000, 0, LP, LP), &[(t, LP)]);
+        }
+        assert_eq!(lat.delai_lecture(), Some(610_000));
     }
 }
