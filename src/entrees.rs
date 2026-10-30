@@ -6,7 +6,7 @@
 use crate::affichage::{self, Etat};
 use crate::capture::Capture;
 use crate::clavier::Touche;
-use crate::combo::{Resultat, Trial};
+use crate::combo::{Recalage, Resultat, Trial};
 use crate::controles::{Action, Controles};
 use crate::ecran::{self, Appui, EntreeJeu};
 use crate::horloge;
@@ -295,6 +295,13 @@ pub fn boucle(
         // L'historique du jeu lu à l'écran : ses nouvelles lignes, et le verdict
         // d'un combo fini s'il attendait les frames exactes.
         let nouveau_jeu = juge.lire_journal(temps);
+        // Le jeu dit qu'un combo s'est arrêté (ses dégâts sont repartis de zéro) : les
+        // appuis faits depuis le dernier coup qui a touché sont un nouveau combo.
+        for fin in std::mem::take(&mut juge.fins_a_traiter) {
+            if combo_arrete(&mut trial, &mut capture, &mut juge, fin, &partage) {
+                change = true;
+            }
+        }
         capture.latence = juge.latence.valeur().unwrap_or(LATENCE_DEFAUT);
         // Historique du jeu visible : les coups sont lus dans ses lignes (ce que le jeu a
         // vraiment pris en compte), et donnés au trial.
@@ -473,6 +480,70 @@ pub fn boucle(
         // On regarde la manette toutes les millisecondes (largement plus vite qu'une frame).
         std::thread::sleep(Duration::from_millis(1));
     }
+}
+
+/// Le jeu a signalé la fin d'un combo à l'heure `fin` : l'essai en cours est recalé sur
+/// les appuis faits depuis le dernier coup qui a touché, ou remis à zéro.
+fn combo_arrete(
+    trial: &mut Trial,
+    capture: &mut Capture,
+    juge: &mut Juge,
+    fin: i64,
+    partage: &Mutex<Partage>,
+) -> bool {
+    let Some(premier) = juge.etapes.first().map(|a| a.temps) else {
+        return false;
+    };
+    // Le dernier coup de l'ancien combo qui a touché, pendant cet essai.
+    let Some(dernier) = juge
+        .coups
+        .iter()
+        .map(|&(t, _)| t)
+        .rfind(|&t| t >= premier && t < fin)
+    else {
+        return false;
+    };
+    let index_avant = trial.index;
+    let Some(recalage) = trial.combo_arrete(horloge::frame(dernier) + 1) else {
+        return false;
+    };
+    capture.annuler();
+    let lachee = trial
+        .etapes
+        .get(index_avant.saturating_sub(1))
+        .map(|e| e.notation.clone())
+        .unwrap_or_default();
+    match recalage {
+        Recalage::Repris(debut) => {
+            let garder = juge.etapes.split_off(debut.min(juge.etapes.len()));
+            juge.etapes = garder;
+            println!(
+                "{}",
+                format!(
+                    "      ↺ combo lâché après {lachee} (le jeu l'a arrêté), nouveau départ : \
+                     étape {}",
+                    trial.index + 1
+                )
+                .cyan()
+            );
+        }
+        Recalage::Remis => {
+            juge.etapes.clear();
+            println!(
+                "{}",
+                format!("      ✗ combo lâché après {lachee} (le jeu l'a arrêté)").red()
+            );
+        }
+    }
+    println!("{}", affichage::trial(trial));
+    if let Ok(mut p) = partage.lock() {
+        p.index = trial.index;
+        p.ecarts = trial.ecarts.clone();
+        p.etape_cassee = None;
+        p.echec();
+        p.message(format!("Combo lâché après {lachee}"), false);
+    }
+    true
 }
 
 /// Donne un coup (toutes ses lectures possibles) au trial, et le verdict si le combo est fini.
@@ -942,6 +1013,8 @@ struct Juge {
     /// (dégâts revenus à 0).
     coups: VecDeque<(i64, u32)>,
     fins_combo: VecDeque<i64>,
+    /// Fins de combo pas encore données au trial.
+    fins_a_traiter: Vec<i64>,
     /// Le panneau des dégâts du jeu est lu.
     degats_visibles: bool,
     /// Coups qui ont touché dans le combo en cours (ou le dernier), et s'il est fini.
@@ -1053,6 +1126,7 @@ impl Juge {
                 }
                 ecran::Degats::Fin(t) => {
                     self.fins_combo.push_back(t);
+                    self.fins_a_traiter.push(t);
                     self.combo_fini = true;
                 }
             }

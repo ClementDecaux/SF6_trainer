@@ -230,6 +230,15 @@ pub enum Resultat {
     Ignore,
 }
 
+/// Ce qui arrive à l'essai quand le jeu dit que le combo s'est arrêté.
+#[derive(Debug, PartialEq, Eq)]
+pub enum Recalage {
+    /// Recalé sur un nouveau départ : le numéro du premier appui gardé.
+    Repris(usize),
+    /// Remis à zéro : on attend la 1re étape.
+    Remis,
+}
+
 /// Un trial en cours.
 pub struct Trial {
     pub nom: String,
@@ -386,6 +395,39 @@ impl Trial {
             }
         }
         resultat
+    }
+
+    /// Le jeu dit que le combo s'est arrêté (ses dégâts sont repartis de zéro) : les appuis
+    /// faits depuis la frame `frame_min` (après le dernier coup qui a touché) appartiennent à
+    /// un nouveau combo. S'ils forment le début du combo, l'essai est recalé dessus
+    /// (`reprise`), sinon il est remis à zéro. Renvoie `None` si rien ne change (pas d'essai
+    /// en cours, ou tout l'essai est déjà dans le nouveau combo).
+    pub fn combo_arrete(&mut self, frame_min: u64) -> Option<Recalage> {
+        if self.index == 0 {
+            return None;
+        }
+        let debut = self.appuis.iter().position(|(_, f)| *f >= frame_min);
+        if debut == Some(0) {
+            return None;
+        }
+        if let Some(debut) = debut {
+            let mut essai = self.vierge();
+            let appuis = self.appuis[debut..].to_vec();
+            if appuis
+                .iter()
+                .all(|(c, f)| essai.coup_simple(c, *f) == Resultat::Avance)
+            {
+                essai.appuis = appuis;
+                let cote = self.cote;
+                *self = essai;
+                self.cote = cote;
+                self.reprise = Some(debut);
+                return Some(Recalage::Repris(debut));
+            }
+        }
+        self.index = 0;
+        self.appuis.clear();
+        Some(Recalage::Remis)
     }
 
     /// Le plus long nouveau départ possible parmi les appuis de l'essai raté (sans le 1er) :
@@ -785,6 +827,30 @@ mod tests {
         assert_eq!(t.coup(&c("1HP"), 335), Resultat::Avance);
         assert_eq!(t.coup(&c("4MK"), 360), Resultat::Avance);
         assert_eq!(t.coup(&c("63214MP"), 380), Resultat::Reussi);
+    }
+
+    #[test]
+    fn le_jeu_dit_que_le_combo_est_fini() {
+        let mut t = Trial::new("test", parser("4MK xx DR xx 1HP, 4MK xx 63214MP").unwrap());
+        t.coup(&c("4MK"), 100);
+        t.coup(&c("DR"), 115);
+        t.coup(&c("1HP"), 135);
+        t.coup(&c("4MK"), 300);
+        // Dernier coup qui a touché vers la frame 150 : le b+MK de la frame 300 est un
+        // nouveau combo.
+        assert_eq!(t.combo_arrete(151), Some(Recalage::Repris(3)));
+        assert_eq!(t.index, 1);
+        assert_eq!(t.coup(&c("DR"), 315), Resultat::Avance);
+        // Rien de neuf depuis : on attend la 1re étape.
+        let mut t = Trial::new("test", parser("4MK xx DR xx 1HP").unwrap());
+        t.coup(&c("4MK"), 100);
+        t.coup(&c("DR"), 115);
+        assert_eq!(t.combo_arrete(200), Some(Recalage::Remis));
+        assert_eq!(t.index, 0);
+        // Tout l'essai est déjà dans le nouveau combo : rien ne change.
+        t.coup(&c("4MK"), 300);
+        assert_eq!(t.combo_arrete(250), None);
+        assert_eq!(t.index, 1);
     }
 
     #[test]
