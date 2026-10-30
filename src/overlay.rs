@@ -273,10 +273,39 @@ impl Overlay {
             return false;
         }
         self.cache = !oui;
-        self.regler_dans = 1;
+        // Réglé tout de suite, sans attendre que l'overlay soit redessiné : invisible, il
+        // ne l'était plus, et il ne réapparaissait jamais.
+        let opacite = if self.cache { 0 } else { self.opacite_fenetre };
+        #[cfg(windows)]
+        regler_fenetre_windows(opacite, self.traversant());
+        #[cfg(not(windows))]
+        let _ = opacite;
         true
     }
 }
+
+/// Demande à Windows de redessiner l'overlay. Quand SF6 est devant, Windows ne le fait
+/// pas toujours de lui-même : l'overlay restait blanc, ou figé (F8 sans effet).
+#[cfg(windows)]
+pub fn reveiller() {
+    use windows_sys::Win32::Graphics::Gdi::{RDW_INTERNALPAINT, RDW_INVALIDATE, RedrawWindow};
+    use windows_sys::Win32::UI::WindowsAndMessaging::FindWindowW;
+    let titre: Vec<u16> = TITRE.encode_utf16().chain([0]).collect();
+    unsafe {
+        let hwnd = FindWindowW(std::ptr::null(), titre.as_ptr());
+        if !hwnd.is_null() {
+            RedrawWindow(
+                hwnd,
+                std::ptr::null(),
+                std::ptr::null_mut(),
+                RDW_INVALIDATE | RDW_INTERNALPAINT,
+            );
+        }
+    }
+}
+
+#[cfg(not(windows))]
+pub fn reveiller() {}
 
 /// Le titre de la fenêtre de l'overlay (sert aussi à la retrouver côté Windows).
 pub const TITRE: &str = "SF6 Trainer - overlay";

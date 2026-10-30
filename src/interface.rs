@@ -216,11 +216,13 @@ impl eframe::App for Interface {
         // clics sans effet).
         self.jeu_actif = jeu_au_premier_plan(&self.titre_jeu);
         let montrer = (!jeu_exige || self.jeu_actif) && entrainement;
-        if visible
-            && let Ok(mut o) = self.overlay.lock()
-            && o.montrer(montrer)
-        {
-            ctx.request_repaint_of(overlay::id());
+        if visible {
+            if let Ok(mut o) = self.overlay.lock()
+                && o.montrer(montrer)
+            {
+                ctx.request_repaint_of(overlay::id());
+            }
+            overlay::reveiller();
         }
         // Un nouveau clip vient d'être filmé : on relit le dossier et on rouvre la vidéo
         // (le nouveau clip remplace l'ancien du même combo).
@@ -1413,9 +1415,23 @@ fn jeu_au_premier_plan(titre: &str) -> bool {
         GetWindowTextW(hwnd, tampon.as_mut_ptr(), tampon.len() as i32)
     };
     let actif = String::from_utf16_lossy(&tampon[..longueur.max(0) as usize]);
+    if actif == overlay::TITRE {
+        // L'overlay a pris le focus (en apparaissant au-dessus de SF6) : on le rend au jeu,
+        // sinon le clavier et la manette n'y vont plus.
+        let jeu: Vec<u16> = titre.trim().encode_utf16().chain([0]).collect();
+        unsafe {
+            let fenetre = windows_sys::Win32::UI::WindowsAndMessaging::FindWindowW(
+                std::ptr::null(),
+                jeu.as_ptr(),
+            );
+            if !fenetre.is_null() {
+                windows_sys::Win32::UI::WindowsAndMessaging::SetForegroundWindow(fenetre);
+            }
+        }
+        return true;
+    }
     // Titre exact : un onglet de navigateur « Street Fighter 6/Dhalsim » ne compte pas.
-    // L'overlay lui-même (cliqué) compte comme le jeu : sinon il se fermerait sous la souris.
-    actif.trim() == titre.trim() || actif == overlay::TITRE
+    actif.trim() == titre.trim()
 }
 
 #[cfg(not(windows))]

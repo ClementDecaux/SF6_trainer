@@ -18,7 +18,7 @@ toml = "1.1.8"
 # l'overlay, son, touche F8).
 [target.'cfg(windows)'.dependencies]
 raw-window-handle = "0.6"
-windows-sys = { version = "0.61", features = ["Win32_Foundation", "Win32_Media", "Win32_Media_Audio", "Win32_System_Performance", "Win32_UI_Input_KeyboardAndMouse", "Win32_UI_Input_XboxController", "Win32_UI_WindowsAndMessaging"] }
+windows-sys = { version = "0.61", features = ["Win32_Foundation", "Win32_Graphics_Gdi", "Win32_Media", "Win32_Media_Audio", "Win32_System_Performance", "Win32_UI_Input_KeyboardAndMouse", "Win32_UI_Input_XboxController", "Win32_UI_WindowsAndMessaging"] }
 # Capture vidéo de la fenêtre de SF6 et encodage MP4 par Windows (étape 7).
 windows-capture = "2.0"
 # Lecture des vidéos dans l'interface (décodage par Media Foundation, inclus dans Windows),
