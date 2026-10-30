@@ -76,6 +76,13 @@ pub struct Partage {
     pub etape_cassee: Option<usize>,
     /// Un mauvais coup vient d'être fait : la prochaine ligne ajoutée est celle du break.
     pub ligne_cassee_a_venir: bool,
+    /// L'historique lu dans le jeu (lignes finies, la plus récente en premier),
+    /// avec les coups reconnus de notre côté. Affiché quand l'historique du jeu est visible.
+    pub lignes_jeu: VecDeque<Ligne>,
+    /// La ligne en cours dans le jeu (sa durée vient du compteur affiché par le jeu).
+    pub ligne_jeu_en_cours: Option<Ligne>,
+    /// Nombre de lignes du jeu ajoutées depuis le lancement.
+    pub lignes_jeu_total: u64,
 }
 
 impl Partage {
@@ -101,7 +108,17 @@ impl Partage {
             photo_demandee: false,
             etape_cassee: None,
             ligne_cassee_a_venir: false,
+            lignes_jeu: VecDeque::new(),
+            ligne_jeu_en_cours: None,
+            lignes_jeu_total: 0,
         }
+    }
+
+    /// Une ligne finie de l'historique du jeu.
+    pub fn ajouter_ligne_jeu(&mut self, ligne: Ligne) {
+        self.lignes_jeu.push_front(ligne);
+        self.lignes_jeu_total += 1;
+        self.lignes_jeu.truncate(LIGNES_MAX);
     }
 
     pub fn ajouter_ligne(&mut self, mut ligne: Ligne) {
@@ -118,13 +135,21 @@ impl Partage {
     pub fn marquer_cassee(&mut self, temps: i64) {
         // L'état d'un appui commence au plus tôt à sa frame : une frame de marge.
         const MARGE: i64 = 166_667;
-        let ligne = self
+        let proche = |l: &&mut Ligne| !l.coups.is_empty() && (l.debut - temps).abs() <= MARGE;
+        let mut trouvee = false;
+        // Dans les deux historiques : le nôtre et celui lu dans le jeu.
+        for ligne in self
             .lignes
             .iter_mut()
-            .find(|l| !l.coups.is_empty() && (l.debut - temps).abs() <= MARGE);
-        match ligne {
-            Some(ligne) => ligne.cassee = true,
-            None => self.ligne_cassee_a_venir = true,
+            .find(proche)
+            .into_iter()
+            .chain(self.lignes_jeu.iter_mut().find(proche))
+        {
+            ligne.cassee = true;
+            trouvee = true;
+        }
+        if !trouvee {
+            self.ligne_cassee_a_venir = true;
         }
     }
 

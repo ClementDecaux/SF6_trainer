@@ -280,8 +280,16 @@ impl eframe::App for Overlay {
                 ui.separator();
                 // L'historique défile à la molette ; une nouvelle ligne le ramène en haut.
                 let mut defilement = egui::ScrollArea::vertical();
-                if partage.lignes_total != self.lignes_vues {
-                    self.lignes_vues = partage.lignes_total;
+                // Historique du jeu visible : on recopie ses lignes (ce que le jeu a pris
+                // en compte). Sinon, celles de notre manette.
+                let du_jeu = partage.historique_jeu && partage.ligne_jeu_en_cours.is_some();
+                let total = if du_jeu {
+                    partage.lignes_jeu_total
+                } else {
+                    partage.lignes_total
+                };
+                if total != self.lignes_vues {
+                    self.lignes_vues = total;
                     defilement = defilement.vertical_scroll_offset(0.0);
                 }
                 let sortie = defilement
@@ -290,7 +298,13 @@ impl eframe::App for Overlay {
                             | egui::scroll_area::ScrollSource::SCROLL_BAR,
                     )
                     .auto_shrink([false, false])
-                    .show(ui, |ui| historique(ui, &partage.lignes));
+                    .show(ui, |ui| {
+                        if du_jeu {
+                            historique_du_jeu(ui, &partage);
+                        } else {
+                            historique(ui, &partage.lignes);
+                        }
+                    });
                 self.zones.extend(ecran(sortie.inner_rect));
             });
 
@@ -581,24 +595,52 @@ fn message(ui: &mut egui::Ui, p: &Partage) {
     }
 }
 
+/// L'historique lu dans le jeu : la ligne en cours (avec le compteur affiché par le jeu),
+/// puis les lignes finies.
+fn historique_du_jeu(ui: &mut egui::Ui, p: &Partage) {
+    if let Some(en_cours) = &p.ligne_jeu_en_cours {
+        let mut ligne = en_cours.clone();
+        // Le compteur du jeu, s'il est lu sur la même ligne.
+        ligne.frames = crate::ecran::ligne_du_haut()
+            .filter(|h| h.direction == ligne.direction && h.boutons == en_cours_bits(&ligne))
+            .map_or(1, |h| u64::from(h.frames));
+        ligne_encadree(ui, &ligne);
+    }
+    for ligne in &p.lignes_jeu {
+        ligne_encadree(ui, ligne);
+    }
+}
+
+/// Les boutons d'une ligne, en bits comme dans l'historique du jeu.
+fn en_cours_bits(ligne: &Ligne) -> u8 {
+    ligne.boutons.iter().fold(0, |b, (a, _)| {
+        b | crate::ecran::boutons_etape(&a.to_string())
+    })
+}
+
 /// L'historique d'inputs, le plus récent en haut comme dans SF6.
 fn historique(ui: &mut egui::Ui, lignes: &std::collections::VecDeque<Ligne>) {
     for ligne in lignes {
-        // Là où le combo a cassé : fond et contour rouges.
-        let (fond, bord) = if ligne.cassee {
-            (
-                Color32::from_rgba_unmultiplied(255, 60, 60, 70),
-                egui::Stroke::new(1.5, ROUGE),
-            )
-        } else {
-            (Color32::TRANSPARENT, egui::Stroke::NONE)
-        };
-        egui::Frame::new()
-            .fill(fond)
-            .stroke(bord)
-            .corner_radius(4)
-            .show(ui, |ui| ligne_historique(ui, ligne));
+        ligne_encadree(ui, ligne);
     }
+}
+
+/// Une ligne de l'historique, encadrée en rouge si le combo a cassé dessus.
+fn ligne_encadree(ui: &mut egui::Ui, ligne: &Ligne) {
+    // Là où le combo a cassé : fond et contour rouges.
+    let (fond, bord) = if ligne.cassee {
+        (
+            Color32::from_rgba_unmultiplied(255, 60, 60, 70),
+            egui::Stroke::new(1.5, ROUGE),
+        )
+    } else {
+        (Color32::TRANSPARENT, egui::Stroke::NONE)
+    };
+    egui::Frame::new()
+        .fill(fond)
+        .stroke(bord)
+        .corner_radius(4)
+        .show(ui, |ui| ligne_historique(ui, ligne));
 }
 
 /// Une ligne de l'historique : durée, direction, boutons et coups reconnus.

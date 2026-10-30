@@ -292,6 +292,7 @@ pub fn boucle(
             p.degats_visibles = juge.degats_visibles;
             p.hits_direct = juge.hits_combo;
             juge.corriger(&mut p.lignes);
+            juge.publier_lignes(&mut p);
             change = true;
         }
         if let Some(fin) = juge.pret(temps) {
@@ -504,6 +505,52 @@ fn appui_etape<'a>(notation: &'a str, candidats: &[String]) -> &'a str {
     }
 }
 
+/// Une ligne de l'historique du jeu, pour l'overlay.
+/// `debut` : l'heure de l'appui (côté manette), pour la retrouver dans notre historique.
+fn ligne_jeu(entree: &EntreeJeu, frames: u64, latence: i64) -> Ligne {
+    const BOUTONS: [(u8, Action); 6] = [
+        (ecran::LP, Action::LP),
+        (ecran::MP, Action::MP),
+        (ecran::HP, Action::HP),
+        (ecran::LK, Action::LK),
+        (ecran::MK, Action::MK),
+        (ecran::HK, Action::HK),
+    ];
+    Ligne {
+        frames,
+        direction: entree.direction,
+        boutons: BOUTONS
+            .iter()
+            .filter(|(bit, _)| entree.boutons & bit != 0)
+            .map(|&(bit, action)| (action, entree.nouveaux & bit != 0))
+            .collect(),
+        coups: Vec::new(),
+        debut: entree.vu - latence,
+        exact: true,
+        cassee: false,
+    }
+}
+
+/// Reprend de notre ligne correspondante (même direction, même moment) les coups reconnus
+/// et la marque de break.
+fn completer(ligne: &mut Ligne, nos_lignes: &VecDeque<Ligne>) {
+    let bits = |l: &Ligne| {
+        l.boutons
+            .iter()
+            .fold(0, |b, (a, _)| b | ecran::boutons_etape(&a.to_string()))
+    };
+    let boutons = bits(ligne);
+    if let Some(notre) = nos_lignes
+        .iter()
+        .filter(|l| l.direction == ligne.direction && bits(l) == boutons)
+        .min_by_key(|l| (l.debut - ligne.debut).abs())
+        .filter(|l| (l.debut - ligne.debut).abs() <= 2 * ecran::FRAME)
+    {
+        ligne.coups = notre.coups.clone();
+        ligne.cassee = notre.cassee;
+    }
+}
+
 /// Un combo fini : écarts entre les étapes et erreurs de timing.
 #[derive(Debug, Clone)]
 struct Fin {
@@ -643,6 +690,10 @@ struct Juge {
     /// Coups qui ont touché dans le combo en cours (ou le dernier), et s'il est fini.
     hits_combo: u32,
     combo_fini: bool,
+    /// Lignes du jeu arrivées, pas encore recopiées dans l'historique de l'overlay.
+    a_publier: Vec<EntreeJeu>,
+    /// La dernière ligne du jeu recopiée (en cours : sa durée n'est pas encore connue).
+    en_cours: Option<EntreeJeu>,
 }
 
 struct Attente {
@@ -746,6 +797,7 @@ impl Juge {
         for entree in ecran::nouvelles_entrees(&mut self.dernier) {
             self.latence.mesurer(&entree, &appuis);
             self.journal.push_back(entree);
+            self.a_publier.push(entree);
             nouveau = true;
         }
         // Le moment où le jeu lit la manette, déduit de nos appuis : nos limites de frames
@@ -816,6 +868,31 @@ impl Juge {
         for k in absentes.into_iter().rev() {
             lignes.remove(k);
         }
+    }
+
+    /// Recopie les nouvelles lignes du jeu dans l'historique de l'overlay, avec les coups
+    /// reconnus sur notre ligne correspondante (et sa marque de break).
+    fn publier_lignes(&mut self, p: &mut Partage) {
+        let latence = self.latence.valeur().unwrap_or(LATENCE_DEFAUT);
+        for entree in std::mem::take(&mut self.a_publier) {
+            if let Some(avant) = self.en_cours.take() {
+                // Une ligne qui change de segment : le jeu a perdu le fil (99 frames...).
+                let frames = if avant.segment == entree.segment {
+                    entree.frame - avant.frame
+                } else {
+                    99
+                };
+                let mut ligne = ligne_jeu(&avant, frames, latence);
+                completer(&mut ligne, &p.lignes);
+                p.ajouter_ligne_jeu(ligne);
+            }
+            self.en_cours = Some(entree);
+        }
+        p.ligne_jeu_en_cours = self.en_cours.map(|e| {
+            let mut ligne = ligne_jeu(&e, 0, latence);
+            completer(&mut ligne, &p.lignes);
+            ligne
+        });
     }
 
     /// Le combo vient de finir. Si l'historique ou les dégâts du jeu sont lus, on attend
@@ -1116,4 +1193,45 @@ fn changer_direction(dirs: &mut Directions, bouton: &str, pressed: bool) -> bool
         _ => return false,
     }
     true
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn une_ligne_du_jeu_reprend_nos_coups_et_le_break() {
+        let entree = EntreeJeu {
+            vu: 1_000_000,
+            frame: 10,
+            segment: 1,
+            direction: 4,
+            boutons: ecran::MK,
+            nouveaux: ecran::MK,
+        };
+        let latence = 300_000;
+        let mut ligne = ligne_jeu(&entree, 4, latence);
+        assert_eq!(ligne.boutons, vec![(Action::MK, true)]);
+        assert_eq!(ligne.debut, 700_000);
+
+        let notre = |direction, debut, coup: &str| Ligne {
+            frames: 5,
+            direction,
+            boutons: vec![(Action::MK, true)],
+            coups: vec![coup.to_string()],
+            debut,
+            exact: false,
+            cassee: true,
+        };
+        // Même moment mais autre direction, puis la bonne ligne à une demi-frame près.
+        let nos_lignes = VecDeque::from([notre(6, 700_000, "6MK"), notre(4, 780_000, "4MK")]);
+        completer(&mut ligne, &nos_lignes);
+        assert_eq!(ligne.coups, vec!["4MK".to_string()]);
+        assert!(ligne.cassee);
+
+        // Trop loin dans le temps : rien repris.
+        let mut seule = ligne_jeu(&entree, 4, latence);
+        completer(&mut seule, &VecDeque::from([notre(4, 2_000_000, "4MK")]));
+        assert!(seule.coups.is_empty());
+    }
 }

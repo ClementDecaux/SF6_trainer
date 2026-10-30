@@ -638,6 +638,13 @@ pub fn nouveaux_degats(dernier: &mut u64) -> Vec<Degats> {
 static JOURNAL: Mutex<VecDeque<(u64, EntreeJeu)>> = Mutex::new(VecDeque::new());
 /// Heure de la dernière image où l'historique a été lu (0 = jamais).
 static DERNIERE_LECTURE: AtomicI64 = AtomicI64::new(0);
+/// La ligne du haut de l'historique du jeu à la dernière image (la ligne en cours).
+static LIGNE_DU_HAUT: Mutex<Option<LigneJeu>> = Mutex::new(None);
+
+/// La ligne en cours dans l'historique du jeu, avec son compteur de frames tel qu'affiché.
+pub fn ligne_du_haut() -> Option<LigneJeu> {
+    LIGNE_DU_HAUT.lock().ok().and_then(|l| *l)
+}
 const JOURNAL_MAX: usize = 400;
 
 /// Ce que le thread de capture suit d'une image à l'autre.
@@ -654,6 +661,9 @@ pub fn lire_image(lecteur: &mut Lecteur, vue: &Vue, temps: i64) {
     let lignes = lire_lignes(vue);
     if lignes.len() >= 2 {
         DERNIERE_LECTURE.store(temps, Ordering::Relaxed);
+        if let Ok(mut haut) = LIGNE_DU_HAUT.lock() {
+            *haut = lignes.first().copied();
+        }
     }
     let nouvelles = suivi.image(&lignes, temps);
     if nouvelles.is_empty() {
