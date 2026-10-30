@@ -22,7 +22,6 @@ const FRAME: i64 = 166_667;
 #[derive(Clone, Copy, PartialEq, Eq)]
 enum Onglet {
     Combos,
-    Videos,
     Reglages,
 }
 
@@ -57,6 +56,8 @@ struct Lecteur {
     position: f64,
     derniere_image: Instant,
     texture: Option<(usize, egui::TextureHandle)>,
+    /// Bouton « plein écran » cliqué (l'interface bascule).
+    basculer_plein_ecran: bool,
 }
 
 pub struct Interface {
@@ -74,8 +75,8 @@ pub struct Interface {
     images_avant: usize,
     clips: Vec<Clip>,
     clips_lus: bool,
-    /// Vidéos : seulement celles du combo choisi.
-    filtre_combo: bool,
+    /// Le lecteur vidéo occupe tout l'écran.
+    plein_ecran: bool,
     lecteur: Option<Lecteur>,
     /// Titre de la fenêtre de SF6 (`fenetre` dans capture.toml).
     titre_jeu: String,
@@ -106,7 +107,7 @@ impl Interface {
             images_avant: (avant_ms * 60 / 1000) as usize,
             clips: Vec::new(),
             clips_lus: false,
-            filtre_combo: true,
+            plein_ecran: false,
             lecteur: None,
             titre_jeu: titre_jeu.to_string(),
             overlay_montre: true,
@@ -179,13 +180,6 @@ impl Interface {
             .lock()
             .map_or(Syntaxe::default(), |p| p.syntaxe)
     }
-
-    fn clips_du_combo(&self, nom: &str) -> usize {
-        self.clips
-            .iter()
-            .filter(|c| c.infos.as_ref().is_some_and(|i| i.combo == nom))
-            .count()
-    }
 }
 
 impl eframe::App for Interface {
@@ -213,16 +207,36 @@ impl eframe::App for Interface {
             self.lire_clips();
         }
 
+        // Plein écran : seulement le lecteur (Échap pour sortir).
+        if self.plein_ecran {
+            if self.lecteur.is_none() || ui.input(|i| i.key_pressed(egui::Key::Escape)) {
+                self.basculer_plein_ecran(&ctx);
+            } else {
+                let reglages = self.reglages_lecteur();
+                let images_avant = self.images_avant;
+                egui::CentralPanel::default().show(ui, |ui| {
+                    if let Some(lecteur) = &mut self.lecteur {
+                        lecteur.afficher(ui, images_avant, reglages, true);
+                    }
+                });
+                if self
+                    .lecteur
+                    .as_ref()
+                    .is_some_and(|l| l.basculer_plein_ecran)
+                {
+                    self.basculer_plein_ecran(&ctx);
+                }
+                ctx.request_repaint_after(std::time::Duration::from_millis(200));
+                return;
+            }
+        }
+
         egui::Panel::top("onglets").show(ui, |ui| {
             ui.add_space(4.0);
             ui.horizontal(|ui| {
                 ui.heading("SF6 Trainer");
                 ui.add_space(20.0);
-                for (onglet, nom) in [
-                    (Onglet::Combos, "Combos"),
-                    (Onglet::Videos, "Vidéos"),
-                    (Onglet::Reglages, "Réglages"),
-                ] {
+                for (onglet, nom) in [(Onglet::Combos, "Combos"), (Onglet::Reglages, "Réglages")] {
                     if ui
                         .selectable_label(self.onglet == onglet, RichText::new(nom).size(16.0))
                         .clicked()
@@ -253,7 +267,6 @@ impl eframe::App for Interface {
 
         egui::CentralPanel::default().show(ui, |ui| match self.onglet {
             Onglet::Combos => self.onglet_combos(ui),
-            Onglet::Videos => self.onglet_videos(ui),
             Onglet::Reglages => {
                 egui::ScrollArea::vertical().show(ui, |ui| self.onglet_reglages(ui));
             }
@@ -331,13 +344,14 @@ impl Interface {
                 return;
             };
             ui.add_space(6.0);
-            ui.heading(&combo.nom);
-            if !combo.categorie.is_empty() {
-                ui.label(RichText::new(&combo.categorie).color(GRIS));
-            }
-            ui.add_space(10.0);
-            ui.label(RichText::new(&combo.inputs).monospace().size(15.0));
-            ui.add_space(10.0);
+            ui.horizontal(|ui| {
+                ui.heading(&combo.nom);
+                if !combo.categorie.is_empty() {
+                    ui.label(RichText::new(&combo.categorie).color(GRIS));
+                }
+            });
+            ui.label(RichText::new(&combo.inputs).monospace().color(GRIS));
+            ui.add_space(6.0);
             match crate::combo::parser(&combo.inputs) {
                 Ok(etapes) => {
                     ui.horizontal_wrapped(|ui| {
@@ -377,21 +391,14 @@ impl Interface {
                         .map(|d| format!("{d} (appris)"))
                 })
                 .unwrap_or_else(|| "pas encore appris".into());
-            egui::Grid::new("details")
-                .spacing([20.0, 6.0])
-                .show(ui, |ui| {
-                    ui.label(RichText::new("Hits").color(GRIS));
-                    ui.label(hits);
-                    ui.end_row();
-                    ui.label(RichText::new("Dégâts").color(GRIS));
-                    ui.label(degats);
-                    ui.end_row();
-                    ui.label(RichText::new("Vidéos").color(GRIS));
-                    ui.label(format!("{}", self.clips_du_combo(&combo.nom)));
-                    ui.end_row();
-                });
-            ui.add_space(16.0);
+            ui.add_space(6.0);
             ui.horizontal(|ui| {
+                ui.label(RichText::new("Hits").color(GRIS));
+                ui.label(RichText::new(hits).strong());
+                ui.add_space(12.0);
+                ui.label(RichText::new("Dégâts").color(GRIS));
+                ui.label(RichText::new(degats).strong());
+                ui.add_space(20.0);
                 let lance = en_cours == self.choisi;
                 let bouton = egui::Button::new(
                     RichText::new(if lance {
@@ -406,14 +413,10 @@ impl Interface {
                 {
                     p.combo_demande = Some(self.choisi);
                 }
-                if ui
-                    .button(RichText::new("Voir ses vidéos").size(16.0))
-                    .clicked()
-                {
-                    self.filtre_combo = true;
-                    self.onglet = Onglet::Videos;
-                }
             });
+            ui.add_space(6.0);
+            ui.separator();
+            self.videos_du_combo(ui, &combo.nom);
         });
     }
 }
@@ -421,80 +424,111 @@ impl Interface {
 // ---------------------------------------------------------------- Vidéos
 
 impl Interface {
-    fn onglet_videos(&mut self, ui: &mut egui::Ui) {
-        let nom_choisi = self
-            .combos
-            .get(self.choisi)
-            .map(|c| c.nom.clone())
-            .unwrap_or_default();
-        egui::Panel::left("liste_clips")
-            .default_size(300.0)
-            .show(ui, |ui| {
-                ui.add_space(6.0);
-                ui.horizontal(|ui| {
-                    if ui.button("Actualiser").clicked() {
-                        self.lire_clips();
-                    }
-                    ui.checkbox(&mut self.filtre_combo, "Seulement ce combo");
-                });
-                if self.filtre_combo {
-                    ui.label(RichText::new(&nom_choisi).color(JAUNE));
-                }
-                ui.add_space(6.0);
-                let mut ouvrir = None;
-                egui::ScrollArea::vertical().show(ui, |ui| {
-                    let mut aucun = true;
-                    for (i, clip) in self.clips.iter().enumerate() {
-                        let du_combo = clip.infos.as_ref().is_some_and(|i| i.combo == nom_choisi);
-                        if self.filtre_combo && !du_combo {
-                            continue;
-                        }
-                        aucun = false;
-                        let ouvert = self
-                            .lecteur
-                            .as_ref()
-                            .is_some_and(|l| l.video.chemin == clip.video);
-                        if ui.selectable_label(ouvert, clip.titre()).clicked() {
-                            ouvrir = Some(i);
-                        }
-                    }
-                    if aucun {
-                        ui.label(
-                            RichText::new(
-                                "Aucune vidéo. Active les vidéos (Réglages ou F9) : chaque \
-                                 combo réussi est filmé.",
-                            )
-                            .color(GRIS),
-                        );
-                    }
-                });
-                if let Some(i) = ouvrir {
-                    let clip = &self.clips[i];
-                    self.lecteur = Some(Lecteur {
-                        video: Video::ouvrir(&clip.video),
-                        infos: clip.infos.clone(),
-                        image: 0,
-                        lecture: false,
-                        vitesse: 1.0,
-                        position: 0.0,
-                        derniere_image: Instant::now(),
-                        texture: None,
-                    });
-                }
-            });
-
-        let images_avant = self.images_avant;
-        let syntaxe = self.syntaxe();
-        let liaisons = self
-            .partage
+    /// Syntaxe et liaisons choisies, pour le lecteur.
+    fn reglages_lecteur(&self) -> (Syntaxe, StyleLiaison) {
+        self.partage
             .lock()
-            .map_or(Default::default(), |p| p.liaisons);
-        egui::CentralPanel::default().show(ui, |ui| match &mut self.lecteur {
-            Some(lecteur) => lecteur.afficher(ui, images_avant, (syntaxe, liaisons)),
-            None => {
-                ui.label("Choisis une vidéo dans la liste.");
+            .map_or(Default::default(), |p| (p.syntaxe, p.liaisons))
+    }
+
+    fn ouvrir_clip(&mut self, i: usize) {
+        let Some(clip) = self.clips.get(i) else {
+            return;
+        };
+        self.lecteur = Some(Lecteur {
+            video: Video::ouvrir(&clip.video),
+            infos: clip.infos.clone(),
+            image: 0,
+            lecture: false,
+            vitesse: 1.0,
+            position: 0.0,
+            derniere_image: Instant::now(),
+            texture: None,
+            basculer_plein_ecran: false,
+        });
+    }
+
+    fn basculer_plein_ecran(&mut self, ctx: &egui::Context) {
+        self.plein_ecran = !self.plein_ecran;
+        ctx.send_viewport_cmd(egui::ViewportCommand::Fullscreen(self.plein_ecran));
+        if let Some(l) = &mut self.lecteur {
+            l.basculer_plein_ecran = false;
+        }
+    }
+
+    /// Sous le combo : ses vidéos (la plus récente ouverte d'office) et le lecteur.
+    fn videos_du_combo(&mut self, ui: &mut egui::Ui, nom: &str) {
+        let siens: Vec<usize> = (0..self.clips.len())
+            .filter(|&i| self.clips[i].infos.as_ref().is_some_and(|c| c.combo == nom))
+            .collect();
+        // Le lecteur suit le combo choisi.
+        let lecteur_du_combo = self
+            .lecteur
+            .as_ref()
+            .is_some_and(|l| l.infos.as_ref().is_some_and(|c| c.combo == nom));
+        if !lecteur_du_combo {
+            self.lecteur = None;
+            if let Some(&i) = siens.first() {
+                self.ouvrir_clip(i);
+            }
+        }
+
+        ui.horizontal(|ui| {
+            ui.heading(format!("Vidéos ({})", siens.len()));
+            if ui.small_button("Actualiser").clicked() {
+                self.lire_clips();
+            }
+            if siens.len() > 1 {
+                let ouvert = self.lecteur.as_ref().map(|l| l.video.chemin.clone());
+                let titre = |i: usize| {
+                    self.clips[i]
+                        .infos
+                        .as_ref()
+                        .map_or_else(|| self.clips[i].titre(), |c| c.date.clone())
+                };
+                let actuel = siens
+                    .iter()
+                    .find(|&&i| Some(&self.clips[i].video) == ouvert.as_ref())
+                    .map_or_else(String::new, |&i| titre(i));
+                let mut choix = None;
+                egui::ComboBox::from_id_salt("clip")
+                    .selected_text(actuel)
+                    .show_ui(ui, |ui| {
+                        for &i in &siens {
+                            let pris = Some(&self.clips[i].video) == ouvert.as_ref();
+                            if ui.selectable_label(pris, titre(i)).clicked() {
+                                choix = Some(i);
+                            }
+                        }
+                    });
+                if let Some(i) = choix {
+                    self.ouvrir_clip(i);
+                }
             }
         });
+        if siens.is_empty() {
+            ui.label(
+                RichText::new(
+                    "Pas encore de vidéo pour ce combo. Active les vidéos (Réglages ou F9) : \
+                     chaque combo réussi est filmé.",
+                )
+                .color(GRIS),
+            );
+            return;
+        }
+        ui.add_space(4.0);
+        let reglages = self.reglages_lecteur();
+        let images_avant = self.images_avant;
+        if let Some(lecteur) = &mut self.lecteur {
+            lecteur.afficher(ui, images_avant, reglages, false);
+        }
+        if self
+            .lecteur
+            .as_ref()
+            .is_some_and(|l| l.basculer_plein_ecran)
+        {
+            self.basculer_plein_ecran(ui.ctx());
+        }
     }
 }
 
@@ -504,6 +538,7 @@ impl Lecteur {
         ui: &mut egui::Ui,
         images_avant: usize,
         (syntaxe, liaisons): (Syntaxe, StyleLiaison),
+        plein_ecran: bool,
     ) {
         let Ok(decodage) = self.video.decodage.lock() else {
             return;
@@ -585,7 +620,9 @@ impl Lecteur {
             ui.vertical(|ui| {
                 let largeur = (ui.available_width() - historique_largeur - 10.0).max(200.0);
                 let taille = texture.size_vec2();
-                let echelle = largeur / taille.x;
+                // Assez de place en dessous pour la barre, les boutons et les étapes.
+                let hauteur = (ui.available_height() - 130.0).max(120.0);
+                let echelle = (largeur / taille.x).min(hauteur / taille.y);
                 ui.add(egui::Image::new(&texture).fit_to_exact_size(taille * echelle));
 
                 // Barre de temps avec les étapes.
@@ -644,6 +681,15 @@ impl Lecteur {
                         {
                             self.vitesse = v;
                         }
+                    }
+                    ui.add_space(10.0);
+                    let texte = if plein_ecran {
+                        "Quitter le plein écran (Échap)"
+                    } else {
+                        "Plein écran"
+                    };
+                    if ui.button(texte).clicked() {
+                        self.basculer_plein_ecran = true;
                     }
                     ui.add_space(10.0);
                     ui.label(

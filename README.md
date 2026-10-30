@@ -29,13 +29,15 @@ cargo test         # lance les tests
 
 ## L'interface
 
-Au lancement, une fenêtre normale s'ouvre en plus de l'overlay. Trois onglets :
+Au lancement, une fenêtre normale s'ouvre en plus de l'overlay. Deux onglets :
 
 - **Combos** : la liste rangée par catégorie, avec une recherche. Clique un combo pour voir
   ses étapes, ses hits et dégâts, puis **Travailler ce combo** pour le passer dans l'overlay.
-- **Vidéos** : les combos réussis filmés. Le lecteur avance image par image (← →, ou les
-  boutons), lit au ralenti (x0.5, x0.25, x0.1), et place chaque étape du combo sur la barre de
-  temps : cliquer une étape y amène. À droite, l'historique du jeu tel qu'il était à cette image.
+  En dessous, ses vidéos : la plus récente s'ouvre d'office, les autres se choisissent dans la
+  liste. Le lecteur avance image par image (← →, ou les boutons), lit au ralenti (x0.5, x0.25,
+  x0.1), et place chaque étape du combo sur la barre de temps : cliquer une étape y amène. À
+  droite, l'historique du jeu tel qu'il était à cette image. **Plein écran** agrandit le
+  lecteur (Échap pour sortir).
 - **Réglages** : afficher ou cacher l'overlay, le déplacer, son opacité, le son, les vidéos,
   et la façon d'écrire les coups.
 
