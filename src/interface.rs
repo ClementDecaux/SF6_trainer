@@ -994,7 +994,8 @@ fn remplacer_cles(texte: &str, valeurs: &[(&str, String)]) -> String {
     sortie
 }
 
-/// Vrai si la fenêtre active est celle de SF6 (son titre contient `titre`).
+/// Vrai si la fenêtre active est celle de SF6 (son titre est exactement `titre`,
+/// comme pour la capture vidéo).
 #[cfg(windows)]
 fn jeu_au_premier_plan(titre: &str) -> bool {
     use windows_sys::Win32::UI::WindowsAndMessaging::{GetForegroundWindow, GetWindowTextW};
@@ -1010,7 +1011,8 @@ fn jeu_au_premier_plan(titre: &str) -> bool {
         GetWindowTextW(hwnd, tampon.as_mut_ptr(), tampon.len() as i32)
     };
     let actif = String::from_utf16_lossy(&tampon[..longueur.max(0) as usize]);
-    actif.contains(titre)
+    // Titre exact : un onglet de navigateur « Street Fighter 6/Dhalsim » ne compte pas.
+    actif.trim() == titre.trim()
 }
 
 #[cfg(not(windows))]
