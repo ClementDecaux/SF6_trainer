@@ -34,7 +34,17 @@ Au lancement, une fenêtre normale s'ouvre en plus de l'overlay. Trois onglets :
 - **Vidéos** : les combos réussis filmés. Le lecteur avance image par image (← →, ou les
   boutons), lit au ralenti (x0.5, x0.25, x0.1), et place chaque étape du combo sur la barre de
   temps : cliquer une étape y amène. À droite, l'historique du jeu tel qu'il était à cette image.
-- **Réglages** : afficher ou cacher l'overlay, le déplacer, son opacité, le son, les vidéos.
+- **Réglages** : afficher ou cacher l'overlay, le déplacer, son opacité, le son, les vidéos,
+  et la façon d'écrire les coups.
+
+### Écriture des coups
+
+Quatre syntaxes au choix (Réglages, ou `syntaxe = "..."` dans `overlay.toml`) :
+`sf6` (flèches et pastilles poing / pied colorées comme dans le jeu, par défaut), `numpad`
+(`236HP`), `anglais` (`qcf+HP`, `cr.MK`) ou `fleches` (flèches puis `HP`). Tout suit ce choix :
+étapes et historique de l'overlay, message de raté, liste des combos et lecteur vidéo. Le
+terminal reste en numpad. Dans `combos.toml`, on peut écrire en numpad, en anglais ou avec les
+flèches `↓↘→`.
 
 Le bouton en haut à droite cache ou réaffiche l'overlay. Fermer l'interface ferme l'outil.
 
@@ -119,6 +129,7 @@ Notation reconnue : directions `b f d u db df cr. st.` ou chiffres numpad, mouve
 | --- | --- |
 | `src/main.rs` | Lancement : charge les configs, ouvre l'interface, démarre le thread de la manette |
 | `src/interface.rs` | Fenêtre principale : combos, lecteur vidéo, réglages ; ouvre l'overlay |
+| `src/syntaxe.rs` | Les syntaxes des coups (numpad, anglais, flèches, icônes SF6) et leur dessin |
 | `src/video.rs` | Décodage des vidéos MP4 image par image (Media Foundation) |
 | `src/entrees.rs` | Thread de la manette : lit les inputs, reconnaît les coups, fait avancer le trial |
 | `src/manette.rs` | Lecture de la manette : XInput toutes les millisecondes sous Windows |

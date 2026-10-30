@@ -10,6 +10,7 @@
 use crate::combo::Liaison;
 use crate::controles::Action;
 use crate::partage::{Ligne, Partage};
+use crate::syntaxe::Syntaxe;
 use eframe::egui::{self, Color32, RichText};
 use serde::Deserialize;
 use std::sync::{Arc, Mutex};
@@ -32,6 +33,9 @@ opacite_fenetre = 230
 transparence = false
 # Petit son quand un combo est réussi.
 son = true
+# Façon d'écrire les coups : "sf6" (icônes du jeu), "numpad" (236HP),
+# "anglais" (qcf+HP) ou "fleches" (↓↘→ HP). Se change aussi dans les réglages.
+syntaxe = "sf6"
 "#;
 
 #[derive(Debug, Deserialize)]
@@ -50,6 +54,9 @@ pub struct Config {
     /// Absent des anciens fichiers : `true` par défaut.
     #[serde(default = "vrai")]
     pub son: bool,
+    /// Façon d'écrire les coups. Absent des anciens fichiers : numpad.
+    #[serde(default)]
+    pub syntaxe: Syntaxe,
 }
 
 fn vrai() -> bool {
@@ -347,7 +354,7 @@ impl Overlay {
                         if du_jeu {
                             historique_du_jeu(ui, &partage);
                         } else {
-                            historique(ui, &partage.lignes);
+                            historique(ui, &partage.lignes, partage.syntaxe);
                         }
                     });
                 self.zones.extend(ecran(sortie.inner_rect));
@@ -558,7 +565,11 @@ fn entete(ui: &mut egui::Ui, p: &Partage) {
                     .size(15.0),
             );
             if p.enregistrement {
-                ui.label(RichText::new("● REC").color(ROUGE).size(15.0).strong());
+                // De droite à gauche : le texte, puis le point rouge devant.
+                ui.label(RichText::new("REC").color(ROUGE).size(15.0).strong());
+                let (rect, _) =
+                    ui.allocate_exact_size(egui::vec2(12.0, 12.0), egui::Sense::hover());
+                ui.painter().circle_filled(rect.center(), 5.0, ROUGE);
             }
             // D'où viennent les frames : l'historique du jeu (exact) ou notre estimation.
             let (texte, couleur) = if p.historique_jeu {
@@ -615,12 +626,7 @@ fn etapes(ui: &mut egui::Ui, p: &Partage) {
                 ui.horizontal(|ui| {
                     dessiner_coche(ui, i < p.index);
                     ui.label(RichText::new(liaison).color(GRIS).size(14.0).monospace());
-                    ui.label(
-                        RichText::new(&etape.notation)
-                            .color(couleur)
-                            .size(24.0)
-                            .strong(),
-                    );
+                    crate::syntaxe::dessiner(ui, &etape.notation, p.syntaxe, 24.0, couleur);
                     timing(ui, p, i);
                 });
             });
@@ -653,7 +659,23 @@ fn message(ui: &mut egui::Ui, p: &Partage) {
         // Un raté reste affiché jusqu'au prochain essai : on a le temps de lire pourquoi.
         Some(m) if !m.reussi || m.quand.elapsed() < DUREE_MESSAGE => {
             let couleur = if m.reussi { VERT } else { ROUGE };
-            ui.label(RichText::new(&m.texte).color(couleur).size(22.0).strong());
+            match &m.rate {
+                // « Raté : attendu X, reçu Y », les coups écrits dans la syntaxe choisie.
+                Some((attendu, recu)) => {
+                    ui.horizontal_wrapped(|ui| {
+                        let mot = |ui: &mut egui::Ui, t: &str| {
+                            ui.label(RichText::new(t).color(couleur).size(20.0).strong());
+                        };
+                        mot(ui, "Raté : attendu");
+                        crate::syntaxe::dessiner(ui, attendu, p.syntaxe, 22.0, Color32::WHITE);
+                        mot(ui, ", reçu");
+                        crate::syntaxe::dessiner(ui, recu, p.syntaxe, 22.0, Color32::WHITE);
+                    });
+                }
+                None => {
+                    ui.label(RichText::new(&m.texte).color(couleur).size(22.0).strong());
+                }
+            }
         }
         // Ligne vide de la même hauteur, pour que rien ne saute quand le message apparaît.
         _ => {
@@ -671,10 +693,10 @@ fn historique_du_jeu(ui: &mut egui::Ui, p: &Partage) {
         ligne.frames = crate::ecran::ligne_du_haut()
             .filter(|h| h.direction == ligne.direction && h.boutons == en_cours_bits(&ligne))
             .map_or(1, |h| u64::from(h.frames));
-        ligne_encadree(ui, &ligne);
+        ligne_encadree(ui, &ligne, p.syntaxe);
     }
     for ligne in &p.lignes_jeu {
-        ligne_encadree(ui, ligne);
+        ligne_encadree(ui, ligne, p.syntaxe);
     }
 }
 
@@ -686,14 +708,14 @@ fn en_cours_bits(ligne: &Ligne) -> u8 {
 }
 
 /// L'historique d'inputs, le plus récent en haut comme dans SF6.
-fn historique(ui: &mut egui::Ui, lignes: &std::collections::VecDeque<Ligne>) {
+fn historique(ui: &mut egui::Ui, lignes: &std::collections::VecDeque<Ligne>, syntaxe: Syntaxe) {
     for ligne in lignes {
-        ligne_encadree(ui, ligne);
+        ligne_encadree(ui, ligne, syntaxe);
     }
 }
 
 /// Une ligne de l'historique, encadrée en rouge si le combo a cassé dessus.
-fn ligne_encadree(ui: &mut egui::Ui, ligne: &Ligne) {
+fn ligne_encadree(ui: &mut egui::Ui, ligne: &Ligne, syntaxe: Syntaxe) {
     // Là où le combo a cassé : fond et contour rouges.
     let (fond, bord) = if ligne.cassee {
         (
@@ -707,11 +729,11 @@ fn ligne_encadree(ui: &mut egui::Ui, ligne: &Ligne) {
         .fill(fond)
         .stroke(bord)
         .corner_radius(4)
-        .show(ui, |ui| ligne_historique(ui, ligne));
+        .show(ui, |ui| ligne_historique(ui, ligne, syntaxe));
 }
 
 /// Une ligne de l'historique : durée, direction, boutons et coups reconnus.
-fn ligne_historique(ui: &mut egui::Ui, ligne: &Ligne) {
+fn ligne_historique(ui: &mut egui::Ui, ligne: &Ligne, syntaxe: Syntaxe) {
     ui.horizontal(|ui| {
         let duree = if ligne.frames > 99 {
             "99+".to_string()
@@ -730,6 +752,10 @@ fn ligne_historique(ui: &mut egui::Ui, ligne: &Ligne) {
         dessiner_direction(ui, ligne.direction, couleur_dir);
 
         for &(action, nouveau) in &ligne.boutons {
+            if syntaxe == Syntaxe::Sf6 && crate::syntaxe::pastille_action(ui, action, 16.0, nouveau)
+            {
+                continue;
+            }
             let mut texte = RichText::new(action.to_string())
                 .color(couleur_bouton(action))
                 .size(16.0);
@@ -743,7 +769,8 @@ fn ligne_historique(ui: &mut egui::Ui, ligne: &Ligne) {
         }
 
         for coup in &ligne.coups {
-            ui.label(RichText::new(format!("» {coup}")).color(JAUNE).size(16.0));
+            ui.label(RichText::new("»").color(JAUNE).size(16.0));
+            crate::syntaxe::dessiner(ui, coup, syntaxe, 16.0, JAUNE);
         }
         if let Some(etape) = ligne.etape {
             ui.label(

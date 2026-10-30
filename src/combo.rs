@@ -129,7 +129,21 @@ pub fn normaliser(etape: &str) -> Result<String, String> {
             _ => {}
         }
     }
+    // Les flèches (« ↓↘→ HP ») sont changées en chiffres numpad.
     let t: String = sans_remarques
+        .chars()
+        .map(|c| match c {
+            '↙' => '1',
+            '↓' => '2',
+            '↘' => '3',
+            '←' => '4',
+            '→' => '6',
+            '↖' => '7',
+            '↑' => '8',
+            '↗' => '9',
+            _ => c,
+        })
+        .collect::<String>()
         .to_uppercase()
         .chars()
         .filter(|c| !matches!(c, ' ' | '+' | '.' | '/'))
@@ -365,6 +379,12 @@ mod tests {
 
     fn c(s: &str) -> Vec<String> {
         vec![s.to_string()]
+    }
+
+    #[test]
+    fn les_fleches_sont_comprises() {
+        assert_eq!(normaliser("↓↘→+MK").unwrap(), "236MK");
+        assert_eq!(normaliser("← HP").unwrap(), "4HP");
     }
 
     #[test]

@@ -9,6 +9,7 @@ use crate::combo::ComboFichier;
 use crate::ecran::EntreeJeu;
 use crate::overlay::{self, CYAN, GRIS, JAUNE, Overlay, ROUGE, VERT};
 use crate::partage::Partage;
+use crate::syntaxe::{self, Syntaxe};
 use crate::video::Video;
 use eframe::egui::{self, Color32, RichText};
 use std::path::{Path, PathBuf};
@@ -165,6 +166,12 @@ impl Interface {
         self.clips.sort_by(|a, b| b.video.cmp(&a.video));
     }
 
+    fn syntaxe(&self) -> Syntaxe {
+        self.partage
+            .lock()
+            .map_or(Syntaxe::default(), |p| p.syntaxe)
+    }
+
     fn clips_du_combo(&self, nom: &str) -> usize {
         self.clips
             .iter()
@@ -231,7 +238,9 @@ impl eframe::App for Interface {
         egui::CentralPanel::default().show(ui, |ui| match self.onglet {
             Onglet::Combos => self.onglet_combos(ui),
             Onglet::Videos => self.onglet_videos(ui),
-            Onglet::Reglages => self.onglet_reglages(ui),
+            Onglet::Reglages => {
+                egui::ScrollArea::vertical().show(ui, |ui| self.onglet_reglages(ui));
+            }
         });
 
         // L'état du jeu (historique lu, etc.) change sans clic : on se redessine de temps en temps.
@@ -295,6 +304,7 @@ impl Interface {
                 }
             });
 
+        let syntaxe = self.syntaxe();
         egui::CentralPanel::default().show(ui, |ui| {
             let Some(combo) = self.combos.get(self.choisi).cloned() else {
                 ui.label("Aucun combo dans combos.toml.");
@@ -319,12 +329,7 @@ impl Interface {
                                 };
                                 ui.label(RichText::new(liaison).color(GRIS));
                             }
-                            ui.label(
-                                RichText::new(&e.notation)
-                                    .size(20.0)
-                                    .strong()
-                                    .color(Color32::WHITE),
-                            );
+                            syntaxe::dessiner(ui, &e.notation, syntaxe, 20.0, Color32::WHITE);
                         }
                     });
                 }
@@ -463,8 +468,9 @@ impl Interface {
             });
 
         let images_avant = self.images_avant;
+        let syntaxe = self.syntaxe();
         egui::CentralPanel::default().show(ui, |ui| match &mut self.lecteur {
-            Some(lecteur) => lecteur.afficher(ui, images_avant),
+            Some(lecteur) => lecteur.afficher(ui, images_avant, syntaxe),
             None => {
                 ui.label("Choisis une vidéo dans la liste.");
             }
@@ -473,7 +479,7 @@ impl Interface {
 }
 
 impl Lecteur {
-    fn afficher(&mut self, ui: &mut egui::Ui, images_avant: usize) {
+    fn afficher(&mut self, ui: &mut egui::Ui, images_avant: usize, syntaxe: Syntaxe) {
         let Ok(decodage) = self.video.decodage.lock() else {
             return;
         };
@@ -576,7 +582,7 @@ impl Lecteur {
                     peintre.text(
                         egui::pos2(x, rect.top() - 2.0),
                         egui::Align2::CENTER_BOTTOM,
-                        notation,
+                        syntaxe::texte_simple(notation, syntaxe),
                         egui::FontId::proportional(12.0),
                         couleur,
                     );
@@ -584,12 +590,12 @@ impl Lecteur {
 
                 ui.add_space(4.0);
                 ui.horizontal(|ui| {
-                    if ui.button("|◀").on_hover_text("Début").clicked() {
+                    if ui.button("|<").on_hover_text("Début").clicked() {
                         aller = Some(0);
                     }
                     if ui
-                        .button("◀ 1")
-                        .on_hover_text("Image précédente (←)")
+                        .button("< 1")
+                        .on_hover_text("Image précédente (flèche gauche)")
                         .clicked()
                     {
                         aller = Some(self.image.saturating_sub(1));
@@ -599,8 +605,8 @@ impl Lecteur {
                         self.lecture = !self.lecture;
                     }
                     if ui
-                        .button("1 ▶")
-                        .on_hover_text("Image suivante (→)")
+                        .button("1 >")
+                        .on_hover_text("Image suivante (flèche droite)")
                         .clicked()
                     {
                         aller = Some(self.image + 1);
@@ -631,11 +637,8 @@ impl Lecteur {
                     ui.label(RichText::new("Étapes :").color(GRIS));
                     for (i, notation) in &etapes {
                         let faite = *i <= self.image;
-                        let texte = RichText::new(notation)
-                            .color(if faite { VERT } else { Color32::WHITE })
-                            .strong();
-                        if ui
-                            .button(texte)
+                        let couleur = if faite { VERT } else { Color32::WHITE };
+                        if syntaxe::bouton_coup(ui, notation, syntaxe, 16.0, couleur)
                             .on_hover_text(format!("image {}", i + 1))
                             .clicked()
                         {
@@ -656,7 +659,7 @@ impl Lecteur {
                 ui.label(RichText::new("Historique du jeu").strong());
                 match &self.infos {
                     Some(infos) if !infos.lignes.is_empty() && debut != 0 => {
-                        historique_a(ui, &infos.lignes, debut + temps_image);
+                        historique_a(ui, &infos.lignes, debut + temps_image, syntaxe);
                     }
                     _ => {
                         ui.label(
@@ -702,7 +705,7 @@ impl Lecteur {
 }
 
 /// L'historique du jeu tel qu'il était affiché à l'heure `maintenant` (le plus récent en haut).
-fn historique_a(ui: &mut egui::Ui, lignes: &[EntreeJeu], maintenant: i64) {
+fn historique_a(ui: &mut egui::Ui, lignes: &[EntreeJeu], maintenant: i64, syntaxe: Syntaxe) {
     let visibles: Vec<&EntreeJeu> = lignes.iter().filter(|e| e.vu <= maintenant).collect();
     if visibles.is_empty() {
         ui.label(RichText::new("(rien encore)").color(GRIS));
@@ -742,6 +745,10 @@ fn historique_a(ui: &mut egui::Ui, lignes: &[EntreeJeu], maintenant: i64) {
                         (crate::ecran::HK, crate::controles::Action::HK),
                     ] {
                         if e.boutons & bit != 0 {
+                            if syntaxe == Syntaxe::Sf6 {
+                                syntaxe::pastille_action(ui, action, 14.0, e.nouveaux & bit != 0);
+                                continue;
+                            }
                             let mut t = RichText::new(action.to_string())
                                 .color(overlay::couleur_bouton(action));
                             t = if e.nouveaux & bit != 0 {
@@ -793,6 +800,31 @@ impl Interface {
         }
 
         ui.add_space(14.0);
+        ui.heading("Écriture des coups");
+        ui.label(RichText::new("Pour l'overlay, la liste des combos et les vidéos.").color(GRIS));
+        let avant = p.syntaxe;
+        ui.horizontal_wrapped(|ui| {
+            for s in Syntaxe::TOUTES {
+                ui.radio_value(&mut p.syntaxe, s, s.nom());
+            }
+        });
+        ui.horizontal(|ui| {
+            ui.label(RichText::new("Exemple :").color(GRIS));
+            for (i, coup) in ["1HP", "DR", "1MK", "236MK", "63214MP"].iter().enumerate() {
+                if i > 0 {
+                    ui.label(RichText::new("xx").color(GRIS));
+                }
+                syntaxe::dessiner(ui, coup, p.syntaxe, 20.0, Color32::WHITE);
+            }
+        });
+        if p.syntaxe != avant {
+            ecrire_cles(
+                "overlay.toml",
+                &[("syntaxe", format!("\"{}\"", p.syntaxe.cle()))],
+            );
+        }
+
+        ui.add_space(14.0);
         ui.heading("Son et vidéos");
         let mut son = crate::son::actif();
         if ui
@@ -815,9 +847,9 @@ impl Interface {
         ui.heading("Lecture du jeu");
         let etat = |ok: bool, oui: &str, non: &str| {
             if ok {
-                RichText::new(format!("✔ {oui}")).color(VERT)
+                RichText::new(format!("• {oui}")).color(VERT)
             } else {
-                RichText::new(format!("○ {non}")).color(JAUNE)
+                RichText::new(format!("• {non}")).color(JAUNE)
             }
         };
         ui.label(etat(

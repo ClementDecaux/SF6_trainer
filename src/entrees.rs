@@ -613,7 +613,7 @@ fn resultat_trial(
                 format!("      ✗ attendu {attendu}, reçu {coup}").red()
             );
             println!("{}", affichage::trial(trial));
-            p.message(format!("Raté : attendu {attendu}, reçu {coup}"), false);
+            p.message_rate(&attendu, coup);
             p.etape_cassee = Some(attendue);
             // Le mauvais coup sera sur la prochaine ligne de l'historique.
             p.ligne_cassee_a_venir = true;

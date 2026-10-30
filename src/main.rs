@@ -25,6 +25,7 @@ mod notation;
 mod overlay;
 mod partage;
 mod son;
+mod syntaxe;
 mod timings;
 mod video;
 
@@ -57,6 +58,7 @@ fn lancer() -> Result<(), String> {
     let mut etat = Partage::new(&trial.nom, trial.etapes.clone());
     etat.combos = combos.iter().map(|c| c.nom.clone()).collect();
     etat.combo_index = choisi;
+    etat.syntaxe = config.syntaxe;
     etat.enregistrement = capture.enregistre;
     let partage = Arc::new(Mutex::new(etat));
 

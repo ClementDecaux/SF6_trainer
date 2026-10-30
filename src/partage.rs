@@ -37,6 +37,8 @@ pub struct Message {
     pub texte: String,
     pub reussi: bool,
     pub quand: Instant,
+    /// Un raté : (coup attendu, coup reçu), dessinés dans la syntaxe choisie.
+    pub rate: Option<(String, String)>,
 }
 
 #[derive(Debug)]
@@ -96,6 +98,8 @@ pub struct Partage {
     pub combo_demande: Option<usize>,
     /// L'overlay est affiché (bouton de l'interface).
     pub overlay_visible: bool,
+    /// Façon d'écrire les coups (overlay et interface).
+    pub syntaxe: crate::syntaxe::Syntaxe,
 }
 
 impl Partage {
@@ -130,6 +134,7 @@ impl Partage {
             combo_index: 0,
             combo_demande: None,
             overlay_visible: true,
+            syntaxe: crate::syntaxe::Syntaxe::default(),
         }
     }
 
@@ -194,6 +199,15 @@ impl Partage {
             texte,
             reussi,
             quand: Instant::now(),
+            rate: None,
         });
+    }
+
+    /// « Raté : attendu X, reçu Y ».
+    pub fn message_rate(&mut self, attendu: &str, recu: &str) {
+        self.message(format!("Raté : attendu {attendu}, reçu {recu}"), false);
+        if let Some(m) = &mut self.message {
+            m.rate = Some((attendu.to_string(), recu.to_string()));
+        }
     }
 }
