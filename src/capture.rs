@@ -450,6 +450,9 @@ pub struct Tampon {
     images: std::collections::VecDeque<Image>,
     /// Mémoire des images jetées, réutilisée pour les suivantes (évite d'en redemander).
     libres: Vec<Vec<u8>>,
+    /// Images sorties du tampon mais encore chez l'encodeur : leur mémoire sera reprise
+    /// quand il les aura lâchées (sinon il fallait de la mémoire neuve, 25 à 30 ms par image).
+    rendues: Vec<std::sync::Arc<Vec<u8>>>,
     /// Durée gardée, en unités de 100 ns.
     duree: i64,
     octets_max: usize,
@@ -463,6 +466,7 @@ impl Tampon {
         Tampon {
             images: std::collections::VecDeque::new(),
             libres: Vec::new(),
+            rendues: Vec::new(),
             duree: avant_ms as i64 * 10_000,
             octets_max,
         }
@@ -474,7 +478,18 @@ impl Tampon {
 
     /// De la mémoire pour une nouvelle image (réutilisée si possible).
     pub fn place(&mut self) -> Vec<u8> {
-        self.libres.pop().unwrap_or_default()
+        if let Some(pixels) = self.libres.pop() {
+            return pixels;
+        }
+        if let Some(i) = self
+            .rendues
+            .iter()
+            .position(|p| std::sync::Arc::strong_count(p) == 1)
+            && let Ok(pixels) = std::sync::Arc::try_unwrap(self.rendues.swap_remove(i))
+        {
+            return pixels;
+        }
+        Vec::new()
     }
 
     pub fn ajouter(&mut self, image: Image) {
@@ -487,9 +502,20 @@ impl Tampon {
             }
             octets -= plus_vieille.pixels.len();
             // Plus utilisée par l'encodeur : sa mémoire resservira.
-            if let Some(image) = self.images.pop_front()
-                && let Ok(pixels) = std::sync::Arc::try_unwrap(image.pixels)
-            {
+            if let Some(image) = self.images.pop_front() {
+                match std::sync::Arc::try_unwrap(image.pixels) {
+                    Ok(pixels) => self.recycler(pixels),
+                    Err(partagee) => self.rendues.push(partagee),
+                }
+            }
+        }
+        // Celles que l'encodeur a lâchées depuis : gardées pour resservir (ou libérées).
+        let (lachees, encore): (Vec<_>, Vec<_>) = std::mem::take(&mut self.rendues)
+            .into_iter()
+            .partition(|p| std::sync::Arc::strong_count(p) == 1);
+        self.rendues = encore;
+        for pixels in lachees {
+            if let Ok(pixels) = std::sync::Arc::try_unwrap(pixels) {
                 self.recycler(pixels);
             }
         }
@@ -503,9 +529,8 @@ impl Tampon {
     }
 
     pub fn recycler(&mut self, pixels: Vec<u8>) {
-        // Quelques-unes suffisent : on en reprend une à chaque image (celles données à
-        // l'encodeur reviennent un peu plus tard).
-        if self.libres.len() < 6 {
+        // Quelques-unes suffisent : on en reprend une à chaque image.
+        if self.libres.len() < 12 {
             self.libres.push(pixels);
         }
     }
