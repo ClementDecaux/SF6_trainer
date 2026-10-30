@@ -415,6 +415,20 @@ pub fn supprimer_anciens(dossier: &std::path::Path, infos: &InfosClip) -> usize 
     supprimes
 }
 
+/// Les étapes du traitement d'une image, dans l'ordre de `Image::phases` (la dernière :
+/// le total).
+pub const PHASES: [&str; 5] = ["ordres", "lecture", "historique", "copie", "total"];
+
+/// Décrit le temps passé dans chaque étape (`phases` en µs), pour le diagnostic.
+pub fn decrire_phases(phases: &[u32; 5]) -> String {
+    let morceaux: Vec<String> = PHASES
+        .iter()
+        .zip(phases)
+        .map(|(nom, us)| format!("{nom} {:.1}", *us as f64 / 1000.0))
+        .collect();
+    format!("{} ms", morceaux.join(", "))
+}
+
 /// Une image du jeu gardée en mémoire (pixels BGRA, lignes du bas vers le haut).
 pub struct Image {
     /// Heure de l'image, en unités de 100 ns (horloge de Windows).
@@ -422,8 +436,9 @@ pub struct Image {
     pub largeur: u32,
     pub hauteur: u32,
     pub pixels: Vec<u8>,
-    /// Temps passé à traiter cette image dans la capture, en ms (pour trouver les saccades).
-    pub duree_ms: u32,
+    /// Temps passé à traiter cette image dans la capture, en µs (pour trouver les
+    /// saccades) : voir `PHASES`.
+    pub phases: [u32; 5],
 }
 
 /// Les dernières images du jeu (`avant_ms`), pour que la vidéo commence
@@ -488,9 +503,9 @@ impl Tampon {
     }
 
     /// Note le temps de traitement de la dernière image ajoutée.
-    pub fn noter_duree(&mut self, duree_ms: u32) {
+    pub fn noter_phases(&mut self, phases: [u32; 5]) {
         if let Some(image) = self.images.back_mut() {
-            image.duree_ms = duree_ms;
+            image.phases = phases;
         }
     }
 
@@ -689,10 +704,10 @@ mod capture_windows {
             derniere_image: i64,
             manquees: u32,
             lentes: u32,
-            /// Pire temps de traitement d'une image pendant le film, en ms.
-            pire_ms: u32,
-            /// Avant la 1re étape (images du tampon) : manquantes, lentes, pire temps (ms).
-            avant: (u32, u32, u32),
+            /// Pire temps de traitement d'une image pendant le film (voir `PHASES`).
+            pire: [u32; 5],
+            /// Avant la 1re étape (images du tampon) : manquantes, lentes, pire temps.
+            avant: (u32, u32, [u32; 5]),
             /// Les trous : (heure de l'image d'avant, images manquantes), et la durée du
             /// démarrage de la vidéo (encodeur, images d'avant la 1re étape).
             trous: Vec<(i64, u32)>,
@@ -716,6 +731,8 @@ mod capture_windows {
         photo: bool,
         /// Lecture de l'historique d'inputs et des dégâts du jeu.
         lecteur: crate::ecran::Lecteur,
+        /// Temps passé dans chaque étape pour l'image en cours (voir `PHASES`).
+        phases: [u32; 5],
         /// La mémoire des images, rendue par l'encodeur une fois l'image encodée.
         retour: (Sender<Vec<u8>>, Receiver<Vec<u8>>),
     }
@@ -754,7 +771,7 @@ mod capture_windows {
                 son,
                 manquees,
                 lentes,
-                pire_ms,
+                pire,
                 avant,
                 trous,
                 demarrage_ms,
@@ -779,7 +796,7 @@ mod capture_windows {
             let diagnostic = Diagnostic {
                 manquees,
                 lentes,
-                pire_ms,
+                pire,
                 avant,
                 trous,
                 demarrage_ms,
@@ -911,13 +928,18 @@ mod capture_windows {
                 crate::ecran::lire_image(&mut self.lecteur, &vue, temps);
                 return Ok(None);
             }
+            let chrono = Instant::now();
             let mut image = frame.buffer()?;
             let pas = image.row_pitch() as usize;
             let brut = image.as_raw_buffer();
+            self.phases[1] = chrono.elapsed().as_micros() as u32;
+            let chrono = Instant::now();
             if self.config.historique {
                 let vue = crate::ecran::Vue::jeu(brut, largeur as usize, hauteur as usize, pas);
                 crate::ecran::lire_image(&mut self.lecteur, &vue, temps);
             }
+            self.phases[2] = chrono.elapsed().as_micros() as u32;
+            let chrono = Instant::now();
             let mut pixels = self.tampon.place();
             retourner_lignes(
                 brut,
@@ -926,12 +948,13 @@ mod capture_windows {
                 hauteur as usize,
                 &mut pixels,
             );
+            self.phases[3] = chrono.elapsed().as_micros() as u32;
             Ok(Some(Image {
                 temps,
                 largeur,
                 hauteur,
                 pixels,
-                duree_ms: 0,
+                phases: [0; 5],
             }))
         }
 
@@ -957,7 +980,7 @@ mod capture_windows {
             let mut trous = Vec::new();
             let mut premier = None;
             let mut precedente = None;
-            let mut avant = (0, 0, 0);
+            let mut avant = (0, 0, [0; 5]);
             let images = self.tampon.prendre().into_iter().chain(actuelle);
             for image in images {
                 if image.largeur != largeur || image.hauteur != hauteur {
@@ -972,10 +995,12 @@ mod capture_windows {
                         trous.push((p, n));
                     }
                 }
-                if image.duree_ms > 14 {
+                if image.phases[4] > 14_000 {
                     avant.1 += 1;
                 }
-                avant.2 = avant.2.max(image.duree_ms);
+                if image.phases[4] > avant.2[4] {
+                    avant.2 = image.phases;
+                }
                 premier.get_or_insert(image.temps);
                 precedente = Some(image.temps);
                 let _ = envoi.send(Envoi::Image(image));
@@ -997,7 +1022,7 @@ mod capture_windows {
                 derniere_image: temps,
                 manquees,
                 lentes: 0,
-                pire_ms: 0,
+                pire: [0; 5],
                 avant,
                 trous,
                 demarrage_ms: chrono.elapsed().as_millis(),
@@ -1009,8 +1034,8 @@ mod capture_windows {
     struct Diagnostic {
         manquees: u32,
         lentes: u32,
-        pire_ms: u32,
-        avant: (u32, u32, u32),
+        pire: [u32; 5],
+        avant: (u32, u32, [u32; 5]),
         trous: Vec<(i64, u32)>,
         demarrage_ms: u128,
         encodeurs: u32,
@@ -1041,15 +1066,15 @@ mod capture_windows {
                 .collect();
             println!(
                 "      Vidéo : {} image(s) manquante(s) (saccades), {} image(s) traitée(s) en \
-                 plus de 14 ms (pire : {} ms), démarrage en {} ms. Avant la 1re étape : {} \
-                 manquante(s), {} lente(s) (pire : {} ms). Encodeurs créés : {}. Trous : {}",
+                 plus de 14 ms (pire : {}), démarrage en {} ms. Avant la 1re étape : {} \
+                 manquante(s), {} lente(s) (pire : {}). Encodeurs créés : {}. Trous : {}",
                 d.manquees,
                 d.lentes,
-                d.pire_ms,
+                super::decrire_phases(&d.pire),
                 d.demarrage_ms,
                 d.avant.0,
                 d.avant.1,
-                d.avant.2,
+                super::decrire_phases(&d.avant.2),
                 d.encodeurs,
                 liste.join(", ")
             );
@@ -1199,6 +1224,7 @@ mod capture_windows {
                 photo: false,
                 lecteur: crate::ecran::Lecteur::default(),
                 retour: std::sync::mpsc::channel(),
+                phases: [0; 5],
             })
         }
 
@@ -1242,6 +1268,8 @@ mod capture_windows {
 
             // 2. L'image est lue (historique du jeu) et va dans le tampon des dernières images.
             let temps = frame.timestamp()?.Duration;
+            self.phases = [0; 5];
+            self.phases[0] = arrivee.elapsed().as_micros() as u32;
             // L'heure de chaque image sert aussi à caler nos frames sur celles du jeu.
             crate::horloge::image_du_jeu(temps);
             let mut image = match self.lire_image(frame, temps) {
@@ -1311,17 +1339,18 @@ mod capture_windows {
             if let Some(image) = image {
                 self.tampon.recycler(image.pixels);
             }
-            let duree_ms = arrivee.elapsed().as_millis() as u32;
+            self.phases[4] = arrivee.elapsed().as_micros() as u32;
+            let phases = self.phases;
             match &mut self.etat {
-                Etat::Filme {
-                    lentes, pire_ms, ..
-                } => {
-                    if duree_ms > 14 {
+                Etat::Filme { lentes, pire, .. } => {
+                    if phases[4] > 14_000 {
                         *lentes += 1;
                     }
-                    *pire_ms = (*pire_ms).max(duree_ms);
+                    if phases[4] > pire[4] {
+                        *pire = phases;
+                    }
                 }
-                Etat::Attente => self.tampon.noter_duree(duree_ms),
+                Etat::Attente => self.tampon.noter_phases(phases),
                 Etat::Demande => {}
             }
             if terminer {
@@ -1524,7 +1553,7 @@ mod tests {
                 largeur: 1,
                 hauteur: 1,
                 pixels,
-                duree_ms: 0,
+                phases: [0; 5],
             });
         }
         // 6 intervalles de 16 ms = 96 ms : les images 13 à 19.
@@ -1543,7 +1572,7 @@ mod tests {
                 largeur: 10,
                 hauteur: 10,
                 pixels: vec![0; 100],
-                duree_ms: 0,
+                phases: [0; 5],
             });
         }
         assert_eq!(tampon.len(), 3);
