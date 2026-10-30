@@ -674,6 +674,10 @@ mod capture_windows {
             derniere_image: i64,
             manquees: u32,
             lentes: u32,
+            /// Les trous : (heure de l'image d'avant, images manquantes), et la durée du
+            /// démarrage de la vidéo (encodeur, images d'avant la 1re étape).
+            trous: Vec<(i64, u32)>,
+            demarrage_ms: u128,
         },
     }
 
@@ -726,6 +730,8 @@ mod capture_windows {
                 son,
                 manquees,
                 lentes,
+                trous,
+                demarrage_ms,
                 ..
             } = etat
             else {
@@ -751,9 +757,18 @@ mod capture_windows {
                     infos.lignes = crate::ecran::entrees_depuis(premier);
                     self.ranger(&chemin, &infos);
                     if manquees > 0 || lentes > 0 {
+                        let liste: Vec<String> = trous
+                            .iter()
+                            .take(12)
+                            .map(|&(t, n)| {
+                                format!("à {:.2} s : {n}", (t - premier) as f64 / 10_000_000.0)
+                            })
+                            .collect();
                         println!(
                             "      Vidéo : {manquees} image(s) manquante(s) (saccades), \
-                             {lentes} image(s) traitée(s) en plus de 14 ms"
+                             {lentes} image(s) traitée(s) en plus de 14 ms, démarrage en \
+                             {demarrage_ms} ms. Trous : {}",
+                            liste.join(", ")
                         );
                     }
                 }
@@ -885,6 +900,7 @@ mod capture_windows {
 
         /// Démarre la vidéo : d'abord les images du tampon, puis l'image actuelle.
         fn commencer(&mut self, frame: &Frame, temps: i64, actuelle: Option<Image>) {
+            let chrono = Instant::now();
             let (largeur, hauteur) = (frame.width(), frame.height());
             let Pret {
                 mut encodeur,
@@ -902,12 +918,17 @@ mod capture_windows {
             let mut image_actuelle_envoyee = false;
             let mut premier = None;
             let mut manquees = 0;
+            let mut trous = Vec::new();
             let mut precedente: Option<i64> = None;
             for image in self.tampon.prendre() {
                 if image.largeur == largeur && image.hauteur == hauteur {
                     premier.get_or_insert(image.temps);
                     if let Some(p) = precedente.replace(image.temps) {
-                        manquees += images_manquees(image.temps - p);
+                        let n = images_manquees(image.temps - p);
+                        if n > 0 {
+                            manquees += n;
+                            trous.push((p, n));
+                        }
                     }
                     if let Err(e) = encodeur.send_frame_buffer(&image.pixels, image.temps) {
                         eprintln!("Vidéo : image perdue ({e}).");
@@ -918,7 +939,11 @@ mod capture_windows {
             }
             if !image_actuelle_envoyee {
                 if let Some(p) = precedente {
-                    manquees += images_manquees(temps - p);
+                    let n = images_manquees(temps - p);
+                    if n > 0 {
+                        manquees += n;
+                        trous.push((p, n));
+                    }
                 }
                 let envoi = match &actuelle {
                     Some(image) if image.largeur == largeur && image.hauteur == hauteur => {
@@ -949,6 +974,8 @@ mod capture_windows {
                 derniere_image: temps,
                 manquees,
                 lentes: 0,
+                trous,
+                demarrage_ms: chrono.elapsed().as_millis(),
             };
         }
     }
@@ -1063,10 +1090,9 @@ mod capture_windows {
             match &mut self.etat {
                 Etat::Attente => {
                     let (largeur, hauteur) = (frame.width(), frame.height());
-                    let a_jour = self
-                        .pret
-                        .as_ref()
-                        .is_some_and(|p| p.largeur == largeur && p.hauteur == hauteur);
+                    let a_jour = self.pret.as_ref().is_some_and(|p| {
+                        p.largeur == largeur && p.hauteur == hauteur && p.taux == self.taux_son()
+                    });
                     if !a_jour && !self.echec_preparation {
                         match self.prendre_encodeur(largeur, hauteur) {
                             Ok(pret) => self.pret = Some(Box::new(pret)),
@@ -1088,9 +1114,14 @@ mod capture_windows {
                     hauteur,
                     derniere_image,
                     manquees,
+                    trous,
                     ..
                 } => {
-                    *manquees += images_manquees(temps - *derniere_image);
+                    let n = images_manquees(temps - *derniere_image);
+                    if n > 0 {
+                        *manquees += n;
+                        trous.push((*derniere_image, n));
+                    }
                     *derniere_image = temps;
                     // L'image copiée en mémoire, pas la texture de la capture : Windows réutilise
                     // cette texture pour l'image suivante avant que l'encodeur l'ait lue, et la
