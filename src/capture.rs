@@ -9,7 +9,9 @@
 //! - 1re étape du trial validée : la vidéo commence par ces images, puis on filme ;
 //! - raté ou trop lent : on jette la vidéo ;
 //! - combo réussi : on filme encore un peu (`apres_ms`), puis on garde la vidéo dans
-//!   `clips/`, avec un fichier `.json` à côté (combo, personnage, frame de chaque étape).
+//!   `clips/`. Les infos du clip (combo, personnage, frame de chaque étape) sont rangées
+//!   dans la vidéo elle-même, en JSON, dans une boîte MP4 `uuid` ajoutée à la fin du
+//!   fichier : les lecteurs l'ignorent, l'outil la relit. Un seul fichier par combo.
 //!
 //! Le thread de la manette envoie des ordres (`Ordre`) au thread de capture par un canal
 //! (`mpsc`) : il n'attend jamais la vidéo, les inputs restent lus à la milliseconde.
@@ -93,7 +95,7 @@ pub fn charger() -> Result<Config, String> {
     toml::from_str(&texte).map_err(|e| format!("erreur dans {FICHIER} : {e}"))
 }
 
-/// Ce qui est écrit dans le `.json` à côté de la vidéo.
+/// Les infos d'un clip, rangées en JSON dans la vidéo (voir [`ecrire_infos`]).
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct InfosClip {
     pub personnage: String,
@@ -254,7 +256,7 @@ pub fn lancer(config: Config, personnage: &str, combo: &str, inputs: &str) -> Ca
 /// Toujours 16 caractères : l'empreinte (FNV-1a 64 bits, en hexadécimal) du personnage et du
 /// nom du combo. Une fonction de taille fixe ne peut pas être bijective (il y a plus de combos
 /// possibles que de noms), mais on retrouve le combo avec [`combo_du_fichier`], qui calcule
-/// l'empreinte des combos connus, et le `.json` à côté de la vidéo garde le nom complet.
+/// l'empreinte des combos connus, et les infos rangées dans la vidéo gardent le nom complet.
 pub fn nom_fichier(infos: &InfosClip) -> String {
     empreinte(&infos.personnage, &infos.combo)
 }
@@ -283,32 +285,87 @@ pub fn combo_du_fichier<'a>(
         .find(|n| empreinte(personnage, n) == base)
 }
 
-/// Supprime les clips déjà gardés pour ce combo (vidéo et `.json`), y compris ceux des
-/// anciennes versions dont le nom commençait par la date. Renvoie le nombre supprimé.
+/// Identifiant de notre boîte `uuid` dans le MP4 (16 octets, lisible dans un éditeur hexa).
+const UUID_INFOS: [u8; 16] = *b"sf6trainer-infos";
+
+/// Range les infos du clip dans la vidéo : une boîte MP4 `uuid` ajoutée à la fin du fichier
+/// (taille sur 4 octets, « uuid », notre identifiant, puis le JSON). Les lecteurs vidéo
+/// sautent les boîtes qu'ils ne connaissent pas : la vidéo se lit toujours partout.
+pub fn ecrire_infos(video: &std::path::Path, infos: &InfosClip) -> std::io::Result<()> {
+    use std::io::Write;
+    let json = serde_json::to_vec(infos).map_err(std::io::Error::other)?;
+    let taille = u32::try_from(8 + UUID_INFOS.len() + json.len())
+        .map_err(|_| std::io::Error::other("infos du clip trop grandes"))?;
+    let mut fichier = std::fs::OpenOptions::new().append(true).open(video)?;
+    let mut boite = Vec::with_capacity(taille as usize);
+    boite.extend_from_slice(&taille.to_be_bytes());
+    boite.extend_from_slice(b"uuid");
+    boite.extend_from_slice(&UUID_INFOS);
+    boite.extend_from_slice(&json);
+    fichier.write_all(&boite)
+}
+
+/// Relit les infos rangées dans la vidéo par [`ecrire_infos`] (aucune : `None`).
+/// Parcourt les boîtes MP4 du premier niveau sans lire la vidéo elle-même.
+pub fn lire_infos(video: &std::path::Path) -> Option<InfosClip> {
+    use std::io::{Read, Seek, SeekFrom};
+    let mut fichier = std::fs::File::open(video).ok()?;
+    let longueur = fichier.metadata().ok()?.len();
+    let mut position = 0u64;
+    while position + 8 <= longueur {
+        fichier.seek(SeekFrom::Start(position)).ok()?;
+        let mut entete = [0u8; 8];
+        fichier.read_exact(&mut entete).ok()?;
+        let mut taille = u64::from(u32::from_be_bytes(entete[..4].try_into().ok()?));
+        let mut debut = 8;
+        if taille == 1 {
+            // Taille sur 64 bits, juste après le type.
+            let mut grande = [0u8; 8];
+            fichier.read_exact(&mut grande).ok()?;
+            taille = u64::from_be_bytes(grande);
+            debut = 16;
+        } else if taille == 0 {
+            // Jusqu'à la fin du fichier.
+            taille = longueur - position;
+        }
+        if taille < debut || position + taille > longueur {
+            return None;
+        }
+        if &entete[4..] == b"uuid" && taille >= debut + 16 {
+            let mut uuid = [0u8; 16];
+            fichier.read_exact(&mut uuid).ok()?;
+            if uuid == UUID_INFOS {
+                let mut json = vec![0u8; (taille - debut - 16) as usize];
+                fichier.read_exact(&mut json).ok()?;
+                return serde_json::from_slice(&json).ok();
+            }
+        }
+        position += taille;
+    }
+    None
+}
+
+/// Supprime les clips déjà gardés pour ce combo. Renvoie le nombre supprimé.
 pub fn supprimer_anciens(dossier: &std::path::Path, infos: &InfosClip) -> usize {
     let Ok(entrees) = std::fs::read_dir(dossier) else {
         return 0;
     };
     let mut supprimes = 0;
     for entree in entrees.flatten() {
-        let json = entree.path();
-        if json.extension().is_none_or(|e| e != "json") {
+        let video = entree.path();
+        if video.extension().is_none_or(|e| e != "mp4") {
             continue;
         }
-        let meme_combo = std::fs::read_to_string(&json)
-            .ok()
-            .and_then(|t| serde_json::from_str::<InfosClip>(&t).ok())
+        let meme_combo = lire_infos(&video)
             .is_some_and(|i| i.combo == infos.combo && i.personnage == infos.personnage);
         if meme_combo {
-            let video = json.with_extension("mp4");
-            if video.exists() && std::fs::remove_file(&video).is_err() {
+            if std::fs::remove_file(&video).is_err() {
                 eprintln!(
                     "Vidéo : impossible de supprimer {} (ouverte ?).",
                     video.display()
                 );
                 continue;
             }
-            let _ = std::fs::remove_file(&json);
             supprimes += 1;
         }
     }
@@ -414,8 +471,8 @@ pub fn retourner_lignes(
 #[cfg(windows)]
 mod capture_windows {
     use super::{
-        Config, Image, InfosClip, OCTETS_MAX_TAMPON, Ordre, Tampon, nom_fichier, retourner_lignes,
-        supprimer_anciens,
+        Config, Image, InfosClip, OCTETS_MAX_TAMPON, Ordre, Tampon, ecrire_infos, nom_fichier,
+        retourner_lignes, supprimer_anciens,
     };
     use std::path::{Path, PathBuf};
     use std::sync::mpsc::Receiver;
@@ -634,7 +691,7 @@ mod capture_windows {
             }
         }
 
-        /// Renomme la vidéo et écrit le `.json` à côté.
+        /// Renomme la vidéo et y range ses infos.
         fn ranger(&self, en_cours: &Path, infos: &InfosClip) {
             // Un seul exemplaire par combo : l'ancien clip laisse la place au nouveau.
             supprimer_anciens(Path::new(&self.config.dossier), infos);
@@ -645,13 +702,8 @@ mod capture_windows {
                 eprintln!("Vidéo : impossible de ranger le clip ({e}).");
                 return;
             }
-            match serde_json::to_string_pretty(infos) {
-                Ok(json) => {
-                    if let Err(e) = std::fs::write(base.with_extension("json"), json) {
-                        eprintln!("Vidéo : impossible d'écrire le .json ({e}).");
-                    }
-                }
-                Err(e) => eprintln!("Vidéo : impossible de préparer le .json ({e})."),
+            if let Err(e) = ecrire_infos(&video, infos) {
+                eprintln!("Vidéo : impossible d'y ranger les infos du clip ({e}).");
             }
             println!("      🎬 clip enregistré : {}", video.display());
         }
@@ -985,6 +1037,47 @@ mod tests {
         );
     }
 
+    /// Un petit MP4 : une boîte `ftyp`, puis une `mdat` avec une taille sur 64 bits.
+    fn mp4_factice() -> Vec<u8> {
+        let mut octets = Vec::new();
+        octets.extend_from_slice(&16u32.to_be_bytes());
+        octets.extend_from_slice(b"ftypisom\0\0\0\0");
+        octets.extend_from_slice(&1u32.to_be_bytes());
+        octets.extend_from_slice(b"mdat");
+        octets.extend_from_slice(&20u64.to_be_bytes());
+        octets.extend_from_slice(b"abcd");
+        octets
+    }
+
+    #[test]
+    fn les_infos_sont_rangees_dans_la_video() {
+        use super::{ecrire_infos, lire_infos};
+        let video = std::env::temp_dir().join(format!("sf6_infos_{}.mp4", std::process::id()));
+        std::fs::write(&video, mp4_factice()).unwrap();
+        assert!(lire_infos(&video).is_none());
+        let infos = InfosClip {
+            personnage: "Dhalsim".into(),
+            combo: "Drive Rush, Yoga Flame".into(),
+            inputs: "5LP xx DR, 5LP".into(),
+            date: "2026-10-30 18:00:00".into(),
+            fps: 60,
+            etapes: vec![],
+            debut_video: 12,
+            latence: 3,
+            lignes: vec![],
+        };
+        ecrire_infos(&video, &infos).unwrap();
+        let relu = lire_infos(&video).unwrap();
+        assert_eq!(
+            (relu.combo, relu.inputs, relu.debut_video),
+            (infos.combo, infos.inputs, 12)
+        );
+        // La vidéo d'origine est intacte, la boîte est juste ajoutée à la fin.
+        let octets = std::fs::read(&video).unwrap();
+        assert_eq!(&octets[..mp4_factice().len()], &mp4_factice()[..]);
+        let _ = std::fs::remove_file(&video);
+    }
+
     #[test]
     fn les_anciens_clips_du_combo_sont_supprimes() {
         let dossier = std::env::temp_dir().join(format!("sf6_clips_{}", std::process::id()));
@@ -1002,13 +1095,13 @@ mod tests {
             lignes: vec![],
         };
         for (nom, combo) in [("a", "Un"), ("b", "Un"), ("c", "Deux")] {
-            std::fs::write(dossier.join(format!("{nom}.mp4")), b"").unwrap();
-            let json = serde_json::to_string(&infos(combo)).unwrap();
-            std::fs::write(dossier.join(format!("{nom}.json")), json).unwrap();
+            let video = dossier.join(format!("{nom}.mp4"));
+            std::fs::write(&video, mp4_factice()).unwrap();
+            ecrire_infos(&video, &infos(combo)).unwrap();
         }
         assert_eq!(supprimer_anciens(&dossier, &infos("Un")), 2);
         assert!(!dossier.join("a.mp4").exists());
-        assert!(!dossier.join("b.json").exists());
+        assert!(!dossier.join("b.mp4").exists());
         assert!(dossier.join("c.mp4").exists());
         let _ = std::fs::remove_dir_all(&dossier);
     }

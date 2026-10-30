@@ -25,7 +25,7 @@ enum Onglet {
     Reglages,
 }
 
-/// Une vidéo de combo réussi, avec son `.json` s'il existe.
+/// Une vidéo de combo réussi, avec ses infos (rangées dans le MP4) si elle en a.
 struct Clip {
     video: PathBuf,
     infos: Option<InfosClip>,
@@ -166,9 +166,7 @@ impl Interface {
             if chemin.extension().is_none_or(|e| e != "mp4") || nom.starts_with("en_cours") {
                 continue;
             }
-            let infos = std::fs::read_to_string(chemin.with_extension("json"))
-                .ok()
-                .and_then(|t| serde_json::from_str(&t).ok());
+            let infos = crate::capture::lire_infos(&chemin);
             self.clips.push(Clip {
                 video: chemin,
                 infos,

@@ -137,14 +137,15 @@ commence donc un peu avant la 1re étape. Elle est jetée si le combo est raté,
 `clips/` s'il est réussi. Un seul exemplaire par combo : la dernière réussite remplace la
 vidéo précédente. L'overlay n'apparaît pas dans la vidéo.
 Les vidéos ont un nom de taille fixe (16 caractères, ex. `3f9a0c41d27be865.mp4`) : l'empreinte
-du personnage et du nom du combo. Le `.json` à côté donne le combo en clair, et l'outil retrouve
-le combo d'une vidéo en recalculant l'empreinte des combos de `combos.toml`. Les anciennes
-vidéos gardent leur nom jusqu'à leur remplacement.
+du personnage et du nom du combo. L'outil retrouve le combo d'une vidéo en recalculant
+l'empreinte des combos de `combos.toml`.
 
-À côté de chaque vidéo, un `.json` donne le combo, le personnage, la date, l'heure de chaque
-étape et l'historique du jeu pendant la vidéo : c'est ce qui permet au lecteur de l'interface
-(onglet Vidéos) de placer les étapes à la bonne image. Les vidéos sont en H.264 à 60 fps ; le
-lecteur les décode avec Windows (Media Foundation), en 960 pixels de large au plus.
+Un seul fichier par combo : les infos du clip (combo, personnage, date, heure de chaque étape et
+historique du jeu pendant la vidéo) sont rangées en JSON dans le MP4 lui-même, dans une boîte
+`uuid` ajoutée à la fin du fichier. Les lecteurs vidéo l'ignorent (la vidéo se lit partout), et
+le lecteur de l'interface s'en sert pour placer les étapes à la bonne image. Les vidéos
+d'avant ce changement (avec un `.json` à côté) n'ont plus d'infos : refais-les. Les vidéos sont
+en H.264 à 60 fps ; le lecteur les décode avec Windows (Media Foundation), en 960 pixels de large au plus.
 
 Notation reconnue : directions `b f d u db df cr. st.` ou chiffres numpad, mouvements
 `qcf qcb hcf hcb dp` ou `236 214 41236 63214 623 421`, `DI` (HP+HK), `DP` (MP+MK),
