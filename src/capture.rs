@@ -631,6 +631,11 @@ mod capture_windows {
             son: Option<Option<u64>>,
             /// Combo réussi : quand arrêter, et ce qu'on écrira dans le `.json`.
             fin: Option<(Instant, Box<InfosClip>)>,
+            /// Pour trouver d'où viennent les saccades : heure de la dernière image, images
+            /// qui manquent (trous de plus d'une image), images traitées trop lentement.
+            derniere_image: i64,
+            manquees: u32,
+            lentes: u32,
         },
     }
 
@@ -681,6 +686,8 @@ mod capture_windows {
                 fin,
                 premier,
                 son,
+                manquees,
+                lentes,
                 ..
             } = etat
             else {
@@ -704,7 +711,13 @@ mod capture_windows {
                     // Pour le lecteur : où commence la vidéo, et l'historique du jeu pendant.
                     infos.debut_video = premier;
                     infos.lignes = crate::ecran::entrees_depuis(premier);
-                    self.ranger(&chemin, &infos)
+                    self.ranger(&chemin, &infos);
+                    if manquees > 0 || lentes > 0 {
+                        println!(
+                            "      Vidéo : {manquees} image(s) manquante(s) (saccades), \
+                             {lentes} image(s) traitée(s) en plus de 14 ms"
+                        );
+                    }
                 }
                 None => {
                     let _ = std::fs::remove_file(&chemin);
@@ -834,9 +847,14 @@ mod capture_windows {
             };
             let mut image_actuelle_envoyee = false;
             let mut premier = None;
+            let mut manquees = 0;
+            let mut precedente: Option<i64> = None;
             for image in self.tampon.prendre() {
                 if image.largeur == largeur && image.hauteur == hauteur {
                     premier.get_or_insert(image.temps);
+                    if let Some(p) = precedente.replace(image.temps) {
+                        manquees += images_manquees(image.temps - p);
+                    }
                     if let Err(e) = encodeur.send_frame_buffer(&image.pixels, image.temps) {
                         eprintln!("Vidéo : image perdue ({e}).");
                     }
@@ -844,8 +862,13 @@ mod capture_windows {
                 }
                 self.tampon.recycler(image.pixels);
             }
-            if !image_actuelle_envoyee && let Err(e) = encodeur.send_frame(frame) {
-                eprintln!("Vidéo : image perdue ({e}).");
+            if !image_actuelle_envoyee {
+                if let Some(p) = precedente {
+                    manquees += images_manquees(temps - p);
+                }
+                if let Err(e) = encodeur.send_frame(frame) {
+                    eprintln!("Vidéo : image perdue ({e}).");
+                }
             }
             let premier = premier.unwrap_or(temps);
             // Le son commence à l'heure de la 1re image : il est calé dessus.
@@ -858,6 +881,9 @@ mod capture_windows {
                 premier,
                 son,
                 fin: None,
+                derniere_image: temps,
+                manquees,
+                lentes: 0,
             };
         }
     }
@@ -882,6 +908,12 @@ mod capture_windows {
         {
             eprintln!("Vidéo : son perdu ({e}).");
         }
+    }
+
+    /// Images qui manquent entre deux images reçues à `ecart` d'intervalle (100 ns) à 60 fps.
+    fn images_manquees(ecart: i64) -> u32 {
+        const IMAGE: i64 = 166_667;
+        ((ecart + IMAGE / 2) / IMAGE - 1).max(0) as u32
     }
 
     /// Ferme un encodeur qui n'a pas servi et supprime son fichier.
@@ -915,6 +947,7 @@ mod capture_windows {
             frame: &mut Frame,
             _controle: InternalCaptureControl,
         ) -> Result<(), Self::Error> {
+            let arrivee = Instant::now();
             // 1. Les ordres arrivés depuis la dernière image.
             let ordres: Vec<Ordre> = match self.ordres.lock() {
                 Ok(reception) => reception.try_iter().collect(),
@@ -977,8 +1010,12 @@ mod capture_windows {
                     fin,
                     premier,
                     son,
+                    derniere_image,
+                    manquees,
                     ..
                 } => {
+                    *manquees += images_manquees(temps - *derniere_image);
+                    *derniere_image = temps;
                     if let Err(e) = encodeur.send_frame(frame) {
                         eprintln!("Vidéo : image perdue ({e}).");
                     }
@@ -989,6 +1026,11 @@ mod capture_windows {
                         None => debut.elapsed() > Duration::from_secs(self.config.duree_max_s),
                     };
                 }
+            }
+            if let Etat::Filme { lentes, .. } = &mut self.etat
+                && arrivee.elapsed() > Duration::from_millis(14)
+            {
+                *lentes += 1;
             }
             if terminer {
                 self.arreter();
