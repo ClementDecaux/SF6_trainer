@@ -553,8 +553,8 @@ pub fn lire_degats(vue: &Vue) -> Option<LectureDegats> {
 /// Ce que le panneau des dégâts nous apprend.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Degats {
-    /// Un coup vient de toucher (heure de l'image).
-    Coup(i64),
+    /// Un coup vient de toucher (heure de l'image, dégâts du combo après ce coup).
+    Coup(i64, u32),
     /// Le combo est fini : les dégâts sont revenus à 0.
     Fin(i64),
 }
@@ -582,9 +582,9 @@ impl SuiviDegats {
         } else if nouvelle < avant {
             // Les dégâts d'un combo ne font que monter : s'ils baissent, le jeu n'est pas
             // repassé par 0 et un nouveau combo a commencé.
-            vec![Degats::Fin(temps), Degats::Coup(temps)]
+            vec![Degats::Fin(temps), Degats::Coup(temps, nouvelle)]
         } else {
-            vec![Degats::Coup(temps)]
+            vec![Degats::Coup(temps, nouvelle)]
         }
     }
 }
@@ -1178,13 +1178,16 @@ mod tests {
         let mut s = SuiviDegats::default();
         let l = |valeur| Some(LectureDegats { valeur });
         assert_eq!(s.image(l(0), 0), vec![]); // « 0 » au départ
-        assert_eq!(s.image(l(480), 10), vec![Degats::Coup(10)]);
+        assert_eq!(s.image(l(480), 10), vec![Degats::Coup(10, 480)]);
         assert_eq!(s.image(l(480), 20), vec![]);
-        assert_eq!(s.image(l(1440), 30), vec![Degats::Coup(30)]);
+        assert_eq!(s.image(l(1440), 30), vec![Degats::Coup(30, 1440)]);
         assert_eq!(s.image(None, 50), vec![]); // panneau caché un instant
-        assert_eq!(s.image(l(1488), 60), vec![Degats::Coup(60)]);
+        assert_eq!(s.image(l(1488), 60), vec![Degats::Coup(60, 1488)]);
         // Nouveau combo sans repasser par 0 : fin de l'ancien, 1er coup du nouveau.
-        assert_eq!(s.image(l(720), 70), vec![Degats::Fin(70), Degats::Coup(70)]);
+        assert_eq!(
+            s.image(l(720), 70),
+            vec![Degats::Fin(70), Degats::Coup(70, 720)]
+        );
         assert_eq!(s.image(l(0), 80), vec![Degats::Fin(80)]);
     }
 

@@ -26,7 +26,6 @@ mod partage;
 mod son;
 mod timings;
 
-use combo::Trial;
 use eframe::egui;
 use partage::Partage;
 use std::sync::{Arc, Mutex};
@@ -43,16 +42,17 @@ fn main() {
 
 fn lancer() -> Result<(), String> {
     let controles = controles::charger()?;
-    let (mut trial, personnage, inputs) = choisir_trial()?;
+    let (personnage, combos, choisi) = choisir_combo()?;
     let timings = timings::charger()?;
-    if !trial.hits_fixe {
-        trial.hits = timings.hits(&trial.nom);
-    }
+    let trial = combo::creer_trial(&combos[choisi], &timings)?;
+    let inputs = combos[choisi].inputs.clone();
     let config = overlay::charger()?;
     son::activer(config.son);
     let capture = capture::lancer(capture::charger()?, &personnage, &trial.nom, &inputs);
 
     let mut etat = Partage::new(&trial.nom, trial.etapes.clone());
+    etat.combos = combos.iter().map(|c| c.nom.clone()).collect();
+    etat.combo_index = choisi;
     etat.enregistrement = capture.enregistre;
     let partage = Arc::new(Mutex::new(etat));
 
@@ -81,7 +81,14 @@ fn lancer() -> Result<(), String> {
             egui_extras::install_image_loaders(&ctx);
             let partage_manette = Arc::clone(&partage);
             std::thread::spawn(move || {
-                entrees::boucle(controles, trial, timings, capture, partage_manette, ctx)
+                entrees::boucle(
+                    controles,
+                    (trial, combos),
+                    timings,
+                    capture,
+                    partage_manette,
+                    ctx,
+                )
             });
             Ok(Box::new(overlay::Overlay::new(partage, &config)))
         }),
@@ -90,8 +97,9 @@ fn lancer() -> Result<(), String> {
 }
 
 /// Charge `combos.toml` et prend le combo demandé (`cargo run -- 2`), le premier par défaut.
-/// Renvoie aussi le personnage et le combo tel qu'il est écrit (pour le `.json` des vidéos).
-fn choisir_trial() -> Result<(Trial, String, String), String> {
+/// On peut ensuite en changer avec les flèches de l'overlay.
+/// Renvoie le personnage, tous les combos et le numéro (à partir de 0) du combo choisi.
+fn choisir_combo() -> Result<(String, Vec<combo::ComboFichier>, usize), String> {
     let fichier = combo::charger()?;
     let numero: usize = match std::env::args().nth(1) {
         Some(arg) => arg
@@ -99,18 +107,17 @@ fn choisir_trial() -> Result<(Trial, String, String), String> {
             .map_err(|_| format!("« {arg} » n'est pas un numéro de combo"))?,
         None => 1,
     };
-    let choisi = fichier
-        .combo
-        .get(numero.wrapping_sub(1))
-        .ok_or(format!("pas de combo n°{numero} dans combos.toml"))?;
-    let etapes = combo::parser(&choisi.inputs)?;
+    if numero == 0 || numero > fichier.combo.len() {
+        return Err(format!("pas de combo n°{numero} dans combos.toml"));
+    }
     println!(
-        "{} : {} combo(s) dans combos.toml, n°{numero} chargé.",
+        "{} : {} combo(s) dans combos.toml.",
         fichier.personnage,
         fichier.combo.len()
     );
-    let mut trial = Trial::new(&choisi.nom, etapes);
-    trial.hits = choisi.hits;
-    trial.hits_fixe = choisi.hits.is_some();
-    Ok((trial, fichier.personnage.clone(), choisi.inputs.clone()))
+    for (i, c) in fichier.combo.iter().enumerate() {
+        let marque = if i + 1 == numero { "►" } else { " " };
+        println!("  {marque} {:>2}. {}", i + 1, c.nom);
+    }
+    Ok((fichier.personnage, fichier.combo, numero - 1))
 }

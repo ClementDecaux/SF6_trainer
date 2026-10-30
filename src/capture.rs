@@ -140,6 +140,13 @@ pub struct Capture {
 }
 
 impl Capture {
+    /// Un autre combo est choisi : les prochaines vidéos portent son nom.
+    pub fn changer_combo(&mut self, combo: &str, inputs: &str) {
+        self.annuler();
+        self.combo = combo.to_string();
+        self.inputs = inputs.to_string();
+    }
+
     fn new(envoi: Option<Sender<Ordre>>, personnage: &str, combo: &str, inputs: &str) -> Capture {
         Capture {
             envoi,

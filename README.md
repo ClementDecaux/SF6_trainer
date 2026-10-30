@@ -35,6 +35,12 @@ cargo test         # lance les tests
 | `timings.toml` | Hits (et écarts) appris sur tes vrais combos (créé au premier Select) |
 | `capture.toml` | Vidéo des combos réussis : on/off, dossier, durée filmée avant et après le combo, qualité |
 
+## Choisir le combo
+
+Les combos sont dans `combos.toml` (une liste de combos Dhalsim est créée au premier lancement).
+Les flèches ‹ › de l'overlay passent au combo précédent ou suivant ; `cargo run -- 5` lance
+directement le 5e. La liste numérotée s'affiche dans le terminal au lancement.
+
 ## Validation d'un combo
 
 Une étape avance quand le bon coup arrive, quel que soit le moment (il n'y a plus de fenêtres
@@ -72,6 +78,10 @@ L'outil voit les dégâts du combo monter à chaque coup qui touche. Quand tu co
 combo avec Select, il retient son nombre de hits (dans `timings.toml`). Ensuite, un combo est
 validé si tous ses coups ont touché, quel que soit le timing ; sinon : « 4/7 hits : lâché
 après 236MK ».
+
+Les dégâts du combo complet (`degats` dans `combos.toml`, ou appris avec Select) servent aussi :
+le combo est validé si les hits **ou** les dégâts sont atteints. Deux coups qui touchent dans
+la même image ne comptent que pour un hit, mais les dégâts, eux, sont justes.
 
 ## Vidéos des combos réussis
 

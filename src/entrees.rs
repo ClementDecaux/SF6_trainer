@@ -29,7 +29,7 @@ const SIMULTANE_FRAMES: u64 = 3;
 
 pub fn boucle(
     controles: Controles,
-    mut trial: Trial,
+    (mut trial, combos): (Trial, Vec<crate::combo::ComboFichier>),
     mut timings: Timings,
     mut capture: Capture,
     partage: Arc<Mutex<Partage>>,
@@ -372,6 +372,31 @@ pub fn boucle(
             if std::mem::take(&mut p.photo_demandee) {
                 capture.photo();
             }
+            // Un autre combo choisi sur l'overlay.
+            if let Some(i) = p.combo_demande.take()
+                && let Some(choisi) = combos.get(i)
+            {
+                match crate::combo::creer_trial(choisi, &timings) {
+                    Ok(nouveau) => {
+                        trial = nouveau;
+                        capture.changer_combo(&trial.nom, &choisi.inputs);
+                        juge.oublier_essai();
+                        a_confirmer = None;
+                        p.nom = trial.nom.clone();
+                        p.etapes = trial.etapes.clone();
+                        p.combo_index = i;
+                        p.index = 0;
+                        p.ecarts.clear();
+                        p.etape_cassee = None;
+                        p.hits = None;
+                        p.message = None;
+                        println!();
+                        println!("{}  {}", trial.nom.bold(), affichage::trial(&trial));
+                    }
+                    Err(e) => p.message(e, false),
+                }
+                change = true;
+            }
         }
         if select_appuye {
             select_appuye = false;
@@ -576,6 +601,8 @@ fn resultat_trial(
                 raison: None,
                 hits: None,
                 hits_attendus: None,
+                degats: None,
+                degats_attendus: None,
             });
         }
         Resultat::Rate { attendu } => {
@@ -601,6 +628,23 @@ fn appui_etape<'a>(notation: &'a str, candidats: &[String]) -> &'a str {
         "DP"
     } else {
         notation
+    }
+}
+
+/// Le combo est-il complet ? Oui si tous les hits attendus ont touché, ou si les dégâts
+/// du combo complet sont atteints : les deux se vérifient l'un l'autre (un coup mal compté
+/// ne fait pas rater un combo passé). `None` si on ne sait rien de ce combo.
+fn combo_complet(
+    hits: u32,
+    degats: u32,
+    hits_attendus: Option<u32>,
+    degats_attendus: Option<u32>,
+) -> Option<bool> {
+    let par_hits = hits_attendus.map(|a| hits >= a);
+    let par_degats = degats_attendus.map(|a| degats >= a);
+    match (par_hits, par_degats) {
+        (None, None) => None,
+        (h, d) => Some(h.unwrap_or(false) || d.unwrap_or(false)),
     }
 }
 
@@ -678,6 +722,9 @@ struct Fin {
     /// Coups qui ont touché (panneau des dégâts du jeu), et combien il en faut.
     hits: Option<u32>,
     hits_attendus: Option<u32>,
+    /// Dégâts du combo (panneau du jeu), et ceux du combo complet.
+    degats: Option<u32>,
+    degats_attendus: Option<u32>,
 }
 
 /// Donne le verdict d'un combo fini : son, message, vidéo gardée ou non.
@@ -699,12 +746,23 @@ fn conclure(
     if let Some(raison) = &fin.raison {
         println!("{}", format!("      frames estimées : {raison}").yellow());
     }
-    let hits = match (fin.hits, fin.hits_attendus) {
-        (Some(h), Some(m)) => format!(" ({h}/{m} hits)"),
-        (Some(h), None) => format!(" ({h} hits)"),
-        _ => String::new(),
+    let mut infos = Vec::new();
+    match (fin.hits, fin.hits_attendus) {
+        (Some(h), Some(m)) => infos.push(format!("{h}/{m} hits")),
+        (Some(h), None) => infos.push(format!("{h} hits")),
+        _ => {}
+    }
+    match (fin.degats, fin.degats_attendus) {
+        (Some(d), Some(m)) => infos.push(format!("{d}/{m} dégâts")),
+        (Some(d), None) => infos.push(format!("{d} dégâts")),
+        _ => {}
+    }
+    let hits = if infos.is_empty() {
+        String::new()
+    } else {
+        format!(" ({})", infos.join(", "))
     };
-    let lache = matches!((fin.hits, fin.hits_attendus), (Some(h), Some(m)) if h < m);
+    let lache = fin.hits.is_some() || fin.degats.is_some();
     if fin.erreurs.is_empty() {
         println!(
             "{}",
@@ -749,6 +807,7 @@ fn conclure(
         frame,
         ecarts: fin.ecarts,
         hits: fin.hits,
+        degats: fin.degats,
     }
 }
 
@@ -757,6 +816,7 @@ struct AConfirmer {
     frame: u64,
     ecarts: Vec<u64>,
     hits: Option<u32>,
+    degats: Option<u32>,
 }
 
 /// Combien de temps on attend l'historique du jeu avant de donner le verdict sans lui.
@@ -784,8 +844,9 @@ struct Juge {
     visible: bool,
     /// Dernier numéro lu dans le journal des dégâts.
     dernier_degats: u64,
-    /// Heures des coups qui ont touché, et des fins de combo (dégâts revenus à 0).
-    coups: VecDeque<i64>,
+    /// Coups qui ont touché (heure, dégâts du combo après le coup), et fins de combo
+    /// (dégâts revenus à 0).
+    coups: VecDeque<(i64, u32)>,
     fins_combo: VecDeque<i64>,
     /// Le panneau des dégâts du jeu est lu.
     degats_visibles: bool,
@@ -818,6 +879,7 @@ struct Attente {
     /// Si les frames du jeu ne peuvent pas servir : pourquoi.
     raison_frames: Option<String>,
     hits_attendus: Option<u32>,
+    degats_attendus: Option<u32>,
 }
 
 impl Juge {
@@ -875,8 +937,8 @@ impl Juge {
         }
         for evenement in ecran::nouveaux_degats(&mut self.dernier_degats) {
             match evenement {
-                ecran::Degats::Coup(t) => {
-                    self.coups.push_back(t);
+                ecran::Degats::Coup(t, valeur) => {
+                    self.coups.push_back((t, valeur));
                     // Compteur en direct : repart de 1 au premier coup d'un nouveau combo
                     // (dégâts revenus à 0, ou plus de 1,5 s sans coup).
                     let pause = self
@@ -884,12 +946,16 @@ impl Juge {
                         .iter()
                         .rev()
                         .nth(1)
-                        .is_some_and(|&p| t - p > 15_000_000);
+                        .is_some_and(|&(p, _)| t - p > 15_000_000);
                     if self.combo_fini || pause {
                         self.hits_combo = 0;
                         self.combo_fini = false;
                     }
                     self.hits_combo += 1;
+                    println!(
+                        "{}",
+                        format!("      hit {} : {valeur} dégâts", self.hits_combo).dimmed()
+                    );
                 }
                 ecran::Degats::Fin(t) => {
                     self.fins_combo.push_back(t);
@@ -898,10 +964,19 @@ impl Juge {
             }
             nouveau = true;
         }
-        for liste in [&mut self.coups, &mut self.fins_combo] {
-            while liste.front().is_some_and(|t| temps - t > Self::MEMOIRE) {
-                liste.pop_front();
-            }
+        while self
+            .coups
+            .front()
+            .is_some_and(|(t, _)| temps - t > Self::MEMOIRE)
+        {
+            self.coups.pop_front();
+        }
+        while self
+            .fins_combo
+            .front()
+            .is_some_and(|t| temps - t > Self::MEMOIRE)
+        {
+            self.fins_combo.pop_front();
         }
         let appuis: Vec<(i64, u8)> = self.nos_appuis.iter().copied().collect();
         for entree in ecran::nouvelles_entrees(&mut self.dernier) {
@@ -1036,6 +1111,12 @@ impl Juge {
         }
     }
 
+    /// Un autre combo est choisi : on oublie l'essai en cours.
+    fn oublier_essai(&mut self) {
+        self.etapes.clear();
+        self.attente = None;
+    }
+
     /// Vrai si les coups sont lus dans l'historique du jeu (visible à l'écran).
     fn source_jeu(&self) -> bool {
         self.visible
@@ -1088,6 +1169,29 @@ impl Juge {
                 }
                 candidats.push(format!("{}{nom}", e.direction));
                 self.appuis_jeu.insert(bit, e.frame);
+            }
+            // Deux poings (ou deux pieds) ensemble : version OD, « 236PP ».
+            for (groupe, nom) in [
+                (ecran::LP | ecran::MP | ecran::HP, "PP"),
+                (ecran::LK | ecran::MK | ecran::HK, "KK"),
+            ] {
+                let recents = BOUTONS_JEU
+                    .iter()
+                    .filter(|(bit, _)| {
+                        groupe & bit != 0
+                            && e.boutons & bit != 0
+                            && self
+                                .appuis_jeu
+                                .get(bit)
+                                .is_some_and(|&f| e.frame.saturating_sub(f) < SIMULTANE_FRAMES)
+                    })
+                    .count();
+                if e.nouveaux & groupe != 0 && recents >= 2 {
+                    for m in self.mouvements.reconnaitre_tous(e.frame) {
+                        candidats.push(format!("{}{nom}", m.nom()));
+                    }
+                    candidats.push(format!("{}{nom}", e.direction));
+                }
             }
             // Deux boutons ensemble (même frame ou presque) : Drive Parry, Drive Impact, chope.
             for (a, b, nom) in [
@@ -1150,6 +1254,7 @@ impl Juge {
             latence: self.latence.valeur().unwrap_or(LATENCE_DEFAUT),
             raison_frames: raison,
             hits_attendus: trial.hits,
+            degats_attendus: trial.degats,
         });
         None
     }
@@ -1174,13 +1279,13 @@ impl Juge {
                 && self
                     .fins_combo
                     .iter()
-                    .any(|&f| self.coups.back().is_some_and(|&c| f > c) && f > attente.debut);
+                    .any(|&f| self.coups.back().is_some_and(|&(c, _)| f > c) && f > attente.debut);
             // Nombre de hits connu : on attend qu'ils aient tous touché (ou que le combo
             // soit fini). Pas encore appris : on attend la fin du combo pour tous les compter.
-            let attendre = match attente.hits_attendus {
-                Some(attendus) => hits < attendus && !combo_fini,
-                None => !combo_fini,
-            };
+            let degats = self.degats_depuis(attente.debut).unwrap_or(0);
+            let attendre = !combo_fini
+                && !combo_complet(hits, degats, attente.hits_attendus, attente.degats_attendus)
+                    .unwrap_or(false);
             if attendre {
                 return None;
             }
@@ -1196,7 +1301,16 @@ impl Juge {
 
     /// Coups qui ont touché depuis `debut`.
     fn hits_depuis(&self, debut: i64) -> u32 {
-        self.coups.iter().filter(|&&t| t >= debut).count() as u32
+        self.coups.iter().filter(|&&(t, _)| t >= debut).count() as u32
+    }
+
+    /// Dégâts du combo depuis `debut` (la plus grande valeur lue : ils ne font que monter).
+    fn degats_depuis(&self, debut: i64) -> Option<u32> {
+        self.coups
+            .iter()
+            .filter(|&&(t, _)| t >= debut)
+            .map(|&(_, v)| v)
+            .max()
     }
 
     /// Le verdict : frames exactes si possible (sinon notre estimation, avec la raison),
@@ -1219,13 +1333,26 @@ impl Juge {
             let hits = self.hits_depuis(attente.debut);
             fin.hits = Some(hits);
             fin.hits_attendus = attente.hits_attendus;
-            if let Some(attendus) = attente.hits_attendus {
-                if hits >= attendus {
+            fin.degats = self.degats_depuis(attente.debut);
+            fin.degats_attendus = attente.degats_attendus;
+            let complet = combo_complet(
+                hits,
+                fin.degats.unwrap_or(0),
+                attente.hits_attendus,
+                attente.degats_attendus,
+            );
+            if let Some(complet) = complet {
+                let attendus = attente.hits_attendus.unwrap_or(hits);
+                if complet {
                     // Tous les coups ont touché : le jeu a validé le combo, le timing aussi.
                     fin.erreurs.clear();
                     fin.cassee = None;
                 } else {
-                    let (erreur, cassee) = self.lache(&attente, hits, attendus);
+                    let bilan = match (fin.degats, attente.degats_attendus) {
+                        (Some(d), Some(m)) => format!("{d}/{m} dégâts, {hits} hits"),
+                        _ => format!("{hits}/{attendus} hits"),
+                    };
+                    let (erreur, cassee) = self.lache(&attente, &bilan);
                     fin.erreurs = vec![erreur];
                     fin.cassee = Some(cassee);
                     fin.temps_cassee = attente.appuis.get(cassee).map(|a| a.temps);
@@ -1237,9 +1364,10 @@ impl Juge {
 
     /// « 4/7 hits : lâché après 236MK » : la dernière étape faite avant le dernier coup qui a touché.
     /// Renvoie aussi l'étape d'après, celle où le combo a cassé.
-    fn lache(&self, attente: &Attente, hits: u32, attendus: u32) -> (String, usize) {
-        let Some(&dernier) = self.coups.iter().rev().find(|&&t| t >= attente.debut) else {
-            return (format!("0/{attendus} hits : aucun coup n'a touché"), 0);
+    fn lache(&self, attente: &Attente, bilan: &str) -> (String, usize) {
+        let Some(&(dernier, _)) = self.coups.iter().rev().find(|&&(t, _)| t >= attente.debut)
+        else {
+            return (format!("{bilan} : aucun coup n'a touché"), 0);
         };
         let derniere = attente
             .appuis
@@ -1251,10 +1379,7 @@ impl Juge {
         let cassee = derniere.map_or(0, |k| {
             (k + 1).min(attente.notations.len().saturating_sub(1))
         });
-        (
-            format!("{hits}/{attendus} hits : lâché après {etape}"),
-            cassee,
-        )
+        (format!("{bilan} : lâché après {etape}"), cassee)
     }
 
     /// Les écarts exacts du combo en attente, avec ses erreurs de timing.
@@ -1277,6 +1402,8 @@ impl Juge {
             raison: None,
             hits: None,
             hits_attendus: None,
+            degats: None,
+            degats_attendus: None,
         })
     }
 
@@ -1341,6 +1468,12 @@ fn confirmer(
             let n = timings.apprendre(&trial.nom, &c.ecarts);
             if let Some(hits) = c.hits {
                 timings.apprendre_hits(&trial.nom, hits);
+            }
+            if let Some(degats) = c.degats {
+                timings.apprendre_degats(&trial.nom, degats);
+            }
+            if !trial.degats_fixe {
+                trial.degats = timings.degats(&trial.nom);
             }
             if !trial.hits_fixe {
                 trial.hits = timings.hits(&trial.nom);
@@ -1410,6 +1543,14 @@ mod tests {
     use super::*;
 
     #[test]
+    fn combo_complet_par_les_hits_ou_les_degats() {
+        assert_eq!(combo_complet(5, 2346, Some(6), Some(2346)), Some(true));
+        assert_eq!(combo_complet(6, 2000, Some(6), Some(2346)), Some(true));
+        assert_eq!(combo_complet(5, 2000, Some(6), Some(2346)), Some(false));
+        assert_eq!(combo_complet(5, 2000, None, None), None);
+    }
+
+    #[test]
     fn les_coups_sont_lus_dans_l_historique_du_jeu() {
         let mut juge = Juge {
             visible: true,
@@ -1445,6 +1586,16 @@ mod tests {
         ];
         let coups = juge.coups_du_jeu();
         assert!(coups[1].candidats.contains(&"DP".to_string()));
+
+        // Deux poings ensemble après un demi-cercle : version OD.
+        juge.a_lire = vec![
+            ligne(300, 6, 0, 0),
+            ligne(302, 2, 0, 0),
+            ligne(304, 4, 0, 0),
+            ligne(306, 4, ecran::LP | ecran::MP, ecran::LP | ecran::MP),
+        ];
+        let coups = juge.coups_du_jeu();
+        assert!(coups[0].candidats.contains(&"63214PP".to_string()));
     }
 
     #[test]

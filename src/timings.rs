@@ -28,6 +28,9 @@ pub struct TimingCombo {
     /// Nombre de coups qui touchent quand le combo passe (lu sur le panneau des dégâts).
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub hits: Option<u32>,
+    /// Dégâts du combo complet (lus sur le panneau des dégâts).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub degats: Option<u32>,
 }
 
 #[derive(Debug, Default, Serialize, Deserialize)]
@@ -62,6 +65,7 @@ impl Timings {
                     min: ecarts.to_vec(),
                     max: ecarts.to_vec(),
                     hits: None,
+                    degats: None,
                 });
                 1
             }
@@ -78,6 +82,18 @@ impl Timings {
     pub fn apprendre_hits(&mut self, nom: &str, hits: u32) {
         if let Some(t) = self.combo.iter_mut().find(|t| t.nom == nom) {
             t.hits = Some(t.hits.map_or(hits, |h| h.min(hits)));
+        }
+    }
+
+    /// Les dégâts du combo complet, s'ils ont été appris.
+    pub fn degats(&self, nom: &str) -> Option<u32> {
+        self.combo.iter().find(|t| t.nom == nom)?.degats
+    }
+
+    /// Un vrai combo a fait `degats`. On garde le plus petit vu (un Punish Counter en fait plus).
+    pub fn apprendre_degats(&mut self, nom: &str, degats: u32) {
+        if let Some(t) = self.combo.iter_mut().find(|t| t.nom == nom) {
+            t.degats = Some(t.degats.map_or(degats, |d| d.min(degats)));
         }
     }
 

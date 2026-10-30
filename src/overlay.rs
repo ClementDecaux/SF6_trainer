@@ -452,6 +452,40 @@ fn boutons(ui: &mut egui::Ui, p: &mut Partage) -> egui::Rect {
             p.deplacement = !p.deplacement;
         }
 
+        // Choix du combo : précédent / suivant dans combos.toml.
+        let total = p.combos.len();
+        if total > 1 {
+            ui.add_space(10.0);
+            let image = icone(
+                include_bytes!("../assets/icones/chevron-left.svg"),
+                "bytes://precedent.svg",
+            );
+            if ui
+                .add(egui::Button::image(image.tint(Color32::WHITE)).frame(false))
+                .on_hover_text("Combo précédent")
+                .clicked()
+            {
+                p.combo_demande = Some((p.combo_index + total - 1) % total);
+            }
+            ui.label(
+                RichText::new(format!("{}/{total}", p.combo_index + 1))
+                    .color(GRIS)
+                    .size(14.0),
+            );
+            let image = icone(
+                include_bytes!("../assets/icones/chevron-right.svg"),
+                "bytes://suivant.svg",
+            );
+            if ui
+                .add(egui::Button::image(image.tint(Color32::WHITE)).frame(false))
+                .on_hover_text("Combo suivant")
+                .clicked()
+            {
+                p.combo_demande = Some((p.combo_index + 1) % total);
+            }
+            ui.add_space(10.0);
+        }
+
         let image = icone(
             include_bytes!("../assets/icones/camera.svg"),
             "bytes://photo.svg",

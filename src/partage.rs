@@ -90,6 +90,10 @@ pub struct Partage {
     /// Coups lus dans le jeu : heures des appuis où le combo a cassé, à reporter sur
     /// les lignes du jeu.
     pub cassees_jeu: Vec<i64>,
+    /// Les noms des combos de combos.toml, celui en cours, et celui demandé sur l'overlay.
+    pub combos: Vec<String>,
+    pub combo_index: usize,
+    pub combo_demande: Option<usize>,
 }
 
 impl Partage {
@@ -120,6 +124,9 @@ impl Partage {
             lignes_jeu_total: 0,
             source_jeu: false,
             cassees_jeu: Vec::new(),
+            combos: Vec::new(),
+            combo_index: 0,
+            combo_demande: None,
         }
     }
 

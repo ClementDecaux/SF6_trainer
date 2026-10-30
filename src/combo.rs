@@ -30,13 +30,17 @@ pub struct Etape {
 }
 
 /// Une entrée du fichier `combos.toml`.
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Clone, Deserialize)]
 pub struct ComboFichier {
     pub nom: String,
     pub inputs: String,
     /// Nombre de coups qui doivent toucher (sinon appris avec Select).
     #[serde(default)]
     pub hits: Option<u32>,
+    /// Dégâts du combo complet (panneau « Combo Damage » du training). S'ils sont connus,
+    /// c'est eux qui valident le combo (sinon appris avec Select).
+    #[serde(default)]
+    pub degats: Option<u32>,
 }
 
 #[derive(Debug, Deserialize)]
@@ -47,17 +51,7 @@ pub struct Fichier {
 
 const FICHIER: &str = "combos.toml";
 
-const COMBOS_PAR_DEFAUT: &str = r#"# Tes combos. Écris-les comme sur les forums, l'outil les comprend :
-# b/f/d/u/db/df = directions, qcf/qcb/hcf/hcb/dp = mouvements, xx ou > = cancel, "," = link.
-# Le premier combo de la liste est lancé (ou : cargo run -- 2 pour le deuxième).
-personnage = "Dhalsim"
-
-[[combo]]
-nom = "Drive Rush, Yoga Flame"
-inputs = "b+hp xx DR xx b+mk xx qcf+mk, b+mk xx hcb+mp"
-# Nombre de coups qui touchent quand il passe (panneau des dégâts du training).
-hits = 6
-"#;
+const COMBOS_PAR_DEFAUT: &str = include_str!("../combos_dhalsim.toml");
 
 /// Charge `combos.toml`, ou le crée avec le combo d'exemple.
 pub fn charger() -> Result<Fichier, String> {
@@ -71,6 +65,21 @@ pub fn charger() -> Result<Fichier, String> {
         }
     };
     toml::from_str(&texte).map_err(|e| format!("erreur dans {FICHIER} : {e}"))
+}
+
+/// Le trial d'un combo du fichier, avec les hits et dégâts attendus (du fichier, sinon
+/// appris avec Select dans `timings.toml`).
+pub fn creer_trial(
+    combo: &ComboFichier,
+    timings: &crate::timings::Timings,
+) -> Result<Trial, String> {
+    let etapes = parser(&combo.inputs).map_err(|e| format!("{} : {e}", combo.nom))?;
+    let mut trial = Trial::new(&combo.nom, etapes);
+    trial.hits_fixe = combo.hits.is_some();
+    trial.hits = combo.hits.or_else(|| timings.hits(&combo.nom));
+    trial.degats_fixe = combo.degats.is_some();
+    trial.degats = combo.degats.or_else(|| timings.degats(&combo.nom));
+    Ok(trial)
 }
 
 /// Découpe un combo en étapes.
@@ -106,10 +115,21 @@ pub fn parser(texte: &str) -> Result<Vec<Etape>, String> {
 
 /// Ramène une étape à sa forme unique : « b+hp » -> « 4HP », « qcf+mk » -> « 236MK ».
 pub fn normaliser(etape: &str) -> Result<String, String> {
-    let t: String = etape
+    // Les remarques entre parenthèses (« (pc) », « (hit) ») sont ignorées.
+    let mut sans_remarques = String::new();
+    let mut profondeur = 0;
+    for c in etape.chars() {
+        match c {
+            '(' => profondeur += 1,
+            ')' => profondeur -= 1,
+            _ if profondeur == 0 => sans_remarques.push(c),
+            _ => {}
+        }
+    }
+    let t: String = sans_remarques
         .to_uppercase()
         .chars()
-        .filter(|c| !matches!(c, ' ' | '+' | '.'))
+        .filter(|c| !matches!(c, ' ' | '+' | '.' | '/'))
         .collect();
 
     // Les actions qui s'écrivent seules.
@@ -158,7 +178,8 @@ pub fn normaliser(etape: &str) -> Result<String, String> {
     const MOUVEMENTS: [&str; 15] = [
         "1", "2", "3", "4", "5", "6", "7", "8", "9", "236", "214", "623", "421", "41236", "63214",
     ];
-    const BOUTONS: [&str; 6] = ["LP", "MP", "HP", "LK", "MK", "HK"];
+    // PP et KK : version OD (deux poings ou deux pieds ensemble).
+    const BOUTONS: [&str; 8] = ["LP", "MP", "HP", "LK", "MK", "HK", "PP", "KK"];
     if !MOUVEMENTS.contains(&mouvement.as_str()) {
         return Err(format!(
             "mouvement inconnu « {mouvement} » dans « {etape} »"
@@ -201,6 +222,9 @@ pub struct Trial {
     pub hits: Option<u32>,
     /// `hits` vient de combos.toml : Select ne le change pas.
     pub hits_fixe: bool,
+    /// Dégâts du combo complet (combos.toml, ou appris avec Select).
+    pub degats: Option<u32>,
+    pub degats_fixe: bool,
 }
 
 impl Trial {
@@ -214,6 +238,8 @@ impl Trial {
             intercales: 0,
             hits: None,
             hits_fixe: false,
+            degats: None,
+            degats_fixe: false,
         }
     }
 
@@ -251,13 +277,18 @@ impl Trial {
 
         // Pour un Drive Impact (HP+HK) ou un Drive Parry (MP+MK), le premier des
         // deux boutons arrive seul : on attend le second au lieu de compter un raté.
-        let boutons = match self.attendu() {
-            "DI" => Some(("HP", "HK")),
-            "DP" | "DR" => Some(("MP", "MK")),
-            _ => None,
+        // Pareil pour un coup OD (PP ou KK) : le premier poing (ou pied) arrive seul.
+        let boutons: &[&str] = match self.attendu() {
+            "DI" => &["HP", "HK"],
+            "DP" | "DR" => &["MP", "MK"],
+            a if a.ends_with("PP") => &["LP", "MP", "HP"],
+            a if a.ends_with("KK") => &["LK", "MK", "HK"],
+            _ => &[],
         };
-        if let Some((a, b)) = boutons
-            && candidats.iter().all(|c| c.ends_with(a) || c.ends_with(b))
+        if !boutons.is_empty()
+            && candidats
+                .iter()
+                .all(|c| boutons.iter().any(|b| c.ends_with(b)))
         {
             return Resultat::Ignore;
         }
@@ -379,6 +410,9 @@ mod tests {
         assert_eq!(normaliser("DP").unwrap(), "DP");
         assert_eq!(normaliser("df+hk").unwrap(), "3HK");
         assert_eq!(normaliser("236 HP").unwrap(), "236HP");
+        assert_eq!(normaliser("d/b+hp").unwrap(), "1HP");
+        assert_eq!(normaliser("cr. lp (pc)").unwrap(), "2LP");
+        assert_eq!(normaliser("hcb+kk").unwrap(), "63214KK");
         assert!(normaliser("qcf+xx").is_err());
         assert!(normaliser("25HP").is_err());
     }
@@ -387,7 +421,15 @@ mod tests {
     fn le_fichier_par_defaut_se_lit() {
         let f: Fichier = toml::from_str(COMBOS_PAR_DEFAUT).unwrap();
         assert_eq!(f.personnage, "Dhalsim");
-        assert!(parser(&f.combo[0].inputs).is_ok());
+        for c in &f.combo {
+            assert!(
+                parser(&c.inputs).is_ok(),
+                "{} : {:?}",
+                c.nom,
+                parser(&c.inputs)
+            );
+        }
+        assert_eq!(f.combo[0].degats, Some(2346));
     }
 
     #[test]
@@ -402,6 +444,18 @@ mod tests {
         );
         assert_eq!(t.coup(&c("4MK"), 40), Resultat::Reussi);
         assert_eq!(t.index, 0);
+    }
+
+    #[test]
+    fn coup_od_par_deux_poings() {
+        let mut t = Trial::new("test", parser("b+mk xx hcb+pp").unwrap());
+        assert_eq!(t.coup(&c("4MK"), 10), Resultat::Avance);
+        // Le premier poing seul : on attend le second.
+        assert_eq!(t.coup(&c("63214LP"), 20), Resultat::Ignore);
+        assert_eq!(
+            t.coup(&["63214MP".to_string(), "63214PP".to_string()], 21),
+            Resultat::Reussi
+        );
     }
 
     #[test]
