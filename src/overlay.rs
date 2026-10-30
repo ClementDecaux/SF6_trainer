@@ -117,6 +117,10 @@ pub struct Overlay {
     survol: bool,
     /// L'historique est déplié (languette en bas).
     historique_ouvert: bool,
+    /// Hauteur de la fenêtre historique déplié (repliée, la fenêtre se réduit au contenu).
+    hauteur_ouverte: f32,
+    /// Juste après avoir déplié : la hauteur qu'on attend que la fenêtre reprenne.
+    attendre_hauteur: Option<f32>,
     /// Nombre de lignes déjà vues : une nouvelle ligne ramène l'historique en haut.
     lignes_vues: u64,
     /// Mode déplacement : la fenêtre en train d'être glissée ou redimensionnée.
@@ -240,6 +244,8 @@ impl Overlay {
             deplacement: false,
             survol: false,
             historique_ouvert: config.historique_ouvert,
+            hauteur_ouverte: config.hauteur,
+            attendre_hauteur: None,
             lignes_vues: 0,
             glisse: None,
         }
@@ -305,6 +311,14 @@ impl Overlay {
         }
     }
 
+    /// La place à écrire dans overlay.toml : avec la hauteur dépliée, même si repliée.
+    fn place_a_enregistrer(&self, mut rect: egui::Rect) -> egui::Rect {
+        if !self.historique_ouvert {
+            rect.set_height(self.hauteur_ouverte);
+        }
+        rect
+    }
+
     /// La fenêtre vient d'être (re)créée : il faut la régler de nouveau côté Windows.
     pub fn fenetre_recreee(&mut self) {
         self.regler_dans = 2;
@@ -323,8 +337,10 @@ impl Overlay {
         let traversant_avant = self.traversant();
         if partage.deplacement != self.deplacement {
             self.deplacement = partage.deplacement;
-            if !self.deplacement {
-                enregistrer_position(ui.ctx());
+            if !self.deplacement
+                && let Some(rect) = ui.ctx().input(|i| i.viewport().outer_rect)
+            {
+                enregistrer_rect(self.place_a_enregistrer(rect));
             }
         }
         // La souris au-dessus de l'overlay : la fenêtre la garde (boutons, molette, bande
@@ -358,7 +374,7 @@ impl Overlay {
         let tout = ui.max_rect();
         let mut deplacer = None;
         let mut basculer_historique = false;
-        egui::Frame::new()
+        let cadre = egui::Frame::new()
             .fill(Color32::from_rgba_unmultiplied(0, 0, 0, self.opacite_fond))
             .stroke(bordure)
             .corner_radius(10)
@@ -423,11 +439,23 @@ impl Overlay {
             });
         if basculer_historique {
             self.historique_ouvert = !self.historique_ouvert;
+            if self.historique_ouvert {
+                self.attendre_hauteur = Some(self.hauteur_ouverte);
+            }
             crate::interface::ecrire_cles(
                 FICHIER,
                 &[("historique_ouvert", self.historique_ouvert.to_string())],
             );
         }
+        // Historique replié : la fenêtre se réduit au cadre (plus de fond vide en dessous).
+        // Déplié : elle reprend sa hauteur.
+        let hauteur_cadre = (cadre.response.rect.max.y - tout.min.y).ceil() + 2.0;
+        ajuster_hauteur(
+            ui.ctx(),
+            hauteur_cadre,
+            (self.historique_ouvert, self.glisse.is_some()),
+            (&mut self.hauteur_ouverte, &mut self.attendre_hauteur),
+        );
 
         // On bouge la fenêtre nous-mêmes en suivant la souris à l'écran : le glisser de
         // Windows ne marche pas sur une fenêtre qui ne prend pas le focus (pour le laisser
@@ -444,13 +472,48 @@ impl Overlay {
             }
         }
         if let Some(rect) = fini {
-            enregistrer_rect(rect);
+            enregistrer_rect(self.place_a_enregistrer(rect));
         }
 
         // Redessiner un peu plus tard pour faire disparaître le message à temps.
         if partage.message.is_some() {
             ui.ctx().request_repaint_after(Duration::from_millis(100));
         }
+    }
+}
+
+/// Repliée, la fenêtre fait la hauteur du cadre ; dépliée, `hauteur_ouverte`
+/// (qui suit les redimensionnements faits avec F8).
+fn ajuster_hauteur(
+    ctx: &egui::Context,
+    hauteur_cadre: f32,
+    (ouvert, glisse): (bool, bool),
+    (hauteur_ouverte, attendre_hauteur): (&mut f32, &mut Option<f32>),
+) {
+    let Some(fenetre) = ctx.input(|i| i.viewport().inner_rect) else {
+        return;
+    };
+    let voulue = if ouvert {
+        match *attendre_hauteur {
+            // On vient de déplier : on remet la hauteur jusqu'à ce qu'elle soit prise.
+            Some(h) if (fenetre.height() - h).abs() > 1.0 => h,
+            _ => {
+                *attendre_hauteur = None;
+                *hauteur_ouverte = fenetre.height();
+                return;
+            }
+        }
+    } else if glisse {
+        return;
+    } else {
+        hauteur_cadre
+    };
+    if (fenetre.height() - voulue).abs() > 1.0 {
+        ctx.send_viewport_cmd(egui::ViewportCommand::InnerSize(egui::vec2(
+            fenetre.width(),
+            voulue,
+        )));
+        ctx.request_repaint();
     }
 }
 
@@ -1011,14 +1074,6 @@ pub(crate) fn dessiner_direction(ui: &mut egui::Ui, direction: u8, couleur: Colo
 ///
 /// `unsafe` : on appelle directement des fonctions C de Windows, Rust ne peut pas
 /// vérifier lui-même qu'on les utilise correctement.
-/// Écrit la position actuelle de la fenêtre dans `overlay.toml` (lignes `x =` et `y =`),
-/// sans toucher au reste du fichier.
-fn enregistrer_position(ctx: &egui::Context) {
-    if let Some(rect) = ctx.input(|i| i.viewport().outer_rect) {
-        enregistrer_rect(rect);
-    }
-}
-
 /// Écrit la place de la fenêtre dans `overlay.toml`.
 fn enregistrer_rect(rect: egui::Rect) {
     let Ok(texte) = std::fs::read_to_string(FICHIER) else {
