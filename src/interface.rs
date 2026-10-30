@@ -80,8 +80,6 @@ pub struct Interface {
     lecteur: Option<Lecteur>,
     /// Titre de la fenêtre de SF6 (`fenetre` dans capture.toml).
     titre_jeu: String,
-    /// L'overlay est montré (pas caché parce que SF6 n'est pas au premier plan).
-    overlay_montre: bool,
     /// SF6 est la fenêtre active (vérifié à chaque image de l'interface).
     jeu_actif: bool,
     /// Le dossier des photos, tel que tapé dans les réglages.
@@ -118,7 +116,6 @@ impl Interface {
             plein_ecran: false,
             lecteur: None,
             titre_jeu: titre_jeu.to_string(),
-            overlay_montre: true,
             jeu_actif: false,
             dossier_photos: crate::capture::dossier_photos(),
             clips_vus: 0,
@@ -129,12 +126,10 @@ impl Interface {
     /// Affiche (ou cache) la fenêtre de l'overlay.
     fn fenetre_overlay(&mut self, ctx: &egui::Context, visible: bool) {
         if visible {
-            if !self.overlay_ouvert {
-                // Une nouvelle fenêtre est créée visible.
-                self.overlay_montre = true;
-                if let Ok(mut o) = self.overlay.lock() {
-                    o.fenetre_recreee();
-                }
+            if !self.overlay_ouvert
+                && let Ok(mut o) = self.overlay.lock()
+            {
+                o.fenetre_recreee();
             }
             let overlay = Arc::clone(&self.overlay);
             ctx.show_viewport_deferred(
@@ -214,15 +209,12 @@ impl eframe::App for Interface {
                     p.en_entrainement() || p.deplacement,
                 )
             });
-        self.fenetre_overlay(&ctx, visible);
-        // Caché (sans fermer la fenêtre) quand on n'est pas dans SF6, ou pas en mode
-        // entraînement.
+        // Pas dans SF6, ou pas en mode entraînement : la fenêtre est fermée, et rouverte au
+        // même endroit ensuite. (La cacher sans la fermer la laissait parfois blanche et
+        // impossible à cliquer quand elle réapparaissait : jamais redessinée.)
         self.jeu_actif = jeu_au_premier_plan(&self.titre_jeu);
         let montrer = (!jeu_exige || self.jeu_actif) && entrainement;
-        if visible && montrer != self.overlay_montre {
-            ctx.send_viewport_cmd_to(overlay::id(), egui::ViewportCommand::Visible(montrer));
-            self.overlay_montre = montrer;
-        }
+        self.fenetre_overlay(&ctx, visible && montrer);
         // Un nouveau clip vient d'être filmé : on relit le dossier et on rouvre la vidéo
         // (le nouveau clip remplace l'ancien du même combo).
         let ranges = crate::capture::CLIPS_RANGES.load(std::sync::atomic::Ordering::Relaxed);
@@ -1415,7 +1407,8 @@ fn jeu_au_premier_plan(titre: &str) -> bool {
     };
     let actif = String::from_utf16_lossy(&tampon[..longueur.max(0) as usize]);
     // Titre exact : un onglet de navigateur « Street Fighter 6/Dhalsim » ne compte pas.
-    actif.trim() == titre.trim()
+    // L'overlay lui-même (cliqué) compte comme le jeu : sinon il se fermerait sous la souris.
+    actif.trim() == titre.trim() || actif == overlay::TITRE
 }
 
 #[cfg(not(windows))]
