@@ -422,6 +422,8 @@ pub struct Image {
     pub largeur: u32,
     pub hauteur: u32,
     pub pixels: Vec<u8>,
+    /// Temps passé à traiter cette image dans la capture, en ms (pour trouver les saccades).
+    pub duree_ms: u32,
 }
 
 /// Les dernières images du jeu (`avant_ms`), pour que la vidéo commence
@@ -482,6 +484,13 @@ impl Tampon {
         // l'encodeur reviennent un peu plus tard).
         if self.libres.len() < 6 {
             self.libres.push(pixels);
+        }
+    }
+
+    /// Note le temps de traitement de la dernière image ajoutée.
+    pub fn noter_duree(&mut self, duree_ms: u32) {
+        if let Some(image) = self.images.back_mut() {
+            image.duree_ms = duree_ms;
         }
     }
 
@@ -654,6 +663,8 @@ mod capture_windows {
         taux: Option<u32>,
     }
 
+    // Un seul `Etat` à la fois, et il ne bouge pas : la taille n'a pas d'importance.
+    #[allow(clippy::large_enum_variant)]
     enum Etat {
         Attente,
         /// On a reçu `Demarrer` : on commence à la prochaine image.
@@ -678,6 +689,10 @@ mod capture_windows {
             derniere_image: i64,
             manquees: u32,
             lentes: u32,
+            /// Pire temps de traitement d'une image pendant le film, en ms.
+            pire_ms: u32,
+            /// Avant la 1re étape (images du tampon) : manquantes, lentes, pire temps (ms).
+            avant: (u32, u32, u32),
             /// Les trous : (heure de l'image d'avant, images manquantes), et la durée du
             /// démarrage de la vidéo (encodeur, images d'avant la 1re étape).
             trous: Vec<(i64, u32)>,
@@ -737,6 +752,8 @@ mod capture_windows {
                 son,
                 manquees,
                 lentes,
+                pire_ms,
+                avant,
                 trous,
                 demarrage_ms,
                 ..
@@ -767,15 +784,21 @@ mod capture_windows {
                     if manquees > 0 || lentes > 0 {
                         let liste: Vec<String> = trous
                             .iter()
-                            .take(12)
+                            .take(40)
                             .map(|&(t, n)| {
                                 format!("à {:.2} s : {n}", (t - premier) as f64 / 10_000_000.0)
                             })
                             .collect();
                         println!(
                             "      Vidéo : {manquees} image(s) manquante(s) (saccades), \
-                             {lentes} image(s) traitée(s) en plus de 14 ms, démarrage en \
-                             {demarrage_ms} ms. Trous : {}",
+                             {lentes} image(s) traitée(s) en plus de 14 ms (pire : {pire_ms} \
+                             ms), démarrage en {demarrage_ms} ms. Avant la 1re étape : {} \
+                             manquante(s), {} lente(s) (pire : {} ms). Encodeurs créés : {}. \
+                             Trous : {}",
+                            avant.0,
+                            avant.1,
+                            avant.2,
+                            self.numero,
                             liste.join(", ")
                         );
                     }
@@ -903,6 +926,7 @@ mod capture_windows {
                 largeur,
                 hauteur,
                 pixels,
+                duree_ms: 0,
             }))
         }
 
@@ -928,6 +952,7 @@ mod capture_windows {
             let mut trous = Vec::new();
             let mut premier = None;
             let mut precedente = None;
+            let mut avant = (0, 0, 0);
             let images = self.tampon.prendre().into_iter().chain(actuelle);
             for image in images {
                 if image.largeur != largeur || image.hauteur != hauteur {
@@ -938,9 +963,14 @@ mod capture_windows {
                     let n = images_manquees(image.temps - p);
                     if n > 0 {
                         manquees += n;
+                        avant.0 += n;
                         trous.push((p, n));
                     }
                 }
+                if image.duree_ms > 14 {
+                    avant.1 += 1;
+                }
+                avant.2 = avant.2.max(image.duree_ms);
                 premier.get_or_insert(image.temps);
                 precedente = Some(image.temps);
                 let _ = envoi.send(Envoi::Image(image));
@@ -962,6 +992,8 @@ mod capture_windows {
                 derniere_image: temps,
                 manquees,
                 lentes: 0,
+                pire_ms: 0,
+                avant,
                 trous,
                 demarrage_ms: chrono.elapsed().as_millis(),
             };
@@ -1172,10 +1204,18 @@ mod capture_windows {
             if let Some(image) = image {
                 self.tampon.recycler(image.pixels);
             }
-            if let Etat::Filme { lentes, .. } = &mut self.etat
-                && arrivee.elapsed() > Duration::from_millis(14)
-            {
-                *lentes += 1;
+            let duree_ms = arrivee.elapsed().as_millis() as u32;
+            match &mut self.etat {
+                Etat::Filme {
+                    lentes, pire_ms, ..
+                } => {
+                    if duree_ms > 14 {
+                        *lentes += 1;
+                    }
+                    *pire_ms = (*pire_ms).max(duree_ms);
+                }
+                Etat::Attente => self.tampon.noter_duree(duree_ms),
+                Etat::Demande => {}
             }
             if terminer {
                 self.arreter();
@@ -1376,6 +1416,7 @@ mod tests {
                 largeur: 1,
                 hauteur: 1,
                 pixels,
+                duree_ms: 0,
             });
         }
         // 6 intervalles de 16 ms = 96 ms : les images 13 à 19.
@@ -1394,6 +1435,7 @@ mod tests {
                 largeur: 10,
                 hauteur: 10,
                 pixels: vec![0; 100],
+                duree_ms: 0,
             });
         }
         assert_eq!(tampon.len(), 3);
