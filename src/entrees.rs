@@ -45,7 +45,7 @@ pub fn boucle(
     for nom in manette.noms() {
         println!("Manette détectée : {nom}");
     }
-    println!("Ctrl+C pour quitter. Côté de l'écran : réglable dans l'onglet Entraînement.\n");
+    println!("Ctrl+C pour quitter. Côté de l'écran : réglable dans les réglages de l'interface.\n");
     println!("{}  {}", trial.nom.bold(), affichage::trial(&trial));
     match trial.hits {
         Some(hits) => println!("Combo validé par les hits du jeu : {hits} attendus."),

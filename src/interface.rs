@@ -22,7 +22,6 @@ const FRAME: i64 = 166_667;
 #[derive(Clone, Copy, PartialEq, Eq)]
 enum Onglet {
     Combos,
-    Entrainement,
     Reglages,
 }
 
@@ -240,11 +239,7 @@ impl eframe::App for Interface {
             ui.horizontal(|ui| {
                 ui.heading("SF6 Trainer");
                 ui.add_space(20.0);
-                for (onglet, nom) in [
-                    (Onglet::Combos, "Combos"),
-                    (Onglet::Entrainement, "Entraînement"),
-                    (Onglet::Reglages, "Réglages"),
-                ] {
+                for (onglet, nom) in [(Onglet::Combos, "Combos"), (Onglet::Reglages, "Réglages")] {
                     if ui
                         .selectable_label(self.onglet == onglet, RichText::new(nom).size(16.0))
                         .clicked()
@@ -275,9 +270,6 @@ impl eframe::App for Interface {
 
         egui::CentralPanel::default().show(ui, |ui| match self.onglet {
             Onglet::Combos => self.onglet_combos(ui),
-            Onglet::Entrainement => {
-                egui::ScrollArea::vertical().show(ui, |ui| self.onglet_entrainement(ui));
-            }
             Onglet::Reglages => {
                 egui::ScrollArea::vertical().show(ui, |ui| self.onglet_reglages(ui));
             }
@@ -292,10 +284,42 @@ impl eframe::App for Interface {
 
 impl Interface {
     fn onglet_combos(&mut self, ui: &mut egui::Ui) {
-        let en_cours = self.partage.lock().map_or(usize::MAX, |p| p.combo_index);
+        let (en_cours, mut entrainement) = self
+            .partage
+            .lock()
+            .map_or((usize::MAX, Default::default()), |p| {
+                (p.combo_index, p.entrainement.clone())
+            });
+        let avant = entrainement.clone();
+        let mut lancer = false;
         egui::Panel::left("liste_combos")
             .default_size(340.0)
             .show(ui, |ui| {
+                ui.add_space(6.0);
+                // L'entraînement : les combos cochés, enchaînés (réglages dans Réglages).
+                let n = entrainement.combos.len();
+                ui.horizontal(|ui| {
+                    let (texte, couleur) = if entrainement.actif {
+                        ("Arrêter l'entraînement".to_string(), ROUGE)
+                    } else {
+                        (format!("Lancer l'entraînement ({n})"), VERT)
+                    };
+                    let bouton = egui::Button::new(RichText::new(texte).strong().color(couleur));
+                    if ui
+                        .add_enabled(n > 0 || entrainement.actif, bouton)
+                        .on_hover_text(
+                            "Enchaîne les combos cochés : on passe au suivant après assez de \
+                             réussites (voir Réglages)",
+                        )
+                        .clicked()
+                    {
+                        entrainement.actif = !entrainement.actif;
+                        lancer = entrainement.actif;
+                    }
+                    if ui.small_button("Aucun").clicked() {
+                        entrainement.combos.clear();
+                    }
+                });
                 ui.add_space(6.0);
                 ui.horizontal(|ui| {
                     ui.label("Rechercher");
@@ -313,20 +337,61 @@ impl Interface {
                 let mut clic = None;
                 egui::ScrollArea::vertical().show(ui, |ui| {
                     for categorie in categories {
+                        let noms: Vec<&str> = self
+                            .combos
+                            .iter()
+                            .filter(|c| c.categorie == categorie)
+                            .map(|c| c.nom.as_str())
+                            .collect();
+                        let coches = noms
+                            .iter()
+                            .filter(|n| entrainement.combos.iter().any(|c| c == *n))
+                            .count();
                         let titre = if categorie.is_empty() {
                             "Combos"
                         } else {
                             categorie
                         };
-                        egui::CollapsingHeader::new(RichText::new(titre).strong())
-                            .default_open(true)
-                            .show(ui, |ui| {
-                                for (i, c) in self.combos.iter().enumerate() {
-                                    let trouve = recherche.is_empty()
-                                        || c.nom.to_lowercase().contains(&recherche)
-                                        || c.inputs.to_lowercase().contains(&recherche);
-                                    if c.categorie != categorie || !trouve {
-                                        continue;
+                        egui::CollapsingHeader::new(
+                            RichText::new(format!("{titre}  ({coches}/{})", noms.len())).strong(),
+                        )
+                        .id_salt(("liste", categorie))
+                        .default_open(true)
+                        .show(ui, |ui| {
+                            // Cocher ou décocher toute la catégorie.
+                            let toute = coches == noms.len();
+                            let texte = if toute {
+                                "décocher la catégorie"
+                            } else {
+                                "cocher la catégorie"
+                            };
+                            if ui.small_button(texte).clicked() {
+                                entrainement.combos.retain(|c| !noms.contains(&c.as_str()));
+                                if !toute {
+                                    entrainement
+                                        .combos
+                                        .extend(noms.iter().map(|n| n.to_string()));
+                                }
+                            }
+                            for (i, c) in self.combos.iter().enumerate() {
+                                let trouve = recherche.is_empty()
+                                    || c.nom.to_lowercase().contains(&recherche)
+                                    || c.inputs.to_lowercase().contains(&recherche);
+                                if c.categorie != categorie || !trouve {
+                                    continue;
+                                }
+                                ui.horizontal(|ui| {
+                                    let mut coche = entrainement.combos.contains(&c.nom);
+                                    if ui
+                                        .checkbox(&mut coche, "")
+                                        .on_hover_text("Dans l'entraînement")
+                                        .changed()
+                                    {
+                                        if coche {
+                                            entrainement.combos.push(c.nom.clone());
+                                        } else {
+                                            entrainement.combos.retain(|n| n != &c.nom);
+                                        }
                                     }
                                     let mut texte = RichText::new(&c.nom);
                                     if i == en_cours {
@@ -335,14 +400,27 @@ impl Interface {
                                     if ui.selectable_label(i == self.choisi, texte).clicked() {
                                         clic = Some(i);
                                     }
-                                }
-                            });
+                                });
+                            }
+                        });
                     }
                 });
                 if let Some(i) = clic {
                     self.choisi = i;
                 }
             });
+        if entrainement != avant
+            && let Ok(mut p) = self.partage.lock()
+        {
+            if lancer {
+                p.combo_demande = entrainement.premier(&p.combos);
+            }
+            if !entrainement.actif {
+                p.avance_prevue = None;
+            }
+            p.entrainement = entrainement;
+            crate::entrainement::enregistrer(&p.entrainement);
+        }
 
         let syntaxe = self.syntaxe();
         let liaisons = self
@@ -435,131 +513,34 @@ impl Interface {
 // ---------------------------------------------------------------- Entraînement
 
 impl Interface {
-    fn onglet_entrainement(&mut self, ui: &mut egui::Ui) {
+    /// Réglages de l'entraînement (dans l'onglet Réglages).
+    fn reglages_entrainement(ui: &mut egui::Ui, p: &mut Partage) {
         use crate::combo::Cote;
         use crate::entrainement::Mode;
-        let Ok(mut p) = self.partage.lock() else {
-            return;
-        };
         let avant = p.entrainement.clone();
-        ui.add_space(8.0);
-
-        ui.heading("Côté de l'écran");
-        ui.horizontal_wrapped(|ui| {
-            let e = &mut p.entrainement;
-            ui.radio_value(
-                &mut e.cote,
-                Cote::Auto,
-                "Auto (reconnu au 1er coup de l'essai)",
-            );
-            ui.radio_value(&mut e.cote, Cote::Gauche, "À gauche");
-            ui.radio_value(&mut e.cote, Cote::Droite, "À droite (combo en miroir)");
-        });
-
-        ui.add_space(14.0);
-        ui.heading("Auto-advance");
-        ui.checkbox(
-            &mut p.entrainement.actif,
-            "Passer tout seul au combo suivant de la sélection",
+        let e = &mut p.entrainement;
+        ui.heading("Entraînement");
+        ui.label(
+            RichText::new("Coche des combos dans l'onglet Combos, puis « Lancer l'entraînement ».")
+                .color(GRIS),
         );
-        ui.add_enabled_ui(p.entrainement.actif, |ui| {
-            let e = &mut p.entrainement;
-            ui.horizontal(|ui| {
-                ui.label("Après");
-                ui.add(egui::DragValue::new(&mut e.nombre).range(1..=50));
-                ui.radio_value(&mut e.mode, Mode::Affilee, "réussites d'affilée");
-                ui.radio_value(&mut e.mode, Mode::Total, "réussites au total");
-            });
-            ui.horizontal(|ui| {
-                ui.label("Combo suivant :");
-                ui.radio_value(&mut e.aleatoire, false, "dans l'ordre");
-                ui.radio_value(&mut e.aleatoire, true, "au hasard");
-            });
-        });
-
-        ui.add_space(14.0);
         ui.horizontal(|ui| {
-            ui.heading(format!(
-                "Sélection ({} / {})",
-                p.entrainement.combos.len(),
-                self.combos.len()
-            ));
-            if ui.small_button("Tout").clicked() {
-                p.entrainement.combos = self.combos.iter().map(|c| c.nom.clone()).collect();
-            }
-            if ui.small_button("Aucun").clicked() {
-                p.entrainement.combos.clear();
-            }
-            let premier = p
-                .combos
-                .iter()
-                .position(|n| p.entrainement.combos.contains(n));
-            if ui
-                .add_enabled(
-                    premier.is_some(),
-                    egui::Button::new("Commencer la sélection"),
-                )
-                .clicked()
-            {
-                p.combo_demande = premier;
-            }
+            ui.label("Combo suivant après");
+            ui.add(egui::DragValue::new(&mut e.nombre).range(1..=50));
+            ui.radio_value(&mut e.mode, Mode::Affilee, "réussites d'affilée");
+            ui.radio_value(&mut e.mode, Mode::Total, "réussites au total");
         });
-        // Par catégorie, dans l'ordre du fichier.
-        let mut categories: Vec<&str> = Vec::new();
-        for c in &self.combos {
-            if !categories.contains(&c.categorie.as_str()) {
-                categories.push(&c.categorie);
-            }
-        }
-        for categorie in categories {
-            let noms: Vec<&str> = self
-                .combos
-                .iter()
-                .filter(|c| c.categorie == categorie)
-                .map(|c| c.nom.as_str())
-                .collect();
-            let coches = noms
-                .iter()
-                .filter(|n| p.entrainement.combos.iter().any(|c| c == *n))
-                .count();
-            let titre = if categorie.is_empty() {
-                "Combos"
-            } else {
-                categorie
-            };
-            egui::CollapsingHeader::new(
-                RichText::new(format!("{titre}  ({coches}/{})", noms.len())).strong(),
-            )
-            .id_salt(("selection", categorie))
-            .default_open(true)
-            .show(ui, |ui| {
-                ui.horizontal(|ui| {
-                    if ui.small_button("Toute la catégorie").clicked() {
-                        for n in &noms {
-                            if !p.entrainement.combos.iter().any(|c| c == n) {
-                                p.entrainement.combos.push(n.to_string());
-                            }
-                        }
-                    }
-                    if ui.small_button("Retirer la catégorie").clicked() {
-                        p.entrainement
-                            .combos
-                            .retain(|c| !noms.contains(&c.as_str()));
-                    }
-                });
-                for n in &noms {
-                    let mut coche = p.entrainement.combos.iter().any(|c| c == n);
-                    if ui.checkbox(&mut coche, *n).changed() {
-                        if coche {
-                            p.entrainement.combos.push(n.to_string());
-                        } else {
-                            p.entrainement.combos.retain(|c| c != n);
-                        }
-                    }
-                }
-            });
-        }
-
+        ui.horizontal(|ui| {
+            ui.label("Ordre :");
+            ui.radio_value(&mut e.aleatoire, false, "dans l'ordre de la liste");
+            ui.radio_value(&mut e.aleatoire, true, "au hasard");
+        });
+        ui.horizontal_wrapped(|ui| {
+            ui.label("Côté de l'écran :");
+            ui.radio_value(&mut e.cote, Cote::Auto, "auto (reconnu au 1er coup)");
+            ui.radio_value(&mut e.cote, Cote::Gauche, "à gauche");
+            ui.radio_value(&mut e.cote, Cote::Droite, "à droite (combo en miroir)");
+        });
         if p.entrainement != avant {
             crate::entrainement::enregistrer(&p.entrainement);
         }
@@ -1042,6 +1023,9 @@ impl Interface {
                 );
             }
         }
+
+        ui.add_space(14.0);
+        Self::reglages_entrainement(ui, &mut p);
 
         ui.add_space(14.0);
         ui.heading("Écriture des coups");

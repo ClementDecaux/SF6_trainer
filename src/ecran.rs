@@ -952,6 +952,36 @@ mod tests {
     }
 
     #[test]
+    fn lit_la_photo_4_avec_drive_parry_et_drive_impact() {
+        // MP+MK (Drive Parry / Drive Rush) et HP+HK (Drive Impact) sur une même ligne.
+        let attendu = [
+            "99 5",
+            "4 5 MP MK",
+            "79 5",
+            "5 5 MP MK",
+            "81 5",
+            "5 5 MP MK",
+            "99 5",
+            "5 5 HP HK",
+            "3 5",
+            "11 6",
+            "99 5",
+            "3 5 MP",
+            "1 5",
+            "1 4",
+            "2 1",
+            "1 2",
+            "1 5",
+            "4 6",
+            "2 6 MK",
+        ];
+        let lu = lire_photo(4);
+        for (k, a) in attendu.iter().enumerate() {
+            assert_eq!(lu[k].as_deref(), Some(*a), "ligne {k}");
+        }
+    }
+
+    #[test]
     fn lit_la_photo_1() {
         let attendu = [
             "85 5", "5 5 LK", "99 5", "4 5 MK", "24 5", "6 5 LK", "20 5", "4 5 MP", "21 5",

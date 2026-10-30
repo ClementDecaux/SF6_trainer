@@ -26,7 +26,7 @@ cargo test         # lance les tests
 - **F9** pour garder ou non les vidéos des combos réussis (`REC` dans l'overlay). Coupé au
   lancement, sauf si `enregistrer = true` dans `capture.toml`.
 - Côté de l'écran : par défaut l'outil le reconnaît au 1er coup de chaque essai (un combo joué
-  à droite est retourné : 214 à l'écran = 236). On peut le forcer dans l'onglet Entraînement.
+  à droite est retourné : 214 à l'écran = 236). On peut le forcer dans les réglages.
 
 ## L'interface
 
@@ -34,15 +34,15 @@ Au lancement, une fenêtre normale s'ouvre en plus de l'overlay. Deux onglets :
 
 - **Combos** : la liste rangée par catégorie, avec une recherche. Clique un combo pour voir
   ses étapes, ses hits et dégâts, puis **Travailler ce combo** pour le passer dans l'overlay.
+  Les cases à cocher devant les combos forment l'**entraînement** : « Lancer l'entraînement »
+  enchaîne les combos cochés (le même bouton l'arrête). On passe au suivant après N réussites
+  d'affilée ou au total, dans l'ordre ou au hasard (premier combo compris) : réglages dans
+  l'onglet Réglages, gardés dans `entrainement.toml`. L'overlay affiche la progression.
   En dessous, ses vidéos : la plus récente s'ouvre d'office, les autres se choisissent dans la
   liste. Le lecteur avance image par image (← →, ou les boutons), lit au ralenti (x0.5, x0.25,
   x0.1), et place chaque étape du combo sur la barre de temps : cliquer une étape y amène. À
   droite, l'historique du jeu tel qu'il était à cette image. **Plein écran** agrandit le
   lecteur (Échap pour sortir).
-- **Entraînement** : le côté de l'écran, et l'**auto-advance** : coche les combos qui
-  t'intéressent (par catégorie ou un par un), choisis après combien de réussites (d'affilée ou
-  au total) on passe au suivant, dans l'ordre ou au hasard. L'overlay affiche la progression
-  (« auto 2/3 d'affilée »). Réglages gardés dans `entrainement.toml`.
 - **Réglages** : afficher ou cacher l'overlay, le déplacer, son opacité, le son, les vidéos,
   et la façon d'écrire les coups.
 

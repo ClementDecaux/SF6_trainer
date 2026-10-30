@@ -703,6 +703,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "fastrand"
+version = "2.5.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "da7c62ceae207dd37ea5b845da6a0696c799f85e97da1ab5b7910be3c1c80223"
+
+[[package]]
 name = "fax"
 version = "0.2.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2387,6 +2393,7 @@ dependencies = [
  "colored",
  "eframe",
  "egui_extras",
+ "fastrand",
  "gilrs",
  "png 0.18.1",
  "raw-window-handle",

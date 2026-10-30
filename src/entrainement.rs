@@ -5,7 +5,6 @@
 
 use crate::combo::Cote;
 use serde::{Deserialize, Serialize};
-use std::time::{SystemTime, UNIX_EPOCH};
 
 const FICHIER: &str = "entrainement.toml";
 
@@ -85,25 +84,36 @@ impl Entrainement {
         self.actif && self.compte(total, serie) >= self.nombre.max(1)
     }
 
-    /// Le combo à travailler après `actuel` (index dans `noms`, la liste de combos.toml).
-    /// La sélection est parcourue en boucle. Vide : aucun.
-    pub fn suivant(&self, actuel: usize, noms: &[String]) -> Option<usize> {
-        let selection: Vec<usize> = noms
-            .iter()
+    /// Les combos sélectionnés, par leur index dans `noms` (la liste de combos.toml).
+    fn selection(&self, noms: &[String]) -> Vec<usize> {
+        noms.iter()
             .enumerate()
             .filter(|(_, n)| self.combos.contains(n))
             .map(|(i, _)| i)
-            .collect();
+            .collect()
+    }
+
+    /// Le premier combo de l'entraînement : le premier de la liste, ou un au hasard.
+    pub fn premier(&self, noms: &[String]) -> Option<usize> {
+        let selection = self.selection(noms);
+        if self.aleatoire {
+            fastrand::choice(selection)
+        } else {
+            selection.first().copied()
+        }
+    }
+
+    /// Le combo à travailler après `actuel` (index dans `noms`, la liste de combos.toml).
+    /// La sélection est parcourue en boucle. Vide : aucun.
+    pub fn suivant(&self, actuel: usize, noms: &[String]) -> Option<usize> {
+        let selection = self.selection(noms);
         if selection.is_empty() {
             return None;
         }
         if self.aleatoire && selection.len() > 1 {
-            // Un autre combo de la sélection, au hasard (l'horloge suffit comme hasard).
+            // Un autre combo de la sélection, tiré au hasard.
             let autres: Vec<usize> = selection.into_iter().filter(|&i| i != actuel).collect();
-            let hasard = SystemTime::now()
-                .duration_since(UNIX_EPOCH)
-                .map_or(0, |d| d.subsec_nanos() as usize);
-            return autres.get(hasard % autres.len()).copied();
+            return fastrand::choice(autres);
         }
         Some(
             selection
@@ -147,6 +157,19 @@ mod tests {
         for _ in 0..20 {
             assert_eq!(e.suivant(0, &noms()), Some(2));
         }
+    }
+
+    #[test]
+    fn le_premier_au_hasard_varie() {
+        let mut e = Entrainement {
+            combos: noms(),
+            ..Default::default()
+        };
+        assert_eq!(e.premier(&noms()), Some(0));
+        e.aleatoire = true;
+        let tires: std::collections::HashSet<_> =
+            (0..200).filter_map(|_| e.premier(&noms())).collect();
+        assert_eq!(tires.len(), 4);
     }
 
     #[test]
