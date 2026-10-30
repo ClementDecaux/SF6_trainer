@@ -397,7 +397,13 @@ fn resultat_trial(
         println!("{}", format!("      +{ecart} f").dimmed());
     }
     match resultat {
-        Resultat::Avance => println!("{}", affichage::trial(trial)),
+        Resultat::Avance => {
+            // Nouvel essai : on efface le raté d'avant.
+            if trial.index == 1 {
+                p.message = None;
+            }
+            println!("{}", affichage::trial(trial));
+        }
         Resultat::Reussi => {
             return Some(Fin {
                 ecarts: trial.ecarts.clone(),

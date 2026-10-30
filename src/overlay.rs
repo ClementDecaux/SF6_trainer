@@ -300,7 +300,8 @@ fn timing(ui: &mut egui::Ui, p: &Partage, i: usize) {
 /// « COMBO RÉUSSI » ou « attendu X, reçu Y », pendant 2 secondes.
 fn message(ui: &mut egui::Ui, p: &Partage) {
     match &p.message {
-        Some(m) if m.quand.elapsed() < DUREE_MESSAGE => {
+        // Un raté reste affiché jusqu'au prochain essai : on a le temps de lire pourquoi.
+        Some(m) if !m.reussi || m.quand.elapsed() < DUREE_MESSAGE => {
             let couleur = if m.reussi { VERT } else { ROUGE };
             ui.label(RichText::new(&m.texte).color(couleur).size(22.0).strong());
         }
