@@ -567,26 +567,25 @@ pub struct SuiviDegats {
 }
 
 impl SuiviDegats {
-    pub fn image(&mut self, lecture: Option<LectureDegats>, temps: i64) -> Option<Degats> {
-        let nouvelle = lecture?.valeur;
-        let Some(avant) = self.valeur else {
+    pub fn image(&mut self, lecture: Option<LectureDegats>, temps: i64) -> Vec<Degats> {
+        let Some(nouvelle) = lecture.map(|l| l.valeur) else {
+            return Vec::new();
+        };
+        let Some(avant) = self.valeur.replace(nouvelle) else {
             // Premier passage (on vient d'arriver) : pas un coup.
-            self.valeur = Some(nouvelle);
-            return None;
+            return Vec::new();
         };
         if nouvelle == avant {
-            return None;
+            Vec::new()
+        } else if nouvelle == 0 {
+            vec![Degats::Fin(temps)]
+        } else if nouvelle < avant {
+            // Les dégâts d'un combo ne font que monter : s'ils baissent, le jeu n'est pas
+            // repassé par 0 et un nouveau combo a commencé.
+            vec![Degats::Fin(temps), Degats::Coup(temps)]
+        } else {
+            vec![Degats::Coup(temps)]
         }
-        if nouvelle == 0 {
-            self.valeur = Some(0);
-            return Some(Degats::Fin(temps));
-        }
-        // Les dégâts d'un combo ne font que monter : une baisse est une mauvaise lecture.
-        if nouvelle < avant {
-            return None;
-        }
-        self.valeur = Some(nouvelle);
-        Some(Degats::Coup(temps))
     }
 }
 
@@ -598,12 +597,15 @@ fn publier_degats(suivi: &mut SuiviDegats, vue: &Vue, temps: i64) {
     if lecture.is_some() {
         DEGATS_LUS.store(temps, Ordering::Relaxed);
     }
-    let Some(evenement) = suivi.image(lecture, temps) else {
+    let evenements = suivi.image(lecture, temps);
+    if evenements.is_empty() {
         return;
-    };
+    }
     if let Ok(mut journal) = DEGATS.lock() {
-        let numero = journal.back().map_or(0, |(n, _)| *n) + 1;
-        journal.push_back((numero, evenement));
+        for evenement in evenements {
+            let numero = journal.back().map_or(0, |(n, _)| *n) + 1;
+            journal.push_back((numero, evenement));
+        }
         while journal.len() > JOURNAL_MAX {
             journal.pop_front();
         }
@@ -1139,14 +1141,15 @@ mod tests {
     fn suivi_des_degats() {
         let mut s = SuiviDegats::default();
         let l = |valeur| Some(LectureDegats { valeur });
-        assert_eq!(s.image(l(0), 0), None); // « 0 » au départ
-        assert_eq!(s.image(l(480), 10), Some(Degats::Coup(10)));
-        assert_eq!(s.image(l(480), 20), None);
-        assert_eq!(s.image(l(1440), 30), Some(Degats::Coup(30)));
-        assert_eq!(s.image(l(1140), 40), None); // mauvaise lecture : les dégâts ne baissent pas
-        assert_eq!(s.image(None, 50), None); // panneau caché un instant
-        assert_eq!(s.image(l(1488), 60), Some(Degats::Coup(60)));
-        assert_eq!(s.image(l(0), 70), Some(Degats::Fin(70)));
+        assert_eq!(s.image(l(0), 0), vec![]); // « 0 » au départ
+        assert_eq!(s.image(l(480), 10), vec![Degats::Coup(10)]);
+        assert_eq!(s.image(l(480), 20), vec![]);
+        assert_eq!(s.image(l(1440), 30), vec![Degats::Coup(30)]);
+        assert_eq!(s.image(None, 50), vec![]); // panneau caché un instant
+        assert_eq!(s.image(l(1488), 60), vec![Degats::Coup(60)]);
+        // Nouveau combo sans repasser par 0 : fin de l'ancien, 1er coup du nouveau.
+        assert_eq!(s.image(l(720), 70), vec![Degats::Fin(70), Degats::Coup(70)]);
+        assert_eq!(s.image(l(0), 80), vec![Degats::Fin(80)]);
     }
 
     #[test]

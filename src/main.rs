@@ -46,7 +46,9 @@ fn lancer() -> Result<(), String> {
     let (mut trial, personnage, inputs) = choisir_trial()?;
     let timings = timings::charger()?;
     trial.fenetres = timings.fenetres(&trial.nom, trial.etapes.len());
-    trial.hits = timings.hits(&trial.nom);
+    if !trial.hits_fixe {
+        trial.hits = timings.hits(&trial.nom);
+    }
     let config = overlay::charger()?;
     son::activer(config.son);
     let capture = capture::lancer(capture::charger()?, &personnage, &trial.nom, &inputs);
@@ -107,9 +109,8 @@ fn choisir_trial() -> Result<(Trial, String, String), String> {
         fichier.personnage,
         fichier.combo.len()
     );
-    Ok((
-        Trial::new(&choisi.nom, etapes),
-        fichier.personnage.clone(),
-        choisi.inputs.clone(),
-    ))
+    let mut trial = Trial::new(&choisi.nom, etapes);
+    trial.hits = choisi.hits;
+    trial.hits_fixe = choisi.hits.is_some();
+    Ok((trial, fichier.personnage.clone(), choisi.inputs.clone()))
 }

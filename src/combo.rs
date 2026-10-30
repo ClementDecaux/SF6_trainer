@@ -35,6 +35,9 @@ pub struct Etape {
 pub struct ComboFichier {
     pub nom: String,
     pub inputs: String,
+    /// Nombre de coups qui doivent toucher (sinon appris avec Select).
+    #[serde(default)]
+    pub hits: Option<u32>,
 }
 
 #[derive(Debug, Deserialize)]
@@ -53,6 +56,8 @@ personnage = "Dhalsim"
 [[combo]]
 nom = "Drive Rush, Yoga Flame"
 inputs = "b+hp xx DR xx b+mk xx qcf+mk, b+mk xx hcb+mp"
+# Nombre de coups qui touchent quand il passe (panneau des dégâts du training).
+hits = 6
 "#;
 
 /// Charge `combos.toml`, ou le crée avec le combo d'exemple.
@@ -197,8 +202,10 @@ pub struct Trial {
     pub erreurs_timing: Vec<String>,
     /// Appuis ignorés car faits pendant la récupération (coups intercalés, mash).
     pub intercales: u32,
-    /// Nombre de coups qui touchent quand le combo passe (appris avec Select).
+    /// Nombre de coups qui touchent quand le combo passe (combos.toml, ou appris avec Select).
     pub hits: Option<u32>,
+    /// `hits` vient de combos.toml : Select ne le change pas.
+    pub hits_fixe: bool,
 }
 
 impl Trial {
@@ -213,6 +220,7 @@ impl Trial {
             erreurs_timing: Vec::new(),
             intercales: 0,
             hits: None,
+            hits_fixe: false,
         }
     }
 

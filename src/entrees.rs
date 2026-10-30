@@ -667,8 +667,15 @@ impl Juge {
             match evenement {
                 ecran::Degats::Coup(t) => {
                     self.coups.push_back(t);
-                    // Compteur en direct : repart de 1 au premier coup d'un nouveau combo.
-                    if self.combo_fini {
+                    // Compteur en direct : repart de 1 au premier coup d'un nouveau combo
+                    // (dégâts revenus à 0, ou plus de 1,5 s sans coup).
+                    let pause = self
+                        .coups
+                        .iter()
+                        .rev()
+                        .nth(1)
+                        .is_some_and(|&p| t - p > 15_000_000);
+                    if self.combo_fini || pause {
                         self.hits_combo = 0;
                         self.combo_fini = false;
                     }
@@ -952,7 +959,9 @@ fn confirmer(
             if let Some(hits) = c.hits {
                 timings.apprendre_hits(&trial.nom, hits);
             }
-            trial.hits = timings.hits(&trial.nom);
+            if !trial.hits_fixe {
+                trial.hits = timings.hits(&trial.nom);
+            }
             let hits = trial.hits.map_or(String::new(), |h| format!(", {h} hits"));
             if let Err(e) = timings.enregistrer() {
                 eprintln!("{e}");
