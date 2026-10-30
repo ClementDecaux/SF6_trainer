@@ -422,13 +422,16 @@ pub fn boucle(
         }
 
         if trial.temps_depasse(frame) {
-            println!("{}", "      ⏱ trop lent, on recommence".red());
+            println!(
+                "{}",
+                "      ⏱ essai abandonné (5 s sans étape), on recommence".red()
+            );
             println!("{}", affichage::trial(&trial));
             capture.annuler();
             if let Ok(mut p) = partage.lock() {
                 p.index = 0;
                 p.echec();
-                p.message("Trop lent, on recommence".to_string(), false);
+                p.message("Essai abandonné, on recommence".to_string(), false);
             }
             change = true;
         }

@@ -208,8 +208,10 @@ pub fn normaliser(etape: &str) -> Result<String, String> {
     Ok(format!("{mouvement}{bouton}"))
 }
 
-/// Au-delà de ce nombre de frames sans étape validée, le trial recommence.
-const DELAI_MAX: u64 = 90;
+/// Au-delà de ce nombre de frames (5 s) sans étape validée, l'essai est considéré comme
+/// abandonné et le trial recommence. Ce n'est pas un timing à respecter : seuls les coups
+/// lus dans le jeu et ses hits valident le combo.
+const DELAI_MAX: u64 = 300;
 
 /// Ce qui arrive quand on donne un coup au trial.
 #[derive(Debug, PartialEq, Eq)]
@@ -354,6 +356,26 @@ impl Trial {
             return Resultat::Avance;
         }
 
+        // Drive Rush pas lu (son appui MP+MK n'apparaît pas toujours dans l'historique du
+        // jeu) mais le coup d'après est là : on le compte comme fait. Ce sont les hits du jeu
+        // qui diront si le combo est vraiment passé.
+        if self.hits.is_some()
+            && self.index > 0
+            && self.attendu() == "DR"
+            && let Some(apres) = self.etapes.get(self.index + 1).map(|e| e.notation.clone())
+            && candidats.iter().any(|c| self.accepte(c, &apres))
+        {
+            self.ecarts.push(ecart);
+            self.ecarts.push(0);
+            self.index += 2;
+            self.derniere_frame = frame;
+            if self.index == self.etapes.len() {
+                self.index = 0;
+                return Resultat::Reussi;
+            }
+            return Resultat::Avance;
+        }
+
         // Pour un Drive Impact (HP+HK) ou un Drive Parry (MP+MK), le premier des
         // deux boutons arrive seul : on attend le second au lieu de compter un raté.
         // Pareil pour un coup OD (PP ou KK) : le premier poing (ou pied) arrive seul.
@@ -452,6 +474,21 @@ mod tests {
 
     fn c(s: &str) -> Vec<String> {
         vec![s.to_string()]
+    }
+
+    #[test]
+    fn drive_rush_pas_lu_mais_le_coup_suivant_est_la() {
+        let etapes = parser("4HP xx DR xx 4MK xx 236MK").unwrap();
+        let mut t = Trial::new("test", etapes.clone());
+        t.hits = Some(4);
+        assert_eq!(t.coup(&c("4HP"), 10), Resultat::Avance);
+        assert_eq!(t.coup(&c("4MK"), 30), Resultat::Avance);
+        assert_eq!(t.index, 3);
+        assert_eq!(t.coup(&c("236MK"), 50), Resultat::Reussi);
+        // Sans les hits du jeu pour vérifier, on attend le DR.
+        let mut t = Trial::new("test", etapes);
+        assert_eq!(t.coup(&c("4HP"), 10), Resultat::Avance);
+        assert_eq!(t.coup(&c("4MK"), 30), Resultat::Ignore);
     }
 
     #[test]
@@ -653,11 +690,13 @@ mod tests {
     }
 
     #[test]
-    fn trop_lent() {
+    fn essai_abandonne() {
         let mut t = Trial::new("test", parser("4HP, 4MK").unwrap());
         t.coup(&c("4HP"), 10);
-        assert!(!t.temps_depasse(50));
-        assert!(t.temps_depasse(200));
+        // Un link qui arrive 60 frames après n'est pas « trop lent ».
+        assert!(!t.temps_depasse(70));
+        assert!(!t.temps_depasse(200));
+        assert!(t.temps_depasse(400));
         assert_eq!(t.index, 0);
     }
 }

@@ -782,7 +782,9 @@ impl Lecteur {
                     aller = Some(image);
                 }
                 // Le rail du curseur est un peu en retrait des bords (la poignée dépasse).
-                let rect = barre.rect.shrink2(egui::vec2(barre.rect.height() / 2.5, 0.0));
+                let rect = barre
+                    .rect
+                    .shrink2(egui::vec2(barre.rect.height() / 2.5, 0.0));
                 let peintre = ui.painter();
                 for &(i, ref notation) in &etapes {
                     let x = rect.left() + rect.width() * i as f32 / (total.max(2) - 1) as f32;
