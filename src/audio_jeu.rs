@@ -1,6 +1,7 @@
 //! Le son du jeu dans les vidéos.
 //!
-//! Windows sait « écouter » ce qui sort des haut-parleurs (WASAPI en mode loopback). Un thread
+//! Windows (10 version 2004 et plus) sait « écouter » un seul programme : WASAPI en mode
+//! loopback de processus. On n'entend donc que SF6, pas la musique ni Discord. Un thread
 //! le fait en continu et garde les dernières secondes en mémoire, en PCM 16 bits stéréo, avec
 //! l'heure de chaque échantillon sur la même horloge que les images de la capture. Quand une
 //! vidéo commence, la capture prend le son à partir de l'heure de sa 1re image : il est calé
@@ -147,46 +148,71 @@ pub fn lire(depuis: u64, jusqua: i64) -> (Vec<u8>, u64) {
     }
 }
 
-/// Commence à écouter le son de Windows (sans effet hors Windows).
-pub fn demarrer(avant_ms: u64) {
+/// Commence à écouter le son de SF6 (`processus`, le programme du jeu), et seulement lui.
+/// Sans effet hors Windows.
+pub fn demarrer(processus: &str, avant_ms: u64) {
     #[cfg(windows)]
-    std::thread::spawn(move || wasapi::boucle(avant_ms + MARGE_MS));
+    {
+        let processus = processus.to_string();
+        std::thread::spawn(move || wasapi::boucle(processus, avant_ms + MARGE_MS));
+    }
     #[cfg(not(windows))]
-    let _ = avant_ms;
-}
-
-/// Convertit un échantillon flottant (-1 à 1) en 16 bits.
-fn vers_i16(x: f32) -> i16 {
-    (x.clamp(-1.0, 1.0) * 32767.0) as i16
+    let _ = (processus, avant_ms);
 }
 
 #[cfg(windows)]
 mod wasapi {
-    use super::{SON, TamponSon, vers_i16};
-    use std::time::Duration;
+    use super::{SON, TamponSon};
+    use std::sync::{Mutex, mpsc};
+    use std::time::{Duration, Instant};
+    use windows::Win32::Foundation::{CloseHandle, HANDLE};
     use windows::Win32::Media::Audio::{
-        AUDCLNT_BUFFERFLAGS_SILENT, AUDCLNT_SHAREMODE_SHARED, AUDCLNT_STREAMFLAGS_LOOPBACK,
-        IAudioCaptureClient, IAudioClient, IMMDeviceEnumerator, MMDeviceEnumerator, WAVEFORMATEX,
-        WAVEFORMATEXTENSIBLE, eConsole, eRender,
+        AUDCLNT_BUFFERFLAGS_SILENT, AUDCLNT_SHAREMODE_SHARED, AUDCLNT_STREAMFLAGS_AUTOCONVERTPCM,
+        AUDCLNT_STREAMFLAGS_EVENTCALLBACK, AUDCLNT_STREAMFLAGS_LOOPBACK,
+        AUDCLNT_STREAMFLAGS_SRC_DEFAULT_QUALITY, AUDIOCLIENT_ACTIVATION_PARAMS,
+        AUDIOCLIENT_ACTIVATION_PARAMS_0, AUDIOCLIENT_ACTIVATION_TYPE_PROCESS_LOOPBACK,
+        AUDIOCLIENT_PROCESS_LOOPBACK_PARAMS, ActivateAudioInterfaceAsync,
+        IActivateAudioInterfaceAsyncOperation, IActivateAudioInterfaceCompletionHandler,
+        IActivateAudioInterfaceCompletionHandler_Impl, IAudioCaptureClient, IAudioClient,
+        PROCESS_LOOPBACK_MODE_INCLUDE_TARGET_PROCESS_TREE, VIRTUAL_AUDIO_DEVICE_PROCESS_LOOPBACK,
+        WAVEFORMATEX,
     };
-    use windows::Win32::System::Com::{
-        CLSCTX_ALL, COINIT_MULTITHREADED, CoCreateInstance, CoInitializeEx, CoTaskMemFree,
+    use windows::Win32::System::Com::StructuredStorage::{
+        PROPVARIANT, PROPVARIANT_0, PROPVARIANT_0_0, PROPVARIANT_0_0_0,
     };
+    use windows::Win32::System::Com::{BLOB, COINIT_MULTITHREADED, CoInitializeEx};
+    use windows::Win32::System::Diagnostics::ToolHelp::{
+        CreateToolhelp32Snapshot, PROCESSENTRY32W, Process32FirstW, Process32NextW,
+        TH32CS_SNAPPROCESS,
+    };
+    use windows::Win32::System::Threading::{CreateEventW, WaitForSingleObject};
+    use windows::Win32::System::Variant::VT_BLOB;
+    use windows::core::{IUnknown, Interface, Ref, implement};
 
     type Erreur = Box<dyn std::error::Error>;
 
-    /// Écoute le son ; en cas d'erreur (casque débranché…), recommence un peu plus tard.
-    pub fn boucle(garder_ms: u64) {
+    /// Le son demandé à Windows : PCM 16 bits stéréo à 48 kHz (il convertit lui-même).
+    const TAUX: u32 = 48_000;
+
+    /// Attend SF6, écoute son son tant qu'il tourne, et recommence.
+    pub fn boucle(processus: String, garder_ms: u64) {
         unsafe {
             let _ = CoInitializeEx(None, COINIT_MULTITHREADED);
         }
         let mut prevenu = false;
         loop {
-            if let Err(e) = ecouter(garder_ms)
-                && !prevenu
-            {
-                eprintln!("Son : impossible d'écouter le son de Windows ({e}). Vidéos sans son.");
-                prevenu = true;
+            if let Some(pid) = trouver_processus(&processus) {
+                match ecouter(pid, &processus, garder_ms) {
+                    Ok(()) => prevenu = false,
+                    Err(e) if !prevenu => {
+                        eprintln!(
+                            "Son : impossible d'écouter le son de SF6 ({e}). Vidéos sans son \
+                             (il faut Windows 10 version 2004 ou plus récent)."
+                        );
+                        prevenu = true;
+                    }
+                    Err(_) => {}
+                }
             }
             if let Ok(mut son) = SON.lock() {
                 *son = None;
@@ -195,61 +221,138 @@ mod wasapi {
         }
     }
 
-    /// Comment lire les échantillons donnés par Windows.
-    #[derive(Clone, Copy)]
-    enum Format {
-        Flottant,
-        Entier16,
+    /// Le numéro du processus de SF6 (`processus` dans capture.toml).
+    fn trouver_processus(nom: &str) -> Option<u32> {
+        unsafe {
+            let liste = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0).ok()?;
+            let mut entree = PROCESSENTRY32W {
+                dwSize: std::mem::size_of::<PROCESSENTRY32W>() as u32,
+                ..Default::default()
+            };
+            let mut trouve = None;
+            let mut suite = Process32FirstW(liste, &mut entree).is_ok();
+            while suite {
+                let longueur = entree
+                    .szExeFile
+                    .iter()
+                    .position(|&c| c == 0)
+                    .unwrap_or(entree.szExeFile.len());
+                let exe = String::from_utf16_lossy(&entree.szExeFile[..longueur]);
+                if exe.eq_ignore_ascii_case(nom) {
+                    trouve = Some(entree.th32ProcessID);
+                    break;
+                }
+                suite = Process32NextW(liste, &mut entree).is_ok();
+            }
+            let _ = CloseHandle(liste);
+            trouve
+        }
     }
 
-    fn ecouter(garder_ms: u64) -> Result<(), Erreur> {
+    /// Prévient quand Windows a fini de préparer l'écoute.
+    #[implement(IActivateAudioInterfaceCompletionHandler)]
+    struct Fini(Mutex<Option<mpsc::Sender<()>>>);
+
+    impl IActivateAudioInterfaceCompletionHandler_Impl for Fini_Impl {
+        fn ActivateCompleted(
+            &self,
+            _operation: Ref<IActivateAudioInterfaceAsyncOperation>,
+        ) -> windows::core::Result<()> {
+            if let Ok(mut envoi) = self.0.lock()
+                && let Some(envoi) = envoi.take()
+            {
+                let _ = envoi.send(());
+            }
+            Ok(())
+        }
+    }
+
+    /// Un client audio qui n'entend que le processus `pid` (et ceux qu'il lance).
+    fn client_du_processus(pid: u32) -> Result<IAudioClient, Erreur> {
         unsafe {
-            let appareils: IMMDeviceEnumerator =
-                CoCreateInstance(&MMDeviceEnumerator, None, CLSCTX_ALL)?;
-            let sortie = appareils.GetDefaultAudioEndpoint(eRender, eConsole)?;
-            let client: IAudioClient = sortie.Activate(CLSCTX_ALL, None)?;
-            let melange = client.GetMixFormat()?;
+            let mut params = AUDIOCLIENT_ACTIVATION_PARAMS {
+                ActivationType: AUDIOCLIENT_ACTIVATION_TYPE_PROCESS_LOOPBACK,
+                Anonymous: AUDIOCLIENT_ACTIVATION_PARAMS_0 {
+                    ProcessLoopbackParams: AUDIOCLIENT_PROCESS_LOOPBACK_PARAMS {
+                        TargetProcessId: pid,
+                        ProcessLoopbackMode: PROCESS_LOOPBACK_MODE_INCLUDE_TARGET_PROCESS_TREE,
+                    },
+                },
+            };
+            // Les paramètres passent dans un PROPVARIANT de type BLOB qui pointe dessus
+            // (pas de PropVariantClear : la mémoire est à nous).
+            let variante = std::mem::ManuallyDrop::new(PROPVARIANT {
+                Anonymous: PROPVARIANT_0 {
+                    Anonymous: std::mem::ManuallyDrop::new(PROPVARIANT_0_0 {
+                        vt: VT_BLOB,
+                        wReserved1: 0,
+                        wReserved2: 0,
+                        wReserved3: 0,
+                        Anonymous: PROPVARIANT_0_0_0 {
+                            blob: BLOB {
+                                cbSize: std::mem::size_of::<AUDIOCLIENT_ACTIVATION_PARAMS>() as u32,
+                                pBlobData: &mut params as *mut _ as *mut u8,
+                            },
+                        },
+                    }),
+                },
+            });
+            let (envoi, reception) = mpsc::channel();
+            let fini: IActivateAudioInterfaceCompletionHandler =
+                Fini(Mutex::new(Some(envoi))).into();
+            let operation = ActivateAudioInterfaceAsync(
+                VIRTUAL_AUDIO_DEVICE_PROCESS_LOOPBACK,
+                &IAudioClient::IID,
+                Some(&*variante as *const PROPVARIANT),
+                &fini,
+            )?;
+            reception
+                .recv_timeout(Duration::from_secs(5))
+                .map_err(|_| "Windows ne répond pas")?;
+            let mut resultat = windows::core::HRESULT(0);
+            let mut interface: Option<IUnknown> = None;
+            operation.GetActivateResult(&mut resultat, &mut interface)?;
+            resultat.ok()?;
+            Ok(interface.ok_or("pas de client audio")?.cast()?)
+        }
+    }
+
+    fn ecouter(pid: u32, processus: &str, garder_ms: u64) -> Result<(), Erreur> {
+        unsafe {
+            let client = client_du_processus(pid)?;
+            let format = WAVEFORMATEX {
+                wFormatTag: 1, // PCM
+                nChannels: 2,
+                nSamplesPerSec: TAUX,
+                nAvgBytesPerSec: TAUX * 4,
+                nBlockAlign: 4,
+                wBitsPerSample: 16,
+                cbSize: 0,
+            };
+            client.Initialize(
+                AUDCLNT_SHAREMODE_SHARED,
+                AUDCLNT_STREAMFLAGS_LOOPBACK
+                    | AUDCLNT_STREAMFLAGS_EVENTCALLBACK
+                    | AUDCLNT_STREAMFLAGS_AUTOCONVERTPCM
+                    | AUDCLNT_STREAMFLAGS_SRC_DEFAULT_QUALITY,
+                2_000_000, // 200 ms de tampon côté Windows
+                0,
+                &format,
+                None,
+            )?;
+            let evenement: HANDLE = CreateEventW(None, false, false, None)?;
             let resultat = (|| -> Result<(), Erreur> {
-                // Structures « packed » : on copie chaque champ avant de s'en servir.
-                let fmt: WAVEFORMATEX = std::ptr::read_unaligned(melange);
-                let (canaux, bits, taux, tag) = (
-                    fmt.nChannels,
-                    fmt.wBitsPerSample,
-                    fmt.nSamplesPerSec,
-                    fmt.wFormatTag,
-                );
-                let canaux = usize::from(canaux.max(1));
-                let tag = if tag == 0xFFFE {
-                    // WAVE_FORMAT_EXTENSIBLE : le vrai format est dans SubFormat.
-                    let ext = std::ptr::read_unaligned(melange as *const WAVEFORMATEXTENSIBLE);
-                    let sous_format = ext.SubFormat;
-                    sous_format.data1 as u16
-                } else {
-                    tag
-                };
-                let format = match (tag, bits) {
-                    (3, 32) => Format::Flottant,
-                    (1, 16) => Format::Entier16,
-                    _ => return Err(format!("format du son non géré ({tag}, {bits} bits)").into()),
-                };
-                // 200 ms de tampon côté Windows.
-                client.Initialize(
-                    AUDCLNT_SHAREMODE_SHARED,
-                    AUDCLNT_STREAMFLAGS_LOOPBACK,
-                    2_000_000,
-                    0,
-                    melange,
-                    None,
-                )?;
+                client.SetEventHandle(evenement)?;
                 let lecture: IAudioCaptureClient = client.GetService()?;
                 if let Ok(mut son) = SON.lock() {
-                    *son = Some(TamponSon::new(taux, garder_ms));
+                    *son = Some(TamponSon::new(TAUX, garder_ms));
                 }
                 client.Start()?;
-                println!("Son : écoute du son de Windows ({taux} Hz) pour les vidéos.");
+                println!("Son : écoute du son de SF6 seulement, pour les vidéos.");
                 let mut trames: Vec<[i16; 2]> = Vec::new();
+                let mut verifie = Instant::now();
                 loop {
-                    std::thread::sleep(Duration::from_millis(10));
+                    let _ = WaitForSingleObject(evenement, 20);
                     while lecture.GetNextPacketSize()? > 0 {
                         let mut donnees = std::ptr::null_mut();
                         let mut nombre = 0u32;
@@ -262,23 +365,30 @@ mod wasapi {
                             None,
                             Some(&mut heure),
                         )?;
-                        trames.clear();
                         let n = nombre as usize;
+                        trames.clear();
                         if drapeaux & (AUDCLNT_BUFFERFLAGS_SILENT.0 as u32) != 0
                             || donnees.is_null()
                         {
                             trames.resize(n, [0, 0]);
                         } else {
-                            convertir(donnees, n, canaux, format, &mut trames);
+                            let e = std::slice::from_raw_parts(donnees as *const i16, n * 2);
+                            trames.extend(e.chunks_exact(2).map(|t| [t[0], t[1]]));
                         }
                         lecture.ReleaseBuffer(nombre)?;
+                        // Heure de la 1re trame ; si Windows ne la donne pas, on la déduit.
+                        let heure = if heure > 0 {
+                            heure as i64
+                        } else {
+                            crate::horloge::maintenant() - (n as i64 * 10_000_000 / i64::from(TAUX))
+                        };
                         if let Ok(mut son) = SON.lock()
                             && let Some(son) = son.as_mut()
                         {
-                            son.ajouter(heure as i64, &trames);
+                            son.ajouter(heure, &trames);
                         }
                     }
-                    // Rien ne joue : Windows n'envoie rien, on comble avec du silence
+                    // SF6 silencieux : Windows n'envoie rien, on comble avec du silence
                     // (sauf les 50 dernières ms, qui peuvent encore arriver).
                     let maintenant = crate::horloge::maintenant();
                     if let Ok(mut son) = SON.lock()
@@ -286,34 +396,19 @@ mod wasapi {
                     {
                         son.silence_jusqua(maintenant - 500_000);
                     }
+                    // SF6 fermé (ou relancé) : on arrête, la boucle le cherchera à nouveau.
+                    if verifie.elapsed() > Duration::from_secs(3) {
+                        verifie = Instant::now();
+                        if trouver_processus(processus) != Some(pid) {
+                            println!("Son : SF6 fermé.");
+                            return Ok(());
+                        }
+                    }
                 }
             })();
-            CoTaskMemFree(Some(melange as *const _));
+            let _ = client.Stop();
+            let _ = CloseHandle(evenement);
             resultat
-        }
-    }
-
-    /// Les échantillons de Windows (N canaux) en trames stéréo 16 bits.
-    unsafe fn convertir(
-        donnees: *const u8,
-        n: usize,
-        canaux: usize,
-        format: Format,
-        trames: &mut Vec<[i16; 2]>,
-    ) {
-        let droite = if canaux > 1 { 1 } else { 0 };
-        match format {
-            Format::Flottant => {
-                let e = unsafe { std::slice::from_raw_parts(donnees as *const f32, n * canaux) };
-                trames.extend(
-                    e.chunks_exact(canaux)
-                        .map(|t| [vers_i16(t[0]), vers_i16(t[droite])]),
-                );
-            }
-            Format::Entier16 => {
-                let e = unsafe { std::slice::from_raw_parts(donnees as *const i16, n * canaux) };
-                trames.extend(e.chunks_exact(canaux).map(|t| [t[0], t[droite]]));
-            }
         }
     }
 }
@@ -377,12 +472,5 @@ mod tests {
         assert_eq!(suivant, 402);
         assert_eq!(&octets[..8], &[0; 8]);
         assert_eq!(&octets[8..10], &40i16.to_le_bytes());
-    }
-
-    #[test]
-    fn conversion_des_flottants() {
-        assert_eq!(vers_i16(0.0), 0);
-        assert_eq!(vers_i16(1.0), 32767);
-        assert_eq!(vers_i16(-2.0), -32767);
     }
 }

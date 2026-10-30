@@ -45,7 +45,7 @@ dossier = "clips"
 avant_ms = 700
 # Combien de temps on filme encore après la dernière étape, en millisecondes.
 apres_ms = 1500
-# Le son du jeu dans les vidéos (ce qui sort des haut-parleurs de Windows).
+# Le son du jeu dans les vidéos (seulement celui de SF6, pas le reste de Windows).
 son = true
 # Qualité de la vidéo, en mégabits par seconde (20 = très bon en 1080p).
 debit_mbps = 20
@@ -244,7 +244,7 @@ pub fn lancer(config: Config, personnage: &str, combo: &str, inputs: &str) -> Ca
         let (envoi, reception) = std::sync::mpsc::channel();
         let enregistre = config.enregistrer;
         if config.son {
-            crate::audio_jeu::demarrer(config.avant_ms);
+            crate::audio_jeu::demarrer(&config.processus, config.avant_ms);
         }
         std::thread::spawn(move || capture_windows::boucle(config, reception));
         let mut capture = Capture::new(Some(envoi), personnage, combo, inputs);

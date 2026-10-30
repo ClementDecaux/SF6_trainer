@@ -23,7 +23,9 @@ windows-sys = { version = "0.61", features = ["Win32_Foundation", "Win32_Media",
 windows-capture = "2.0"
 # Lecture des vidéos dans l'interface (décodage par Media Foundation, inclus dans Windows),
 # et écoute du son du jeu pour les vidéos (WASAPI).
-windows = { version = "0.62", features = ["Win32_Media_Audio", "Win32_Media_MediaFoundation", "Win32_System_Com", "Win32_System_Com_StructuredStorage", "Win32_System_Variant"] }
+windows = { version = "0.62", features = ["Win32_Media_Audio", "Win32_Media_MediaFoundation", "Win32_Security", "Win32_System_Com", "Win32_System_Com_StructuredStorage", "Win32_System_Diagnostics_ToolHelp", "Win32_System_Threading", "Win32_System_Variant"] }
+# Pour écrire en Rust un objet COM appelé par Windows (fin de préparation de l'écoute du son).
+windows-core = "0.62"
 
 # Hors Windows (Linux, pour développer) : la manette est lue par gilrs.
 [target.'cfg(not(windows))'.dependencies]

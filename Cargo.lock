@@ -2402,6 +2402,7 @@ dependencies = [
  "toml",
  "windows",
  "windows-capture",
+ "windows-core",
  "windows-sys 0.61.2",
 ]
 
