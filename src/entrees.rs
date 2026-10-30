@@ -158,11 +158,12 @@ pub fn boucle(
                 }
                 derniers_appuis.insert(action, frame_appui);
                 // On affiche la lecture attendue par le trial si elle y est, sinon la première.
-                let coup = candidats
-                    .iter()
-                    .find(|c| trial.accepte(c, trial.attendu()))
-                    .unwrap_or(&candidats[0])
-                    .clone();
+                // Le bouton Drive Parry utilisé pour un Drive Rush attendu s'affiche « DR ».
+                let coup = match candidats.iter().find(|c| trial.accepte(c, trial.attendu())) {
+                    Some(c) if c == "DP" && trial.attendu() == "DR" => "DR".to_string(),
+                    Some(c) => c.clone(),
+                    None => candidats[0].clone(),
+                };
                 // Un nouvel essai commence : le verdict du précédent ne peut plus attendre.
                 let nouvel_essai = trial.index == 0
                     && candidats
