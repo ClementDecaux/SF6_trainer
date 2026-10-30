@@ -6,7 +6,7 @@
 use crate::affichage::{self, Etat};
 use crate::capture::Capture;
 use crate::clavier::Touche;
-use crate::combo::{Resultat, Trial, correspond};
+use crate::combo::{Resultat, Trial};
 use crate::controles::{Action, Controles};
 use crate::ecran::{self, Appui, EntreeJeu};
 use crate::horloge;
@@ -160,14 +160,14 @@ pub fn boucle(
                 // On affiche la lecture attendue par le trial si elle y est, sinon la première.
                 let coup = candidats
                     .iter()
-                    .find(|c| correspond(c, trial.attendu()))
+                    .find(|c| trial.accepte(c, trial.attendu()))
                     .unwrap_or(&candidats[0])
                     .clone();
                 // Un nouvel essai commence : le verdict du précédent ne peut plus attendre.
                 let nouvel_essai = trial.index == 0
                     && candidats
                         .iter()
-                        .any(|c| correspond(c, &trial.etapes[0].notation));
+                        .any(|c| trial.accepte(c, &trial.etapes[0].notation));
                 if nouvel_essai && let Some(fin) = juge.forcer() {
                     a_confirmer = Some(conclure(&trial, &mut capture, fin, frame, &partage));
                 }

@@ -256,7 +256,7 @@ impl Trial {
             return Resultat::Ignore;
         }
 
-        if candidats.iter().any(|c| correspond(c, self.attendu())) {
+        if candidats.iter().any(|c| self.accepte(c, self.attendu())) {
             if self.index == 0 {
                 self.nouvel_essai();
             } else {
@@ -304,12 +304,24 @@ impl Trial {
         let attendu = self.attendu().to_string();
         self.index = 0;
         // Ce coup raté est peut-être le début d'un nouvel essai.
-        if candidats.iter().any(|c| correspond(c, self.attendu())) {
+        if candidats.iter().any(|c| self.accepte(c, self.attendu())) {
             self.nouvel_essai();
             self.index = 1;
             self.derniere_frame = frame;
         }
         Resultat::Rate { attendu }
+    }
+
+    /// Ce coup valide-t-il l'étape `attendu` ? Quand les hits sont vérifiés dans le jeu
+    /// (`hits` connu), la direction d'un coup normal ne compte pas : 5MK ou 6MK au lieu de
+    /// 4MK peut sortir le même coup (pas de 6MK chez ce perso) ou passer quand même. Si ça ne
+    /// touche pas, le compteur de hits le dira.
+    pub fn accepte(&self, coup: &str, attendu: &str) -> bool {
+        correspond(coup, attendu)
+            || (self.hits.is_some()
+                && normal(coup)
+                && normal(attendu)
+                && bouton(coup) == bouton(attendu))
     }
 
     /// À appeler régulièrement : remet à zéro si on a trop attendu. Renvoie vrai si c'est le cas.
@@ -326,6 +338,12 @@ impl Trial {
 /// annulable, MP+MK (le bouton Drive Parry) lance un Drive Rush, comme 66.
 pub fn correspond(coup: &str, attendu: &str) -> bool {
     coup == attendu || (attendu == "DR" && coup == "DP")
+}
+
+/// Un coup normal : une direction et un bouton (« 4MK »), pas un mouvement spécial.
+fn normal(notation: &str) -> bool {
+    let chiffres = notation.chars().take_while(|c| c.is_ascii_digit()).count();
+    chiffres == 1 && notation.len() > 1
 }
 
 /// Le bouton d'une notation, sans la direction ni le mouvement : « 236MK » -> « MK ».
@@ -349,6 +367,23 @@ mod tests {
         assert_eq!(t.coup(&c("5MP"), 12), Resultat::Ignore);
         assert_eq!(t.coup(&c("DP"), 13), Resultat::Avance);
         assert_eq!(t.coup(&c("4MK"), 30), Resultat::Reussi);
+    }
+
+    #[test]
+    fn direction_libre_si_les_hits_sont_verifies() {
+        let mut t = Trial::new("test", parser("4HP xx 4MK xx 236MK").unwrap());
+        assert_eq!(t.coup(&c("4HP"), 10), Resultat::Avance);
+        // Sans vérification des hits : 6MK n'est pas 4MK.
+        assert!(matches!(t.coup(&c("6MK"), 20), Resultat::Rate { .. }));
+        t.hits = Some(3);
+        assert_eq!(t.coup(&c("4HP"), 30), Resultat::Avance);
+        assert_eq!(
+            t.coup(&["41236MK".to_string(), "6MK".to_string()], 40),
+            Resultat::Avance
+        );
+        // Un mouvement spécial doit toujours être fait.
+        assert!(!t.accepte("2MK", "236MK"));
+        assert!(t.accepte("5MK", "4MK"));
     }
 
     #[test]
