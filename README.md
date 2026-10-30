@@ -136,6 +136,10 @@ Il garde toujours en mémoire les dernières images du jeu (`avant_ms`, 0,7 s pa
 commence donc un peu avant la 1re étape. Elle est jetée si le combo est raté, et gardée dans
 `clips/` s'il est réussi. Un seul exemplaire par combo : la dernière réussite remplace la
 vidéo précédente. L'overlay n'apparaît pas dans la vidéo.
+Le son du jeu est dans la vidéo : l'outil écoute ce qui sort des haut-parleurs de Windows
+(`son = true` dans `capture.toml`, `false` pour des vidéos muettes) et le cale sur les images,
+y compris celles filmées avant la 1re étape. Attention : tout le son de Windows est pris
+(musique, Discord…), pas seulement celui de SF6.
 Les vidéos ont un nom de taille fixe (16 caractères, ex. `3f9a0c41d27be865.mp4`) : l'empreinte
 du personnage et du nom du combo. L'outil retrouve le combo d'une vidéo en recalculant
 l'empreinte des combos de `combos.toml`.

@@ -45,6 +45,8 @@ dossier = "clips"
 avant_ms = 700
 # Combien de temps on filme encore après la dernière étape, en millisecondes.
 apres_ms = 1500
+# Le son du jeu dans les vidéos (ce qui sort des haut-parleurs de Windows).
+son = true
 # Qualité de la vidéo, en mégabits par seconde (20 = très bon en 1080p).
 debit_mbps = 20
 # Au-delà de cette durée (en secondes), on arrête de filmer et on jette la vidéo.
@@ -70,6 +72,9 @@ pub struct Config {
     #[serde(default = "avant_ms_par_defaut")]
     pub avant_ms: u64,
     pub apres_ms: u64,
+    /// Absent des anciens fichiers : `true`.
+    #[serde(default = "vrai")]
+    pub son: bool,
     pub debit_mbps: u32,
     pub duree_max_s: u64,
 }
@@ -238,6 +243,9 @@ pub fn lancer(config: Config, personnage: &str, combo: &str, inputs: &str) -> Ca
     {
         let (envoi, reception) = std::sync::mpsc::channel();
         let enregistre = config.enregistrer;
+        if config.son {
+            crate::audio_jeu::demarrer(config.avant_ms);
+        }
         std::thread::spawn(move || capture_windows::boucle(config, reception));
         let mut capture = Capture::new(Some(envoi), personnage, combo, inputs);
         capture.enregistre = enregistre;
@@ -250,8 +258,8 @@ pub fn lancer(config: Config, personnage: &str, combo: &str, inputs: &str) -> Ca
     }
 }
 
-/// Le nom des fichiers d'un clip, sans extension : « Dhalsim_Drive-Impact-Yoga-Flame ».
-/// Un seul clip par combo : le dernier réussi remplace le précédent.
+/// Le nom de la vidéo d'un clip, sans extension. Un seul clip par combo : le dernier
+/// réussi remplace le précédent.
 ///
 /// Toujours 16 caractères : l'empreinte (FNV-1a 64 bits, en hexadécimal) du personnage et du
 /// nom du combo. Une fonction de taille fixe ne peut pas être bijective (il y a plus de combos
@@ -604,6 +612,8 @@ mod capture_windows {
         chemin: PathBuf,
         largeur: u32,
         hauteur: u32,
+        /// Échantillons par seconde de la piste son (`None` : vidéo sans son).
+        taux: Option<u32>,
     }
 
     enum Etat {
@@ -617,6 +627,8 @@ mod capture_windows {
             debut: Instant,
             /// Heure de la 1re image de la vidéo (horloge de la capture).
             premier: i64,
+            /// La vidéo a une piste son, et la prochaine trame de son à lui envoyer.
+            son: Option<Option<u64>>,
             /// Combo réussi : quand arrêter, et ce qu'on écrira dans le `.json`.
             fin: Option<(Instant, Box<InfosClip>)>,
         },
@@ -664,15 +676,24 @@ mod capture_windows {
         fn arreter(&mut self) {
             let etat = std::mem::replace(&mut self.etat, Etat::Attente);
             let Etat::Filme {
-                encodeur,
+                mut encodeur,
                 chemin,
                 fin,
                 premier,
+                son,
                 ..
             } = etat
             else {
                 return;
             };
+            // Une piste son sans rien dedans peut bloquer la fin de l'encodage : un peu de
+            // silence au minimum.
+            if let Some(None) = son
+                && let Some(taux) = crate::audio_jeu::taux()
+            {
+                let silence = vec![0u8; (taux / 10 * 4) as usize];
+                let _ = encodeur.send_audio_buffer(&silence, 0);
+            }
             if let Err(e) = encodeur.finish() {
                 eprintln!("Vidéo : erreur à la fin de l'encodage ({e}).");
                 let _ = std::fs::remove_file(&chemin);
@@ -717,24 +738,44 @@ mod capture_windows {
                 .sub_type(VideoSettingsSubType::H264)
                 .frame_rate(60)
                 .bitrate(self.config.debit_mbps.saturating_mul(1_000_000));
-            let encodeur = VideoEncoder::new(
-                video,
-                AudioSettingsBuilder::default().disabled(true),
-                ContainerSettingsBuilder::default(),
-                &chemin,
-            )?;
+            let taux = self.taux_son();
+            let son = match taux {
+                Some(taux) => AudioSettingsBuilder::default()
+                    .sample_rate(taux)
+                    .channel_count(2)
+                    .bit_per_sample(16),
+                None => AudioSettingsBuilder::default().disabled(true),
+            };
+            let encodeur =
+                VideoEncoder::new(video, son, ContainerSettingsBuilder::default(), &chemin)?;
             Ok(Pret {
                 encodeur,
                 chemin,
                 largeur,
                 hauteur,
+                taux,
             })
+        }
+
+        /// Le son écouté, s'il est demandé et prêt.
+        fn taux_son(&self) -> Option<u32> {
+            if self.config.son {
+                crate::audio_jeu::taux()
+            } else {
+                None
+            }
         }
 
         /// Un encodeur à la bonne taille : celui préparé à l'avance, sinon un nouveau.
         fn prendre_encodeur(&mut self, largeur: u32, hauteur: u32) -> Result<Pret, Erreur> {
             match self.pret.take() {
-                Some(pret) if pret.largeur == largeur && pret.hauteur == hauteur => Ok(*pret),
+                Some(pret)
+                    if pret.largeur == largeur
+                        && pret.hauteur == hauteur
+                        && pret.taux == self.taux_son() =>
+                {
+                    Ok(*pret)
+                }
                 autre => {
                     if let Some(pret) = autre {
                         jeter(*pret);
@@ -781,6 +822,7 @@ mod capture_windows {
             let Pret {
                 mut encodeur,
                 chemin,
+                taux,
                 ..
             } = match self.prendre_encodeur(largeur, hauteur) {
                 Ok(pret) => pret,
@@ -805,13 +847,40 @@ mod capture_windows {
             if !image_actuelle_envoyee && let Err(e) = encodeur.send_frame(frame) {
                 eprintln!("Vidéo : image perdue ({e}).");
             }
+            let premier = premier.unwrap_or(temps);
+            // Le son commence à l'heure de la 1re image : il est calé dessus.
+            let mut son = taux.map(|_| crate::audio_jeu::numero(premier));
+            envoyer_son(&mut encodeur, &mut son, premier, temps);
             self.etat = Etat::Filme {
                 encodeur: Box::new(encodeur),
                 chemin,
                 debut: Instant::now(),
-                premier: premier.unwrap_or(temps),
+                premier,
+                son,
                 fin: None,
             };
+        }
+    }
+
+    /// Envoie à l'encodeur le son reçu depuis la dernière fois, jusqu'à l'heure `temps`.
+    fn envoyer_son(
+        encodeur: &mut VideoEncoder,
+        son: &mut Option<Option<u64>>,
+        premier: i64,
+        temps: i64,
+    ) {
+        let Some(curseur) = son else {
+            return;
+        };
+        let Some(depuis) = curseur.or_else(|| crate::audio_jeu::numero(premier)) else {
+            return;
+        };
+        let (octets, suivant) = crate::audio_jeu::lire(depuis, temps);
+        *curseur = Some(suivant);
+        if !octets.is_empty()
+            && let Err(e) = encodeur.send_audio_buffer(&octets, 0)
+        {
+            eprintln!("Vidéo : son perdu ({e}).");
         }
     }
 
@@ -906,11 +975,14 @@ mod capture_windows {
                     encodeur,
                     debut,
                     fin,
+                    premier,
+                    son,
                     ..
                 } => {
                     if let Err(e) = encodeur.send_frame(frame) {
                         eprintln!("Vidéo : image perdue ({e}).");
                     }
+                    envoyer_son(encodeur, son, *premier, temps);
                     terminer = match fin {
                         Some((quand, _)) => Instant::now() >= *quand,
                         // Rien de réussi depuis trop longtemps : on jette.

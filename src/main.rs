@@ -10,6 +10,7 @@
 //! Fichiers de config : `controles.toml`, `combos.toml`, `overlay.toml`, `capture.toml`.
 
 mod affichage;
+mod audio_jeu;
 mod capture;
 mod clavier;
 mod combo;

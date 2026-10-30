@@ -120,6 +120,11 @@ fn decoder(chemin: &Path, decodage: &Mutex<Decodage>) -> Result<(), String> {
         let url = HSTRING::from(chemin.as_os_str());
         let lecteur = MFCreateSourceReaderFromURL(&url, &attributs)
             .map_err(|e| erreur("ouverture de la vidéo", e))?;
+        // Seulement les images : la piste son (si la vidéo en a) n'est pas lue ici.
+        lecteur
+            .SetStreamSelection(MF_SOURCE_READER_ALL_STREAMS.0 as u32, false)
+            .and_then(|()| lecteur.SetStreamSelection(flux, true))
+            .map_err(|e| erreur("choix de la piste vidéo", e))?;
 
         let type_voulu = MFCreateMediaType().map_err(|e| erreur("type", e))?;
         type_voulu
