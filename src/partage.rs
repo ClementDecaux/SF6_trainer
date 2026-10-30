@@ -25,6 +25,8 @@ pub struct Ligne {
     pub debut: i64,
     /// Durée recalée sur l'historique du jeu (sinon : estimée avec notre horloge).
     pub exact: bool,
+    /// Le combo a cassé sur cette ligne (affichée en rouge).
+    pub cassee: bool,
 }
 
 /// Le dernier événement du trial, affiché quelques instants.
@@ -72,6 +74,8 @@ pub struct Partage {
     pub photo_demandee: bool,
     /// L'étape où le dernier essai a cassé (mauvais coup, hors timing ou coup qui n'a pas touché).
     pub etape_cassee: Option<usize>,
+    /// Un mauvais coup vient d'être fait : la prochaine ligne ajoutée est celle du break.
+    pub ligne_cassee_a_venir: bool,
 }
 
 impl Partage {
@@ -96,13 +100,32 @@ impl Partage {
             lignes_total: 0,
             photo_demandee: false,
             etape_cassee: None,
+            ligne_cassee_a_venir: false,
         }
     }
 
-    pub fn ajouter_ligne(&mut self, ligne: Ligne) {
+    pub fn ajouter_ligne(&mut self, mut ligne: Ligne) {
+        if std::mem::take(&mut self.ligne_cassee_a_venir) {
+            ligne.cassee = true;
+        }
         self.lignes.push_front(ligne);
         self.lignes_total += 1;
         self.lignes.truncate(LIGNES_MAX);
+    }
+
+    /// Marque en rouge la ligne de l'appui fait à `temps` (celle où le combo a cassé).
+    /// Si elle n'est pas encore dans l'historique (état encore tenu), ce sera la prochaine.
+    pub fn marquer_cassee(&mut self, temps: i64) {
+        // L'état d'un appui commence au plus tôt à sa frame : une frame de marge.
+        const MARGE: i64 = 166_667;
+        let ligne = self
+            .lignes
+            .iter_mut()
+            .find(|l| !l.coups.is_empty() && (l.debut - temps).abs() <= MARGE);
+        match ligne {
+            Some(ligne) => ligne.cassee = true,
+            None => self.ligne_cassee_a_venir = true,
+        }
     }
 
     pub fn message(&mut self, texte: String, reussi: bool) {

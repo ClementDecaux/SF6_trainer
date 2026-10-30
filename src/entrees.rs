@@ -215,6 +215,7 @@ pub fn boucle(
                             coups: coups.clone(),
                             debut: debut_temps,
                             exact: false,
+                            cassee: false,
                         });
                     }
                 }
@@ -470,6 +471,7 @@ fn resultat_trial(
                 ecarts: trial.ecarts.clone(),
                 erreurs: trial.erreurs_timing.clone(),
                 cassee: premiere_hors_timing(&trial.ecarts, trial.fenetres.as_deref()),
+                temps_cassee: None,
                 exact: false,
                 raison: None,
                 hits: None,
@@ -484,6 +486,8 @@ fn resultat_trial(
             println!("{}", affichage::trial(trial));
             p.message(format!("Raté : attendu {attendu}, reçu {coup}"), false);
             p.etape_cassee = Some(attendue);
+            // Le mauvais coup sera sur la prochaine ligne de l'historique.
+            p.ligne_cassee_a_venir = true;
         }
         Resultat::Ignore => {}
     }
@@ -507,6 +511,8 @@ struct Fin {
     erreurs: Vec<String>,
     /// L'étape où le combo a cassé (hors timing, ou après le dernier coup qui a touché).
     cassee: Option<usize>,
+    /// L'heure de l'appui de cette étape, pour la retrouver dans l'historique.
+    temps_cassee: Option<i64>,
     /// Écarts lus dans l'historique du jeu (sinon : estimés avec notre horloge).
     exact: bool,
     /// Pourquoi les écarts n'ont pas pu être lus dans le jeu.
@@ -576,6 +582,11 @@ fn conclure(
         } else {
             fin.cassee
         };
+        if !fin.erreurs.is_empty()
+            && let Some(temps) = fin.temps_cassee
+        {
+            p.marquer_cassee(temps);
+        }
         if fin.erreurs.is_empty() {
             p.reussites += 1;
             p.message(format!("COMBO RÉUSSI !{hits}"), true);
@@ -783,7 +794,10 @@ impl Juge {
 
     /// Le combo vient de finir. Si l'historique ou les dégâts du jeu sont lus, on attend
     /// leurs informations (`None`, le verdict viendra de `pret`). Sinon, verdict tout de suite.
-    fn finir(&mut self, fin: Fin, temps: i64, trial: &Trial) -> Option<Fin> {
+    fn finir(&mut self, mut fin: Fin, temps: i64, trial: &Trial) -> Option<Fin> {
+        if let Some(k) = fin.cassee {
+            fin.temps_cassee = self.etapes.get(k).map(|a| a.temps);
+        }
         let raison = if !self.visible {
             Some("historique du jeu pas visible")
         } else if self.etapes.len() != trial.etapes.len() {
@@ -888,6 +902,7 @@ impl Juge {
                     let (erreur, cassee) = self.lache(&attente, hits, attendus);
                     fin.erreurs = vec![erreur];
                     fin.cassee = Some(cassee);
+                    fin.temps_cassee = attente.appuis.get(cassee).map(|a| a.temps);
                 }
             }
         }
@@ -935,8 +950,10 @@ impl Juge {
                 }
             }
         }
+        let cassee = premiere_hors_timing(&ecarts, attente.fenetres.as_deref());
         Ok(Fin {
-            cassee: premiere_hors_timing(&ecarts, attente.fenetres.as_deref()),
+            cassee,
+            temps_cassee: cassee.and_then(|k| attente.appuis.get(k)).map(|a| a.temps),
             ecarts,
             erreurs,
             exact: true,

@@ -450,41 +450,62 @@ fn message(ui: &mut egui::Ui, p: &Partage) {
 /// L'historique d'inputs, le plus récent en haut comme dans SF6.
 fn historique(ui: &mut egui::Ui, lignes: &std::collections::VecDeque<Ligne>) {
     for ligne in lignes {
-        ui.horizontal(|ui| {
-            let duree = if ligne.frames > 99 {
-                "99+".to_string()
-            } else {
-                format!("{:>3}", ligne.frames)
-            };
-            // En cyan : durée du jeu. En gris : notre estimation (pas retrouvée dans le jeu).
-            let couleur = if ligne.exact { CYAN } else { GRIS };
-            ui.label(RichText::new(duree).color(couleur).size(16.0).monospace());
-
-            let couleur_dir = if ligne.direction == 5 {
-                GRIS
-            } else {
-                Color32::WHITE
-            };
-            dessiner_direction(ui, ligne.direction, couleur_dir);
-
-            for &(action, nouveau) in &ligne.boutons {
-                let mut texte = RichText::new(action.to_string())
-                    .color(couleur_bouton(action))
-                    .size(16.0);
-                // Appuyé à ce moment : en gras. Simplement tenu : plus pâle.
-                texte = if nouveau {
-                    texte.strong()
-                } else {
-                    texte.weak()
-                };
-                ui.label(texte);
-            }
-
-            for coup in &ligne.coups {
-                ui.label(RichText::new(format!("» {coup}")).color(JAUNE).size(16.0));
-            }
-        });
+        // Là où le combo a cassé : fond et contour rouges.
+        let (fond, bord) = if ligne.cassee {
+            (
+                Color32::from_rgba_unmultiplied(255, 60, 60, 70),
+                egui::Stroke::new(1.5, ROUGE),
+            )
+        } else {
+            (Color32::TRANSPARENT, egui::Stroke::NONE)
+        };
+        egui::Frame::new()
+            .fill(fond)
+            .stroke(bord)
+            .corner_radius(4)
+            .show(ui, |ui| ligne_historique(ui, ligne));
     }
+}
+
+/// Une ligne de l'historique : durée, direction, boutons et coups reconnus.
+fn ligne_historique(ui: &mut egui::Ui, ligne: &Ligne) {
+    ui.horizontal(|ui| {
+        let duree = if ligne.frames > 99 {
+            "99+".to_string()
+        } else {
+            format!("{:>3}", ligne.frames)
+        };
+        // En cyan : durée du jeu. En gris : notre estimation (pas retrouvée dans le jeu).
+        let couleur = if ligne.exact { CYAN } else { GRIS };
+        ui.label(RichText::new(duree).color(couleur).size(16.0).monospace());
+
+        let couleur_dir = if ligne.direction == 5 {
+            GRIS
+        } else {
+            Color32::WHITE
+        };
+        dessiner_direction(ui, ligne.direction, couleur_dir);
+
+        for &(action, nouveau) in &ligne.boutons {
+            let mut texte = RichText::new(action.to_string())
+                .color(couleur_bouton(action))
+                .size(16.0);
+            // Appuyé à ce moment : en gras. Simplement tenu : plus pâle.
+            texte = if nouveau {
+                texte.strong()
+            } else {
+                texte.weak()
+            };
+            ui.label(texte);
+        }
+
+        for coup in &ligne.coups {
+            ui.label(RichText::new(format!("» {coup}")).color(JAUNE).size(16.0));
+        }
+        if ligne.cassee {
+            ui.label(RichText::new("× break").color(ROUGE).size(14.0).strong());
+        }
+    });
 }
 
 /// Une flèche dans la direction numpad (un point pour le neutre).
