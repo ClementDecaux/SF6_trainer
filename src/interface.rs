@@ -82,6 +82,8 @@ pub struct Interface {
     titre_jeu: String,
     /// L'overlay est montré (pas caché parce que SF6 n'est pas au premier plan).
     overlay_montre: bool,
+    /// SF6 est la fenêtre active (vérifié à chaque image de l'interface).
+    jeu_actif: bool,
     /// Hits et dégâts tapés pour compléter un combo (nom du combo, hits, dégâts).
     saisie: (String, u32, u32),
 }
@@ -113,6 +115,7 @@ impl Interface {
             lecteur: None,
             titre_jeu: titre_jeu.to_string(),
             overlay_montre: true,
+            jeu_actif: false,
             saisie: (String::new(), 0, 0),
         }
     }
@@ -197,12 +200,19 @@ impl eframe::App for Interface {
 
     fn ui(&mut self, ui: &mut egui::Ui, _frame: &mut eframe::Frame) {
         let ctx = ui.ctx().clone();
-        let (visible, jeu_exige) = self.partage.lock().map_or((true, false), |p| {
-            (p.overlay_visible, p.seulement_jeu && !p.deplacement)
-        });
+        let (visible, jeu_exige, entrainement) =
+            self.partage.lock().map_or((true, false, true), |p| {
+                (
+                    p.overlay_visible,
+                    p.seulement_jeu && !p.deplacement,
+                    p.en_entrainement() || p.deplacement,
+                )
+            });
         self.fenetre_overlay(&ctx, visible);
-        // Caché (sans fermer la fenêtre) quand on n'est pas dans SF6.
-        let montrer = !jeu_exige || jeu_au_premier_plan(&self.titre_jeu);
+        // Caché (sans fermer la fenêtre) quand on n'est pas dans SF6, ou pas en mode
+        // entraînement.
+        self.jeu_actif = jeu_au_premier_plan(&self.titre_jeu);
+        let montrer = (!jeu_exige || self.jeu_actif) && entrainement;
         if visible && montrer != self.overlay_montre {
             ctx.send_viewport_cmd_to(overlay::id(), egui::ViewportCommand::Visible(montrer));
             self.overlay_montre = montrer;
@@ -235,6 +245,7 @@ impl eframe::App for Interface {
             }
         }
 
+        self.barre_statut(ui);
         egui::Panel::top("onglets").show(ui, |ui| {
             ui.add_space(4.0);
             ui.horizontal(|ui| {
@@ -518,6 +529,96 @@ impl Interface {
             ui.separator();
             self.videos_du_combo(ui, &combo.nom);
         });
+    }
+}
+
+// ---------------------------------------------------------------- Barre d'état
+
+impl Interface {
+    /// En bas de la fenêtre, sur tous les onglets : l'overlay est-il affiché, et ce qu'il
+    /// faut pour qu'il le soit (SF6 actif, mode entraînement reconnu à l'écran).
+    fn barre_statut(&self, ui: &mut egui::Ui) {
+        let Ok(p) = self.partage.lock() else {
+            return;
+        };
+        let jeu_exige = p.seulement_jeu && !p.deplacement;
+        let raison = if !p.overlay_visible {
+            Some("désactivé dans les réglages")
+        } else if p.deplacement {
+            None
+        } else if jeu_exige && !self.jeu_actif {
+            Some("SF6 n'est pas la fenêtre active")
+        } else if !p.en_entrainement() {
+            Some("pas en mode entraînement (ni replay)")
+        } else {
+            None
+        };
+        let lecture = p.lecture_ecran;
+        let (historique, degats, entrainement) =
+            (p.historique_jeu, p.degats_visibles, p.ecran_entrainement);
+        drop(p);
+        egui::Panel::bottom("statut").show(ui, |ui| {
+            ui.add_space(3.0);
+            ui.horizontal_wrapped(|ui| {
+                let point = |ui: &mut egui::Ui, couleur: Color32, texte: &str| {
+                    ui.label(RichText::new("•").color(couleur).strong());
+                    ui.label(RichText::new(texte).color(couleur));
+                    ui.add_space(10.0);
+                };
+                match raison {
+                    None => point(ui, VERT, "Overlay affiché"),
+                    Some(r) => point(ui, JAUNE, &format!("Overlay caché : {r}")),
+                }
+                ui.separator();
+                let ok = |b: bool| if b { VERT } else { GRIS };
+                point(
+                    ui,
+                    ok(self.jeu_actif),
+                    if self.jeu_actif {
+                        "SF6 actif"
+                    } else {
+                        "SF6 pas actif"
+                    },
+                );
+                if lecture {
+                    point(
+                        ui,
+                        ok(historique),
+                        if historique {
+                            "historique d'inputs lu"
+                        } else {
+                            "historique d'inputs pas visible"
+                        },
+                    );
+                    point(
+                        ui,
+                        ok(degats),
+                        if degats {
+                            "infos de dégâts lues"
+                        } else {
+                            "infos de dégâts pas visibles"
+                        },
+                    );
+                    point(
+                        ui,
+                        ok(entrainement),
+                        if entrainement {
+                            "mode entraînement reconnu"
+                        } else {
+                            "mode entraînement pas reconnu"
+                        },
+                    );
+                } else {
+                    point(
+                        ui,
+                        GRIS,
+                        "écran du jeu pas lu (capture.toml) : mode entraînement pas vérifié",
+                    );
+                }
+            });
+        });
+        ui.ctx()
+            .request_repaint_after(std::time::Duration::from_millis(500));
     }
 }
 
@@ -1069,6 +1170,23 @@ impl Interface {
             ecrire_cles(
                 "overlay.toml",
                 &[("seulement_jeu", p.seulement_jeu.to_string())],
+            );
+        }
+        if ui
+            .checkbox(
+                &mut p.seulement_entrainement,
+                "Seulement en mode entraînement ou en replay (historique d'inputs ou infos de \
+                 dégâts à l'écran) : ni en ligne, ni dans les menus. Les coups ne sont suivis \
+                 que là.",
+            )
+            .changed()
+        {
+            ecrire_cles(
+                "overlay.toml",
+                &[(
+                    "seulement_entrainement",
+                    p.seulement_entrainement.to_string(),
+                )],
             );
         }
         ui.checkbox(

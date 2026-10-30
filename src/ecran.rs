@@ -687,6 +687,15 @@ pub fn historique_visible(maintenant: i64) -> bool {
     derniere > 0 && maintenant - derniere < 10_000_000
 }
 
+/// L'historique d'inputs ou le panneau des dégâts a été lu dans les `secondes` dernières
+/// secondes : SF6 est en mode entraînement (ou dans un replay), pas en ligne ni dans un menu.
+pub fn ecran_entrainement(maintenant: i64, secondes: i64) -> bool {
+    let derniere = DERNIERE_LECTURE
+        .load(Ordering::Relaxed)
+        .max(DEGATS_LUS.load(Ordering::Relaxed));
+    derniere > 0 && maintenant - derniere < secondes * 10_000_000
+}
+
 /// Les lignes du journal apparues depuis `temps` (pour le `.json` d'une vidéo).
 pub fn entrees_depuis(temps: i64) -> Vec<EntreeJeu> {
     let Ok(journal) = JOURNAL.lock() else {

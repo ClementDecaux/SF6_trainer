@@ -116,11 +116,25 @@ pub struct Partage {
     pub syntaxe: crate::syntaxe::Syntaxe,
     /// L'overlay n'apparaît que quand SF6 est la fenêtre active.
     pub seulement_jeu: bool,
+    /// L'overlay et le suivi des coups seulement en mode entraînement (ou replay).
+    pub seulement_entrainement: bool,
+    /// L'écran du jeu est lu (capture et historique activés) : le mode entraînement peut
+    /// être reconnu. Sinon, on fait comme si on y était.
+    pub lecture_ecran: bool,
+    /// L'historique d'inputs ou les infos de dégâts de SF6 sont à l'écran (vus il y a
+    /// moins de 3 s) : on est en mode entraînement, ou dans un replay.
+    pub ecran_entrainement: bool,
     /// Affichage des liaisons (cancel / link).
     pub liaisons: crate::syntaxe::StyleLiaison,
 }
 
 impl Partage {
+    /// Le trial suit les coups, et l'overlay peut s'afficher : on est en mode entraînement
+    /// (ou dans un replay), ou bien on ne cherche pas à le savoir.
+    pub fn en_entrainement(&self) -> bool {
+        !self.seulement_entrainement || !self.lecture_ecran || self.ecran_entrainement
+    }
+
     pub fn new(nom: &str, etapes: Vec<Etape>) -> Partage {
         Partage {
             nom: nom.to_string(),
@@ -159,6 +173,9 @@ impl Partage {
             hits_attendus: None,
             syntaxe: crate::syntaxe::Syntaxe::default(),
             seulement_jeu: true,
+            seulement_entrainement: true,
+            lecture_ecran: false,
+            ecran_entrainement: false,
             liaisons: crate::syntaxe::StyleLiaison::default(),
         }
     }

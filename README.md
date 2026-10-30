@@ -62,7 +62,11 @@ l'overlay, elles ont une colonne de largeur fixe : les coups sont alignés.
 
 Le bouton en haut à droite cache ou réaffiche l'overlay. L'overlay n'apparaît que quand SF6
 est la fenêtre active (sauf en mode déplacement F8) ; décochable dans les réglages
-(`seulement_jeu` dans `overlay.toml`). Fermer l'interface ferme l'outil.
+(`seulement_jeu` dans `overlay.toml`). Il n'apparaît aussi qu'en mode entraînement ou dans
+un replay : l'outil le reconnaît quand l'historique d'inputs ou les infos de dégâts de SF6 sont
+à l'écran (vus il y a moins de 3 s). En ligne, dans les menus ou en pause, l'overlay est caché
+et les coups ne sont pas suivis (`seulement_entrainement` dans `overlay.toml`). La barre en bas
+de l'interface montre l'état de chaque condition. Fermer l'interface ferme l'outil.
 
 ## Fichiers de config
 

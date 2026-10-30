@@ -56,6 +56,7 @@ fn lancer() -> Result<(), String> {
     let config_capture = capture::charger()?;
     let (dossier_clips, avant_ms) = (config_capture.dossier.clone(), config_capture.avant_ms);
     let titre_jeu = config_capture.fenetre.clone();
+    let lecture_ecran = cfg!(windows) && config_capture.actif && config_capture.historique;
     let capture = capture::lancer(config_capture, &personnage, &trial.nom, &inputs);
 
     let mut etat = Partage::new(&trial.nom, trial.etapes.clone());
@@ -65,6 +66,8 @@ fn lancer() -> Result<(), String> {
     etat.entrainement = entrainement::charger();
     etat.syntaxe = config.syntaxe;
     etat.seulement_jeu = config.seulement_jeu;
+    etat.seulement_entrainement = config.seulement_entrainement;
+    etat.lecture_ecran = lecture_ecran;
     etat.liaisons = config.liaisons;
     etat.enregistrement = capture.enregistre;
     let partage = Arc::new(Mutex::new(etat));

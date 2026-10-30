@@ -37,6 +37,10 @@ son = true
 syntaxe = "sf6"
 # true = l'overlay n'apparaît que quand SF6 est la fenêtre active.
 seulement_jeu = true
+# true = l'overlay n'apparaît qu'en mode entraînement (ou dans un replay) : quand
+# l'historique d'inputs ou les infos de dégâts de SF6 sont à l'écran. Pas en ligne, pas
+# dans les menus. Les coups ne sont pas non plus suivis ailleurs.
+seulement_entrainement = true
 # Liaisons entre les coups : "pastilles" (CANCEL / LINK), "mots", "symboles" (xx ,),
 # "courts" (> ,) ou "aucune".
 liaisons = "pastilles"
@@ -64,6 +68,9 @@ pub struct Config {
     /// L'overlay n'apparaît que quand SF6 est la fenêtre active. Par défaut : oui.
     #[serde(default = "vrai")]
     pub seulement_jeu: bool,
+    /// L'overlay (et le suivi des coups) seulement en mode entraînement. Par défaut : oui.
+    #[serde(default = "vrai")]
+    pub seulement_entrainement: bool,
     /// Affichage des liaisons (cancel / link).
     #[serde(default)]
     pub liaisons: crate::syntaxe::StyleLiaison,

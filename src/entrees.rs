@@ -77,6 +77,7 @@ pub fn boucle(
     let mut f9 = Touche::f9();
     let mut f10 = Touche::f10();
     let mut juge = Juge::default();
+    let mut ecran_entrainement = false;
 
     // Le jeu ne lit la manette qu'une fois par frame. On fait pareil : les appuis et les
     // changements d'une frame sont gardés, et traités ensemble quand la frame se termine,
@@ -126,6 +127,7 @@ pub fn boucle(
                 if let Some(dash) = dash
                     && trial.attendu() == "DR"
                     && !juge.source_jeu()
+                    && partage.lock().is_ok_and(|p| p.en_entrainement())
                 {
                     let fin = resultat_trial(
                         &mut trial,
@@ -364,6 +366,27 @@ pub fn boucle(
         if f10.appuyee() {
             capture.photo();
         }
+        // Mode entraînement (ou replay) reconnu à l'écran : l'historique d'inputs ou les
+        // infos de dégâts de SF6 sont visibles. 3 s de marge : un effet du jeu (Drive Rush,
+        // super) peut les cacher un instant.
+        let vu = ecran::ecran_entrainement(temps, 3);
+        if vu != ecran_entrainement
+            && let Ok(mut p) = partage.lock()
+        {
+            ecran_entrainement = vu;
+            p.ecran_entrainement = vu;
+            if p.seulement_entrainement && p.lecture_ecran {
+                let texte = if vu {
+                    "      ▶ mode entraînement reconnu : overlay affiché, coups suivis".green()
+                } else {
+                    "      ■ plus en mode entraînement (menu, en ligne…) : overlay caché, coups \
+                     ignorés"
+                        .yellow()
+                };
+                println!("{texte}");
+            }
+            change = true;
+        }
         // Les boutons cliquables de l'overlay.
         if let Ok(mut p) = partage.try_lock() {
             if p.enregistrement != capture.enregistre {
@@ -465,6 +488,10 @@ fn jouer(
     (frame_appui, quand): (u64, i64),
     (frame, temps): (u64, i64),
 ) -> String {
+    // Hors du mode entraînement (en ligne, menus) : on ne suit pas les coups.
+    if !partage.lock().is_ok_and(|p| p.en_entrainement()) {
+        return candidats[0].clone();
+    }
     // On affiche la lecture attendue par le trial si elle y est, sinon la première.
     // Le bouton Drive Parry utilisé pour un Drive Rush attendu s'affiche « DR ».
     let coup = match candidats.iter().find(|c| trial.accepte(c, trial.attendu())) {
