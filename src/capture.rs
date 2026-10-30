@@ -47,8 +47,9 @@ avant_ms = 700
 apres_ms = 1500
 # Le son du jeu dans les vidéos (seulement celui de SF6, pas le reste de Windows).
 son = true
-# Qualité de la vidéo, en mégabits par seconde (20 = très bon en 1080p).
-debit_mbps = 20
+# Qualité de la vidéo, en mégabits par seconde (4 = bon compromis taille/qualité en 1080p,
+# environ 2,5 Mo pour un clip de 5 s ; 20 = très bon).
+debit_mbps = 4
 # Au-delà de cette durée (en secondes), on arrête de filmer et on jette la vidéo.
 duree_max_s = 30
 "#;
