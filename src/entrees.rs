@@ -289,6 +289,7 @@ pub fn boucle(
         {
             p.historique_jeu = juge.visible;
             p.degats_visibles = juge.degats_visibles;
+            p.hits_direct = juge.hits_combo;
             juge.corriger(&mut p.lignes);
             change = true;
         }
@@ -590,6 +591,9 @@ struct Juge {
     fins_combo: VecDeque<i64>,
     /// Le panneau des dégâts du jeu est lu.
     degats_visibles: bool,
+    /// Coups qui ont touché dans le combo en cours (ou le dernier), et s'il est fini.
+    hits_combo: u32,
+    combo_fini: bool,
 }
 
 struct Attente {
@@ -661,8 +665,19 @@ impl Juge {
         }
         for evenement in ecran::nouveaux_degats(&mut self.dernier_degats) {
             match evenement {
-                ecran::Degats::Coup(t) => self.coups.push_back(t),
-                ecran::Degats::Fin(t) => self.fins_combo.push_back(t),
+                ecran::Degats::Coup(t) => {
+                    self.coups.push_back(t);
+                    // Compteur en direct : repart de 1 au premier coup d'un nouveau combo.
+                    if self.combo_fini {
+                        self.hits_combo = 0;
+                        self.combo_fini = false;
+                    }
+                    self.hits_combo += 1;
+                }
+                ecran::Degats::Fin(t) => {
+                    self.fins_combo.push_back(t);
+                    self.combo_fini = true;
+                }
             }
             nouveau = true;
         }

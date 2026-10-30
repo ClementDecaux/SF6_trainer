@@ -224,8 +224,14 @@ fn entete(ui: &mut egui::Ui, p: &Partage) {
                 ("frames estimées", JAUNE)
             };
             ui.label(RichText::new(texte).color(couleur).size(13.0));
+            // Compteur de hits en direct, lu sur le panneau des dégâts du jeu.
             if p.degats_visibles {
-                ui.label(RichText::new("hits").color(VERT).size(13.0));
+                ui.label(
+                    RichText::new(format!("{} hits", p.hits_direct))
+                        .color(ROUGE)
+                        .size(15.0)
+                        .strong(),
+                );
             }
         });
     });

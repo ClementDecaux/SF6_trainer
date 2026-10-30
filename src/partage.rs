@@ -64,6 +64,8 @@ pub struct Partage {
     pub degats_visibles: bool,
     /// Coups qui ont touché au dernier combo.
     pub hits: Option<u32>,
+    /// Compteur de hits en direct (combo en cours ou dernier combo).
+    pub hits_direct: u32,
 }
 
 impl Partage {
@@ -84,6 +86,7 @@ impl Partage {
             raison_estimee: None,
             degats_visibles: false,
             hits: None,
+            hits_direct: 0,
         }
     }
 
