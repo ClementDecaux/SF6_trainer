@@ -551,6 +551,14 @@ impl Interface {
                             }
                             syntaxe::dessiner(ui, &e.notation, syntaxe, 20.0, Color32::WHITE);
                         }
+                        ui.add_space(10.0);
+                        if ui
+                            .small_button("Copier")
+                            .on_hover_text("Copie le combo dans la syntaxe choisie (xx = cancel, « , » = link)")
+                            .clicked()
+                        {
+                            ui.ctx().copy_text(combo_en_texte(&etapes, syntaxe));
+                        }
                     });
                 }
                 Err(e) => {
@@ -631,6 +639,21 @@ impl Interface {
 }
 
 // ---------------------------------------------------------------- Personnages
+
+/// Le combo écrit en texte dans la syntaxe choisie, comme sur les forums :
+/// « 4MP xx 63214HK, 2HK ».
+fn combo_en_texte(etapes: &[crate::combo::Etape], syntaxe: Syntaxe) -> String {
+    let mut texte = String::new();
+    for e in etapes {
+        texte.push_str(match e.liaison {
+            crate::combo::Liaison::Debut => "",
+            crate::combo::Liaison::Cancel => " xx ",
+            crate::combo::Liaison::Link => ", ",
+        });
+        texte.push_str(&syntaxe::texte(&e.notation, syntaxe));
+    }
+    texte
+}
 
 /// Les combos dont la notation est reconnue (les autres sont à lire seulement).
 fn jouables(combos: &[ComboFichier]) -> Vec<bool> {
@@ -1717,6 +1740,15 @@ fn ouvrir_dossier(dossier: &Path) {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn combo_copie_en_texte() {
+        let etapes = crate::combo::parser("b+mp xx hcb+hk, cr. hk").unwrap();
+        assert_eq!(
+            combo_en_texte(&etapes, Syntaxe::Numpad),
+            "4MP xx 63214HK, 2HK"
+        );
+    }
 
     #[test]
     fn remplacer_des_cles_garde_le_reste() {
