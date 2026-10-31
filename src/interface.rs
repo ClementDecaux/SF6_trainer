@@ -86,6 +86,9 @@ pub struct Interface {
     jeu_actif: bool,
     /// Le dossier des photos, tel que tapé dans les réglages.
     dossier_photos: String,
+    /// Partage des clips en ligne : réglages enregistrés, et tels que tapés.
+    nuage: crate::nuage::Config,
+    nuage_saisie: crate::nuage::Config,
     /// Clips rangés par la capture la dernière fois qu'on a relu le dossier.
     clips_vus: u64,
     /// Hits et dégâts tapés pour compléter un combo (nom du combo, hits, dégâts).
@@ -121,6 +124,8 @@ impl Interface {
             titre_jeu: titre_jeu.to_string(),
             jeu_actif: false,
             dossier_photos: crate::capture::dossier_photos(),
+            nuage: crate::nuage::charger(),
+            nuage_saisie: crate::nuage::charger(),
             clips_vus: 0,
             saisie: (String::new(), 0, 0),
         }
@@ -794,6 +799,57 @@ impl Interface {
         }
     }
 
+    /// Sous le lecteur : partager la vidéo ouverte en ligne, ou la retirer.
+    fn partage_en_ligne(&mut self, ui: &mut egui::Ui) {
+        use crate::nuage::Etat;
+        let Some(lecteur) = &self.lecteur else {
+            return;
+        };
+        let Some(infos) = lecteur.infos.clone() else {
+            return;
+        };
+        let video = lecteur.video.chemin.clone();
+        let pret = !self.nuage.serveur.is_empty() && self.nuage.pseudo.chars().count() >= 2;
+        ui.horizontal(|ui| match crate::nuage::etat(&video) {
+            Some(Etat::Envoi) => {
+                ui.spinner();
+                ui.label(RichText::new("Envoi en ligne…").color(GRIS));
+                ui.ctx()
+                    .request_repaint_after(std::time::Duration::from_millis(300));
+            }
+            Some(Etat::Retrait) => {
+                ui.spinner();
+                ui.label(RichText::new("Retrait…").color(GRIS));
+                ui.ctx()
+                    .request_repaint_after(std::time::Duration::from_millis(300));
+            }
+            Some(Etat::Partage(partage)) => {
+                ui.label(RichText::new("• partagé en ligne").color(VERT));
+                if ui
+                    .small_button("Retirer")
+                    .on_hover_text("Supprime ce clip du serveur (il reste sur ton PC)")
+                    .clicked()
+                {
+                    crate::nuage::retirer(video.clone(), partage, self.nuage.clone());
+                }
+            }
+            etat => {
+                let bouton = ui
+                    .add_enabled(pret, egui::Button::new("Partager en ligne"))
+                    .on_disabled_hover_text(
+                        "Renseigne le serveur et ton pseudo dans les Réglages (Partage des \
+                         clips en ligne)",
+                    );
+                if bouton.clicked() {
+                    crate::nuage::partager(video.clone(), infos, self.nuage.clone());
+                }
+                if let Some(Etat::Erreur(e)) = etat {
+                    ui.label(RichText::new(format!("Échec : {e}")).color(ROUGE));
+                }
+            }
+        });
+    }
+
     /// Sous le combo : ses vidéos (la plus récente ouverte d'office) et le lecteur.
     fn videos_du_combo(&mut self, ui: &mut egui::Ui, nom: &str) {
         let siens: Vec<usize> = (0..self.clips.len())
@@ -855,6 +911,7 @@ impl Interface {
             );
             return;
         }
+        self.partage_en_ligne(ui);
         ui.add_space(4.0);
         let reglages = self.reglages_lecteur();
         let images_avant = self.images_avant;
@@ -1336,6 +1393,41 @@ impl Interface {
                 ouvrir_dossier(&dossier);
             }
         });
+
+        ui.add_space(14.0);
+        ui.heading("Partage des clips en ligne");
+        egui::Grid::new("nuage").num_columns(2).show(ui, |ui| {
+            ui.label(RichText::new("Serveur :").color(GRIS));
+            ui.add(
+                egui::TextEdit::singleline(&mut self.nuage_saisie.serveur)
+                    .hint_text("https://…")
+                    .desired_width(320.0),
+            );
+            ui.end_row();
+            ui.label(RichText::new("Pseudo :").color(GRIS));
+            ui.add(egui::TextEdit::singleline(&mut self.nuage_saisie.pseudo).desired_width(160.0));
+            ui.end_row();
+        });
+        let saisie = (
+            self.nuage_saisie.serveur.trim().to_string(),
+            self.nuage_saisie.pseudo.trim().to_string(),
+        );
+        let modifie = saisie.0 != self.nuage.serveur || saisie.1 != self.nuage.pseudo;
+        if ui
+            .add_enabled(modifie, egui::Button::new("Enregistrer"))
+            .clicked()
+        {
+            crate::nuage::charger(); // crée le fichier s'il n'existe pas
+            ecrire_cles(
+                crate::nuage::FICHIER,
+                &[
+                    ("serveur", format!("'{}'", saisie.0.replace('\'', ""))),
+                    ("pseudo", format!("'{}'", saisie.1.replace('\'', ""))),
+                ],
+            );
+            self.nuage = crate::nuage::charger();
+            self.nuage_saisie = self.nuage.clone();
+        }
 
         ui.add_space(14.0);
         ui.heading("Lecture du jeu");

@@ -161,6 +161,18 @@ Notation reconnue : directions `b f d u db df cr. st.` ou chiffres numpad, mouve
 `qcf qcb hcf hcb dp` ou `236 214 41236 63214 623 421`, `DI` (HP+HK), `DP` (MP+MK),
 `DR` (66, ou MP+MK pendant un coup annulable), `xx` ou `>` pour un cancel, `,` pour un link.
 
+## Partager ses clips en ligne
+
+Sous chaque vidéo, **Partager en ligne** envoie le clip au serveur de partage. Tout le
+monde peut ensuite le voir. **Retirer** le supprime du serveur, et il reste sur ton PC.
+Il faut d'abord renseigner l'adresse du serveur et un pseudo dans **Réglages → Partage
+des clips en ligne** (enregistrés dans `nuage.toml`). Les clips partagés sont notés dans
+`clips/partages.json`.
+
+Le serveur est dans le dossier `serveur/`. C'est un Worker Cloudflare, avec le stockage
+chez Backblaze B2, gratuit avec des plafonds à 0 €. Son `README.md` explique comment le
+mettre en ligne.
+
 ## Organisation du code
 
 | Fichier | Rôle |

@@ -1,0 +1,27 @@
+# Le serveur des clips partagés : un Worker Cloudflare (gratuit).
+# Voir README.md dans ce dossier pour le mettre en ligne.
+name = "sf6-trainer-clips"
+main = "src/index.js"
+compatibility_date = "2026-09-01"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "sf6-trainer-clips"
+# Remplacé par l'identifiant donné par `npx wrangler d1 create sf6-trainer-clips`.
+database_id = "a-remplacer"
+
+[vars]
+# Le stockage des vidéos (API S3 de Backblaze B2, ou de Cloudflare R2 plus tard).
+# Exemple B2 : https://s3.eu-central-003.backblazeb2.com et eu-central-003.
+STOCKAGE_ADRESSE = "https://s3.eu-central-003.backblazeb2.com"
+STOCKAGE_REGION = "eu-central-003"
+STOCKAGE_BUCKET = "sf6-trainer-clips"
+# Limites (en plus des plafonds à 0 € réglés chez B2).
+TAILLE_MAX_OCTETS = "15000000"
+TOTAL_MAX_OCTETS = "9000000000"
+ENVOIS_PAR_JOUR = "20"
+
+# Secrets (jamais dans ce fichier) : `npx wrangler secret put <NOM>`
+#   STOCKAGE_CLE_ID   identifiant de la clé d'application B2 (keyID)
+#   STOCKAGE_CLE      la clé elle-même (applicationKey)
+#   ADMIN             mot de passe pour supprimer un clip

@@ -24,6 +24,7 @@ mod interface;
 mod manette;
 mod motion;
 mod notation;
+mod nuage;
 mod overlay;
 mod partage;
 mod son;
