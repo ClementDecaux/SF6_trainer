@@ -44,12 +44,76 @@ pub struct ComboFichier {
     /// Le groupe du combo dans la liste de l'interface (« Drive Rush », « OD »...).
     #[serde(default)]
     pub categorie: String,
+    /// Barres de Drive dépensées (info de la bibliothèque).
+    #[serde(default)]
+    pub drive: Option<u32>,
+    /// Barres de super dépensées.
+    #[serde(default, rename = "super")]
+    pub super_: Option<u32>,
+    /// Conseils : distance, frames de punition, coin...
+    #[serde(default)]
+    pub notes: String,
 }
 
-#[derive(Debug, Deserialize)]
+/// Une ligne de la fiche « Modern sans motion » (NMM) : pour lire, pas pour le trial.
+#[derive(Debug, Clone, Deserialize)]
+pub struct Modern {
+    #[serde(default)]
+    pub categorie: String,
+    pub inputs: String,
+    #[serde(default)]
+    pub notes: String,
+}
+
+#[derive(Debug, Clone, Deserialize)]
 pub struct Fichier {
     pub personnage: String,
+    #[serde(default)]
     pub combo: Vec<ComboFichier>,
+    #[serde(default)]
+    pub modern: Vec<Modern>,
+}
+
+/// Les combos de tous les personnages (feuille communautaire), inclus dans l'outil.
+pub const BIBLIOTHEQUE: &[(&str, &str)] = &[
+    ("AKI", include_str!("../bibliotheque/aki.toml")),
+    ("Akuma", include_str!("../bibliotheque/akuma.toml")),
+    ("Alex", include_str!("../bibliotheque/alex.toml")),
+    ("Arjun", include_str!("../bibliotheque/arjun.toml")),
+    ("Bison", include_str!("../bibliotheque/bison.toml")),
+    ("Blanka", include_str!("../bibliotheque/blanka.toml")),
+    ("C-Viper", include_str!("../bibliotheque/c_viper.toml")),
+    ("Cammy", include_str!("../bibliotheque/cammy.toml")),
+    ("Chun-Li", include_str!("../bibliotheque/chun_li.toml")),
+    ("Dee Jay", include_str!("../bibliotheque/dee_jay.toml")),
+    ("Dhalsim", include_str!("../bibliotheque/dhalsim.toml")),
+    ("E. Honda", include_str!("../bibliotheque/e_honda.toml")),
+    ("Ed", include_str!("../bibliotheque/ed.toml")),
+    ("Elena", include_str!("../bibliotheque/elena.toml")),
+    ("Guile", include_str!("../bibliotheque/guile.toml")),
+    ("Ingrid", include_str!("../bibliotheque/ingrid.toml")),
+    ("JP", include_str!("../bibliotheque/jp.toml")),
+    ("Jamie", include_str!("../bibliotheque/jamie.toml")),
+    ("Juri", include_str!("../bibliotheque/juri.toml")),
+    ("Ken", include_str!("../bibliotheque/ken.toml")),
+    ("Kimberly", include_str!("../bibliotheque/kimberly.toml")),
+    ("Lily", include_str!("../bibliotheque/lily.toml")),
+    ("Luke", include_str!("../bibliotheque/luke.toml")),
+    ("Mai", include_str!("../bibliotheque/mai.toml")),
+    ("Manon", include_str!("../bibliotheque/manon.toml")),
+    ("Marisa", include_str!("../bibliotheque/marisa.toml")),
+    ("Rashid", include_str!("../bibliotheque/rashid.toml")),
+    ("Ryu", include_str!("../bibliotheque/ryu.toml")),
+    ("Sagat", include_str!("../bibliotheque/sagat.toml")),
+    ("Terry", include_str!("../bibliotheque/terry.toml")),
+    ("Yasmine", include_str!("../bibliotheque/yasmine.toml")),
+    ("Zangief", include_str!("../bibliotheque/zangief.toml")),
+];
+
+/// Les combos d'un personnage de la bibliothèque.
+pub fn bibliotheque(personnage: &str) -> Option<Fichier> {
+    let (_, texte) = BIBLIOTHEQUE.iter().find(|(p, _)| *p == personnage)?;
+    toml::from_str(texte).ok()
 }
 
 const FICHIER: &str = "combos.toml";
@@ -157,12 +221,13 @@ pub fn normaliser(etape: &str) -> Result<String, String> {
     }
 
     // Les abréviations en tête, les plus longues d'abord (« DF » avant « D »).
-    const ABREVIATIONS: [(&str, &str); 15] = [
+    const ABREVIATIONS: [(&str, &str); 16] = [
         ("QCF", "236"),
         ("QCB", "214"),
         ("HCF", "41236"),
         ("HCB", "63214"),
         ("DP", "623"),
+        ("SRK", "623"),
         ("DF", "3"),
         ("DB", "1"),
         ("UF", "9"),
@@ -196,7 +261,8 @@ pub fn normaliser(etape: &str) -> Result<String, String> {
         "1", "2", "3", "4", "5", "6", "7", "8", "9", "236", "214", "623", "421", "41236", "63214",
     ];
     // PP et KK : version OD (deux poings ou deux pieds ensemble).
-    const BOUTONS: [&str; 8] = ["LP", "MP", "HP", "LK", "MK", "HK", "PP", "KK"];
+    // P et K seuls : n'importe quelle force (« qcf+p »).
+    const BOUTONS: [&str; 10] = ["LP", "MP", "HP", "LK", "MK", "HK", "PP", "KK", "P", "K"];
     if !MOUVEMENTS.contains(&mouvement.as_str()) {
         return Err(format!(
             "mouvement inconnu « {mouvement} » dans « {etape} »"
@@ -581,8 +647,24 @@ impl Trial {
 
 /// Un coup reconnu valide-t-il l'étape attendue ? En plus du nom exact : pendant un coup
 /// annulable, MP+MK (le bouton Drive Parry) lance un Drive Rush, comme 66.
+/// « 236P » (sans force) accepte 236LP, 236MP ou 236HP.
 pub fn correspond(coup: &str, attendu: &str) -> bool {
-    coup == attendu || (attendu == "DR" && coup == "DP")
+    if coup == attendu || (attendu == "DR" && coup == "DP") {
+        return true;
+    }
+    let sans_force = bouton(attendu);
+    if !matches!(sans_force, "P" | "K") {
+        return false;
+    }
+    let mouvement = &attendu[..attendu.len() - sans_force.len()];
+    coup.strip_prefix(mouvement).is_some_and(|b| {
+        [
+            format!("L{sans_force}"),
+            format!("M{sans_force}"),
+            format!("H{sans_force}"),
+        ]
+        .contains(&b.to_string())
+    })
 }
 
 fn retournes_de(coups: &[String]) -> Vec<String> {
@@ -608,6 +690,42 @@ fn bouton(notation: &str) -> &str {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn bibliotheque_lisible() {
+        assert_eq!(BIBLIOTHEQUE.len(), 32);
+        let (mut total, mut jouables) = (0, 0);
+        for (perso, texte) in BIBLIOTHEQUE {
+            let f: Fichier = toml::from_str(texte).unwrap_or_else(|e| panic!("{perso} : {e}"));
+            assert_eq!(&f.personnage, perso);
+            assert!(!f.combo.is_empty(), "{perso} : aucun combo");
+            assert!(!f.modern.is_empty(), "{perso} : pas de fiche Modern");
+            let mut noms = std::collections::HashSet::new();
+            for c in &f.combo {
+                assert!(noms.insert(&c.nom), "{perso} : nom en double « {} »", c.nom);
+                total += 1;
+                jouables += parser(&c.inputs).is_ok() as usize;
+            }
+        }
+        println!("{jouables}/{total} combos suivis par le trainer");
+        assert!(jouables * 2 > total);
+    }
+
+    #[test]
+    fn poing_sans_force() {
+        assert_eq!(normaliser("qcf+p").unwrap(), "236P");
+        assert!(correspond("236LP", "236P"));
+        assert!(correspond("236HP", "236P"));
+        assert!(!correspond("236LK", "236P"));
+        assert!(!correspond("214HP", "236P"));
+        assert!(!correspond("236PP", "236P"));
+        assert!(correspond("623MK", "623K"));
+    }
+
+    #[test]
+    fn srk_est_un_dp() {
+        assert_eq!(normaliser("srk+hp").unwrap(), "623HP");
+    }
 
     fn c(s: &str) -> Vec<String> {
         vec![s.to_string()]

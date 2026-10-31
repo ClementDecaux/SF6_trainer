@@ -1,0 +1,604 @@
+# Ryu : combos de la feuille communautaire SF6 (Google Sheets), importés tels quels.
+# degats = dégâts du combo complet, drive = barres de Drive, super = barres de super.
+# [[modern]] : les mêmes infos en contrôles Modern sans motion (NMM), pour référence.
+personnage = "Ryu"
+
+[[combo]]
+nom = "cr. lk, cr. lp, cr. lp xx qcb+lk"
+categorie = "Sans jauge"
+inputs = "cr. lk, cr. lp, cr. lp xx qcb+lk"
+degats = 1190
+drive = 0
+super = 0
+
+[[combo]]
+nom = "st. lp, st. lp, st. lp xx qcb+lk"
+categorie = "Sans jauge"
+inputs = "st. lp, st. lp, st. lp xx qcb+lk"
+degats = 1290
+drive = 0
+super = 0
+notes = "Beats 4f/throw mash"
+
+[[combo]]
+nom = "st. mp, st. mp xx st. lk xx st. hk"
+categorie = "Sans jauge"
+inputs = "st. mp, st. mp xx st. lk xx st. hk"
+degats = 2070
+drive = 0
+super = 0
+notes = "Can cancel into denjin charge by holding p"
+
+[[combo]]
+nom = "st. mp, cr. mp xx qcb+hk"
+categorie = "Sans jauge"
+inputs = "st. mp, cr. mp xx qcb+hk"
+degats = 2000
+drive = 0
+super = 0
+
+[[combo]]
+nom = "st. mp, b+hp xx srk+hp"
+categorie = "Sans jauge"
+inputs = "st. mp, b+hp xx srk+hp"
+degats = 2520
+drive = 0
+super = 0
+notes = "Requires you to be absolutely point blank with the opponent to connect."
+
+[[combo]]
+nom = "cr. mp, st. lk xx qcb+lk"
+categorie = "Sans jauge"
+inputs = "cr. mp, st. lk xx qcb+lk"
+degats = 1540
+drive = 0
+super = 0
+
+[[combo]]
+nom = "cr. mp, st. lk xx srk+hp"
+categorie = "Sans jauge"
+inputs = "cr. mp, st. lk xx srk+hp"
+degats = 2020
+drive = 0
+super = 0
+
+[[combo]]
+nom = "cr. mk xx qcb+hk"
+categorie = "Sans jauge"
+inputs = "cr. mk xx qcb+hk"
+degats = 1300
+drive = 0
+super = 0
+
+[[combo]]
+nom = "cr. mk xx qcf+mk"
+categorie = "Sans jauge"
+inputs = "cr. mk xx qcf+mk"
+degats = 1380
+drive = 0
+super = 0
+
+[[combo]]
+nom = "cr. hp xx srk+hp"
+categorie = "Sans jauge"
+inputs = "cr. hp xx srk+hp"
+degats = 2200
+drive = 0
+super = 0
+
+[[combo]]
+nom = "b+hk xx srk+hp"
+categorie = "Sans jauge"
+inputs = "b+hk xx srk+hp"
+degats = 2200
+drive = 0
+super = 0
+notes = "Cancels on second hit."
+
+[[combo]]
+nom = "st. hk, cr. mk xx qcb+hk"
+categorie = "Sans jauge"
+inputs = "st. hk, cr. mk xx qcb+hk"
+degats = 2200
+drive = 0
+super = 0
+notes = "Standing only"
+
+[[combo]]
+nom = "f+hp, st. mp xx st. lk xx st. hk"
+categorie = "Sans jauge"
+inputs = "f+hp, st. mp xx st. lk xx st. hk"
+degats = 2030
+drive = 0
+super = 0
+
+[[combo]]
+nom = "f+hp, st. mp xx srk+hp"
+categorie = "Sans jauge"
+inputs = "f+hp, st. mp xx srk+hp"
+degats = 2260
+drive = 0
+super = 0
+
+[[combo]]
+nom = "f+hp, st. lp, st. lp xx srk+hp"
+categorie = "Sans jauge"
+inputs = "f+hp, st. lp, st. lp xx srk+hp"
+degats = 2320
+drive = 0
+super = 0
+notes = "Ryu can now do two lights or threaten a throw after a hit/block solar plexus (8/3/2026)"
+
+[[combo]]
+nom = "st. lp, st. lp, st. lp xx qcb+kk, srk+hp"
+categorie = "OD"
+inputs = "st. lp, st. lp, st. lp xx qcb+kk, srk+hp"
+degats = 2050
+drive = 2
+super = 0
+notes = "Corner only"
+
+[[combo]]
+nom = "st. mp, cr. mp xx qcf+kk, srk+hp"
+categorie = "OD"
+inputs = "st. mp, cr. mp xx qcf+kk, srk+hp"
+degats = 2680
+drive = 2
+super = 0
+
+[[combo]]
+nom = "st. mp, b+hp xx qcf+kk, PDR xx b+hp xx srk+hp"
+categorie = "OD"
+inputs = "st. mp, b+hp xx qcf+kk, PDR xx b+hp xx srk+hp"
+degats = 2784
+drive = 3
+super = 0
+notes = "Parry Drive Rush example"
+
+[[combo]]
+nom = "st. hk, cr. mk xx qcb+pp (charged), b+hp xx srk+hp"
+categorie = "OD"
+inputs = "st. hk, cr. mk xx qcb+pp (charged), b+hp xx srk+hp"
+degats = 3280
+drive = 2
+super = 0
+
+[[combo]]
+nom = "cr. lp xx DR xx st. lk"
+categorie = "Extensions Drive Rush"
+inputs = "cr. lp xx DR xx st. lk"
+drive = 3
+super = 0
+notes = "5f or less"
+
+[[combo]]
+nom = "st. lk xx DR xx st. lk"
+categorie = "Extensions Drive Rush"
+inputs = "st. lk xx DR xx st. lk"
+drive = 3
+super = 0
+notes = "5f or less"
+
+[[combo]]
+nom = "cr. mk xx DR xx st. hp"
+categorie = "Extensions Drive Rush"
+inputs = "cr. mk xx DR xx st. hp"
+drive = 3
+super = 0
+notes = "10f or less"
+
+[[combo]]
+nom = "st. mp xx DR xx st. hk"
+categorie = "Extensions Drive Rush"
+inputs = "st. mp xx DR xx st. hk"
+drive = 3
+super = 0
+notes = "12f or less"
+
+[[combo]]
+nom = "cr. mp xx DR xx st. hk"
+categorie = "Extensions Drive Rush"
+inputs = "cr. mp xx DR xx st. hk"
+drive = 3
+super = 0
+notes = "12f or less"
+
+[[combo]]
+nom = "st. hp xx DR xx st. hk"
+categorie = "Extensions Drive Rush"
+inputs = "st. hp xx DR xx st. hk"
+drive = 3
+super = 0
+notes = "12f or less"
+
+[[combo]]
+nom = "cr. hp xx DR xx st. hk"
+categorie = "Extensions Drive Rush"
+inputs = "cr. hp xx DR xx st. hk"
+drive = 3
+super = 0
+notes = "12f or less"
+
+[[combo]]
+nom = "b+hk xx DR xx st. hk"
+categorie = "Extensions Drive Rush"
+inputs = "b+hk xx DR xx st. hk"
+drive = 3
+super = 0
+notes = "12f or less"
+
+[[combo]]
+nom = "b+hp xx DR xx f+mp"
+categorie = "Extensions Drive Rush"
+inputs = "b+hp xx DR xx f+mp"
+drive = 3
+super = 0
+notes = "20f or less"
+
+[[combo]]
+nom = "st. lk xx DR xx st. lp, b+hp xx srk+hp"
+categorie = "Drive Rush"
+inputs = "st. lk xx DR xx st. lp, b+hp xx srk+hp"
+degats = 1690
+drive = 3
+super = 0
+
+[[combo]]
+nom = "st. mp, b+hp xx DR xx f+hp, st. hp xx qcf+kk, dr xx b+hp xx srk+hp"
+categorie = "Drive Rush"
+inputs = "st. mp, b+hp xx DR xx f+hp, st. hp xx qcf+kk, dr xx b+hp xx srk+hp"
+degats = 3446
+drive = 6
+super = 0
+
+[[combo]]
+nom = "cr. mk xx DR xx st. mp, b+hk xx qcf+kk, qcb+pp (charged), qcfx2+p"
+categorie = "Drive Rush"
+inputs = "cr. mk xx DR xx st. mp, b+hk xx qcf+kk, qcb+pp (charged), qcfx2+p"
+degats = 2592
+drive = 5
+super = 1
+notes = "Example conversion into SA1"
+
+[[combo]]
+nom = "cr. mk xx DR xx st. mp, b+hk xx qcbx2+p"
+categorie = "Drive Rush"
+inputs = "cr. mk xx DR xx st. mp, b+hk xx qcbx2+p"
+degats = 2706
+drive = 3
+super = 2
+notes = "Example conversion into SA2"
+
+[[combo]]
+nom = "st. mp, b+hp xx DR xx st. hk, cr. hp xx srk+hp xx qcfx2+k"
+categorie = "Drive Rush"
+inputs = "st. mp, b+hp xx DR xx st. hk, cr. hp xx srk+hp xx qcfx2+k"
+degats = 5198
+drive = 3
+super = 3
+notes = "Example conversion into SA3"
+
+[[combo]]
+nom = "dr xx st. lp, st. mp, cr. mp xx qcb+lk"
+categorie = "Drive Rush"
+inputs = "dr xx st. lp, st. mp, cr. mp xx qcb+lk"
+degats = 1740
+drive = 1
+super = 0
+
+[[combo]]
+nom = "dr xx cr. lk, st. mp, cr. mp xx qcf+lk"
+categorie = "Drive Rush"
+inputs = "dr xx cr. lk, st. mp, cr. mp xx qcf+lk"
+degats = 1760
+drive = 1
+super = 0
+
+[[combo]]
+nom = "dr xx cr. mp, cr. hp xx qcf+mk"
+categorie = "Drive Rush"
+inputs = "dr xx cr. mp, cr. hp xx qcf+mk"
+degats = 2360
+drive = 1
+super = 0
+
+[[combo]]
+nom = "st. mp, cr. mp xx qcb+hp (charged), dr xx cr. hp xx qcf+hk"
+categorie = "Drive Rush"
+inputs = "st. mp, cr. mp xx qcb+hp (charged), dr xx cr. hp xx qcf+hk"
+degats = 2975
+drive = 1
+super = 0
+notes = "Example denjin charge combo, grants a safejump"
+
+[[combo]]
+nom = "cr. hp xx qcb+hp (charged), dr xx cr. hp xx dr xx b+hp xx qcf+mk, srk+lp"
+categorie = "Drive Rush"
+inputs = "cr. hp xx qcb+hp (charged), dr xx cr. hp xx dr xx b+hp xx qcf+mk, srk+lp"
+degats = 3690
+drive = 4
+super = 0
+notes = "Example denjin charge combo. Corner only."
+
+[[combo]]
+nom = "st. hp xx dr xx st. hk, st. hp xx dr xx st. hk, st. hp xx qcf+mk"
+categorie = "Drive Rush"
+inputs = "st. hp xx dr xx st. hk, st. hp xx dr xx st. hk, st. hp xx qcf+mk"
+degats = 3552
+drive = 6
+super = 0
+notes = "Example Heavy->Heavy loop. Standing only."
+
+[[combo]]
+nom = "st. hp xx dr xx st. hk, st. hp xx dr xx st. hp, b+hp xx qcf+hk, srk+lp xx SA3"
+categorie = "Drive Rush"
+inputs = "st. hp xx dr xx st. hk, st. hp xx dr xx st. hp, b+hp xx qcf+hk, srk+lp xx SA3"
+degats = 5909
+drive = 6
+super = 3
+notes = "Example corner variation of heavy->heavy loop. Standing only."
+
+[[combo]]
+nom = "st. lp, b+hp xx srk+hp"
+categorie = "Punish Counter"
+inputs = "st. lp, b+hp xx srk+hp"
+degats = 1980
+drive = 0
+super = 0
+notes = "4f Punish Counter. Point blank"
+
+[[combo]]
+nom = "st. lp, cr. mk xx qcb+mk"
+categorie = "Punish Counter"
+inputs = "st. lp, cr. mk xx qcb+mk"
+degats = 1460
+drive = 0
+super = 0
+notes = "4f Punish Counter. Works at tip range for st. lp"
+
+[[combo]]
+nom = "st. lk xx DR xx st. mp, st. hp xx srk+hp"
+categorie = "Punish Counter"
+inputs = "st. lk xx DR xx st. mp, st. hp xx srk+hp"
+degats = 1954
+drive = 3
+super = 0
+notes = "5f Punish Counter. Works at tip range of st. lk"
+
+[[combo]]
+nom = "st. lk xx qcf+mk"
+categorie = "Punish Counter"
+inputs = "st. lk xx qcf+mk"
+degats = 1160
+drive = 0
+super = 0
+notes = "5f Punish Counter. Works at tip range of st. lk"
+
+[[combo]]
+nom = "st. mp, st. hp xx srk+hp"
+categorie = "Punish Counter"
+inputs = "st. mp, st. hp xx srk+hp"
+degats = 2640
+drive = 0
+super = 0
+notes = "6f Punish Counter. Works at tip range of st. mp"
+
+[[combo]]
+nom = "st. hp, st. mp xx srk+hp"
+categorie = "Punish Counter"
+inputs = "st. hp, st. mp xx srk+hp"
+degats = 2680
+drive = 0
+super = 0
+notes = "10f Punish Counter. Point blank."
+
+[[combo]]
+nom = "st. hk, cr. hp xx srk+hp"
+categorie = "Punish Counter"
+inputs = "st. hk, cr. hp xx srk+hp"
+degats = 3000
+drive = 0
+super = 0
+notes = "12f Punish Counter. Can walk up to complete this combo."
+
+[[combo]]
+nom = "f+hk, cr. mp xx srk+hp"
+categorie = "Punish Counter"
+inputs = "f+hk, cr. mp xx srk+hp"
+degats = 2680
+drive = 0
+super = 0
+notes = "16f Punish Counter. Lunges forward a significant distance."
+
+[[combo]]
+nom = "f+hp, b+hp xx srk+hp"
+categorie = "Punish Counter"
+inputs = "f+hp, b+hp xx srk+hp"
+degats = 2580
+drive = 0
+super = 0
+notes = "20f Punish Counter. Lunges forward a significant distance."
+
+[[combo]]
+nom = "DI, cr. hp xx srk+hp"
+categorie = "Après DI (crumple)"
+inputs = "DI, cr. hp xx srk+hp"
+degats = 2580
+drive = 1
+super = 0
+
+[[combo]]
+nom = "DI, st. hk, cr. mk xx srk+hp"
+categorie = "Après DI (crumple)"
+inputs = "DI, st. hk, cr. mk xx srk+hp"
+degats = 2870
+drive = 1
+super = 0
+
+[[combo]]
+nom = "DI, st. hk, cr. mk xx qcf+kk, srk+hp"
+categorie = "Après DI (crumple)"
+inputs = "DI, st. hk, cr. mk xx qcf+kk, srk+hp"
+degats = 3060
+drive = 3
+super = 0
+
+[[combo]]
+nom = "DI, st. hp xx srk+hp"
+categorie = "Après DI (wallsplat)"
+inputs = "DI, st. hp xx srk+hp"
+degats = 1760
+drive = 1
+super = 0
+
+[[combo]]
+nom = "DI, b+hp xx qcb+kk, qcf+mk"
+categorie = "Après DI (wallsplat)"
+inputs = "DI, b+hp xx qcb+kk, qcf+mk"
+degats = 2144
+drive = 3
+super = 0
+
+[[combo]]
+nom = "DI, cr. hp xx qcf+hk"
+categorie = "Après DI (wallsplat)"
+inputs = "DI, cr. hp xx qcf+hk"
+degats = 1680
+drive = 1
+super = 0
+notes = "Gives an immediate safejump."
+
+[[combo]]
+nom = "DI, j. hk, cr. hp xx srk+hp"
+categorie = "Après DI (stun)"
+inputs = "DI, j. hk, cr. hp xx srk+hp"
+degats = 2040
+drive = 1
+super = 0
+
+[[combo]]
+nom = "DI, dd+p, j. hk, cr. hp xx qcb+p, srk+hp"
+categorie = "Après DI (stun)"
+inputs = "DI, dd+p, j. hk, cr. hp xx qcb+p, srk+hp"
+degats = 2380
+drive = 1
+super = 0
+
+[[combo]]
+nom = "DI (stun), charge, j. hp, cr. hp xx qcb+hp, srk+hp xx SA3"
+categorie = "Après DI (stun)"
+inputs = "DI (stun), charge, j. hp, cr. hp xx qcb+hp, srk+hp xx SA3"
+degats = 4580
+drive = 1
+super = 3
+
+[[combo]]
+nom = "DI (stun), j. hp, st. hp xx dr xx st. hk, st. hp xx dr xx st. hp, b+hp xx qcf+hk, srk+lp xx SA3"
+categorie = "Après DI (stun)"
+inputs = "DI (stun), j. hp, st. hp xx dr xx st. hk, st. hp xx dr xx st. hp, b+hp xx qcf+hk, srk+lp xx SA3"
+degats = 4976
+drive = 7
+super = 3
+
+[[combo]]
+nom = "DI (stun), charge, j. hp, st. hp xx qcb+pp, st. hp xx dr xx st. hk, st. hp xx dr xx st. hp, b+hp xx qcf+hk, srk+lp xx SA3"
+categorie = "Après DI (stun)"
+inputs = "DI (stun), charge, j. hp, st. hp xx qcb+pp, st. hp xx dr xx st. hk, st. hp xx dr xx st. hp, b+hp xx qcf+hk, srk+lp xx SA3"
+degats = 5178
+drive = 8
+super = 3
+
+[[modern]]
+categorie = "Anti-airs"
+inputs = "D+H"
+notes = "Moves Ryu forward slightly"
+
+[[modern]]
+categorie = "Anti-airs"
+inputs = "F+SP"
+notes = "Fully invincible anti-air option"
+
+[[modern]]
+categorie = "Anti-airs"
+inputs = "B+H"
+notes = "Catches opponents just over Ryu's head"
+
+[[modern]]
+categorie = "Anti-airs"
+inputs = "U+L"
+notes = "Jump back L will catch crossups"
+
+[[modern]]
+categorie = "Pokes"
+inputs = "D+M"
+notes = "Low poke. Special cancellable. One of Ryu's best normals."
+
+[[modern]]
+categorie = "Pokes"
+inputs = "M+[AUTO]"
+notes = "Disjointed poke. Special cancellable. Good for catching drive rushes and whiffed normals."
+
+[[modern]]
+categorie = "Pokes"
+inputs = "L+[AUTO]"
+notes = "Hits a surprising distance for a light. Special cancellable. Good for contesting opposing D+Ms."
+
+[[modern]]
+categorie = "Pokes"
+inputs = "H"
+notes = "A cannon. Special cancellable. Lunges forward slightly."
+
+[[modern]]
+categorie = "Pokes"
+inputs = "D+F+H"
+notes = "Ryu's sweep outranges a lot of common D+Ms."
+
+[[modern]]
+categorie = "Pokes"
+inputs = "F+H"
+notes = "Hops over low attacks, can cancel into B+SP+[AUTO]."
+
+[[modern]]
+categorie = "Punitions"
+inputs = "L > M > B+SP"
+notes = "4f punish counter."
+
+[[modern]]
+categorie = "Punitions"
+inputs = "M > D+H > B+SP"
+notes = "6f punish counter"
+
+[[modern]]
+categorie = "Punitions"
+inputs = "H > M+[AUTO] > B+SP"
+notes = "10f punish counter."
+
+[[modern]]
+categorie = "Punitions"
+inputs = "H+[AUTO] > H > B+SP"
+notes = "20f punish counter."
+
+[[modern]]
+categorie = "Punitions"
+inputs = "H+[AUTO] > H > DR > H > M > DR > H > M > B+SP"
+notes = "Example drive rush loop."
+
+[[modern]]
+categorie = "Combos de base"
+inputs = "L > L > L > F+SP"
+
+[[modern]]
+categorie = "Combos de base"
+inputs = "M > M+[AUTO] > B+SP"
+
+[[modern]]
+categorie = "Combos de base"
+inputs = "H+[AUTO] > M+[AUTO] > B+SP"
+
+[[modern]]
+categorie = "Combos de base"
+inputs = "DR > H > M+[AUTO] > B+SP"
+
+[[modern]]
+categorie = "Combos de base"
+inputs = "D+M > DR > M > D+H > B+SP"

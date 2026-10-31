@@ -5,7 +5,7 @@
 //! plan, les clics passent au travers). On peut le cacher ou le réafficher d'ici.
 
 use crate::capture::InfosClip;
-use crate::combo::ComboFichier;
+use crate::combo::{ComboFichier, Fichier, Modern};
 use crate::ecran::EntreeJeu;
 use crate::overlay::{self, CYAN, GRIS, JAUNE, Overlay, ROUGE, VERT};
 use crate::partage::Partage;
@@ -67,7 +67,16 @@ pub struct Interface {
     overlay_ouvert: bool,
     /// Quand la fenêtre de l'overlay a été (ré)ouverte.
     overlay_ouvert_a: std::time::Instant,
+    /// La liste affichée : `combos.toml` ou un personnage de la bibliothèque.
     combos: Vec<ComboFichier>,
+    /// Chaque combo de la liste peut-il être suivi (notation reconnue) ?
+    jouables: Vec<bool>,
+    /// La fiche Modern sans motion (NMM) du personnage affiché.
+    modern: Vec<Modern>,
+    /// `combos.toml` (« Mes combos »).
+    mes_combos: Fichier,
+    /// Personnage de la bibliothèque affiché (aucun : `combos.toml`).
+    bibliotheque: Option<String>,
     onglet: Onglet,
     recherche: String,
     /// Combo choisi dans la liste (pas forcément celui en cours dans l'overlay).
@@ -100,7 +109,7 @@ impl Interface {
         partage: Arc<Mutex<Partage>>,
         overlay: Overlay,
         config_overlay: &overlay::Config,
-        combos: Vec<ComboFichier>,
+        mes_combos: Fichier,
         (dossier_clips, avant_ms): (&str, u64),
         titre_jeu: &str,
     ) -> Interface {
@@ -111,7 +120,11 @@ impl Interface {
             fenetre_overlay: overlay::fenetre(config_overlay),
             overlay_ouvert: false,
             overlay_ouvert_a: std::time::Instant::now(),
-            combos,
+            jouables: jouables(&mes_combos.combo),
+            combos: mes_combos.combo.clone(),
+            modern: mes_combos.modern.clone(),
+            mes_combos,
+            bibliotheque: None,
             onglet: Onglet::Combos,
             recherche: String::new(),
             choisi,
@@ -355,6 +368,8 @@ impl Interface {
             .default_size(340.0)
             .show(ui, |ui| {
                 ui.add_space(6.0);
+                self.choix_personnage(ui);
+                ui.add_space(6.0);
                 // L'entraînement : les combos cochés, enchaînés (réglages dans Réglages).
                 let n = entrainement.combos.len();
                 ui.horizontal(|ui| {
@@ -436,7 +451,8 @@ impl Interface {
                             for (i, c) in self.combos.iter().enumerate() {
                                 let trouve = recherche.is_empty()
                                     || c.nom.to_lowercase().contains(&recherche)
-                                    || c.inputs.to_lowercase().contains(&recherche);
+                                    || c.inputs.to_lowercase().contains(&recherche)
+                                    || c.notes.to_lowercase().contains(&recherche);
                                 if c.categorie != categorie || !trouve {
                                     continue;
                                 }
@@ -453,15 +469,25 @@ impl Interface {
                                             entrainement.combos.retain(|n| n != &c.nom);
                                         }
                                     }
-                                    let complet = c.hits.is_some() || appris.hits(&c.nom).is_some();
+                                    let complet = c.hits.is_some()
+                                        || c.degats.is_some()
+                                        || appris.hits(&c.nom).is_some();
+                                    let jouable = self.jouables.get(i).copied().unwrap_or(false);
                                     let mut texte = RichText::new(&c.nom);
                                     if i == en_cours {
                                         texte = texte.color(JAUNE);
+                                    } else if !jouable {
+                                        texte = texte.color(GRIS).strikethrough();
                                     } else if !complet {
                                         texte = texte.color(GRIS).italics();
                                     }
                                     let mut reponse = ui.selectable_label(i == self.choisi, texte);
-                                    if !complet {
+                                    if !jouable {
+                                        reponse = reponse.on_hover_text(
+                                            "Notation pas encore reconnue par le trainer \
+                                             (super, saut, coup chargé...) : à lire seulement",
+                                        );
+                                    } else if !complet {
                                         reponse = reponse.on_hover_text(
                                             "Combo incomplet : hits attendus inconnus, il ne \
                                              peut pas être validé",
@@ -474,6 +500,7 @@ impl Interface {
                             }
                         });
                     }
+                    self.fiche_modern(ui);
                 });
                 if let Some(i) = clic {
                     self.choisi = i;
@@ -499,7 +526,7 @@ impl Interface {
             .map_or(Default::default(), |p| p.liaisons);
         egui::CentralPanel::default().show(ui, |ui| {
             let Some(combo) = self.combos.get(self.choisi).cloned() else {
-                ui.label("Aucun combo dans combos.toml.");
+                ui.label("Aucun combo dans cette liste.");
                 return;
             };
             ui.add_space(6.0);
@@ -510,7 +537,11 @@ impl Interface {
                 }
             });
             ui.label(RichText::new(&combo.inputs).monospace().color(GRIS));
+            if !combo.notes.is_empty() {
+                ui.label(RichText::new(&combo.notes).italics());
+            }
             ui.add_space(6.0);
+            let jouable = self.jouables.get(self.choisi).copied().unwrap_or(false);
             match crate::combo::parser(&combo.inputs) {
                 Ok(etapes) => {
                     ui.horizontal_wrapped(|ui| {
@@ -523,7 +554,15 @@ impl Interface {
                     });
                 }
                 Err(e) => {
-                    ui.label(RichText::new(e).color(ROUGE));
+                    ui.label(
+                        RichText::new(
+                            "Notation pas encore reconnue par le trainer (super, saut, coup \
+                             chargé, deux boutons...) : ce combo est à lire, il ne peut pas \
+                             être suivi.",
+                        )
+                        .color(JAUNE),
+                    );
+                    ui.label(RichText::new(e).small().color(GRIS));
                 }
             }
             ui.add_space(12.0);
@@ -531,6 +570,7 @@ impl Interface {
             // Ce qui valide le combo : du fichier, sinon appris avec Select.
             let appris = crate::timings::charger().unwrap_or_default();
             let hits_connus = combo.hits.or_else(|| appris.hits(&combo.nom));
+            let degats_connus = combo.degats.or_else(|| appris.degats(&combo.nom));
             let hits = combo
                 .hits
                 .map(|h| format!("{h}"))
@@ -543,7 +583,7 @@ impl Interface {
                 .unwrap_or_else(|| "inconnus".into());
             ui.add_space(6.0);
             ui.horizontal(|ui| {
-                let couleur = if hits_connus.is_some() {
+                let couleur = if hits_connus.is_some() || degats_connus.is_some() {
                     Color32::WHITE
                 } else {
                     JAUNE
@@ -553,6 +593,16 @@ impl Interface {
                 ui.add_space(12.0);
                 ui.label(RichText::new("Dégâts").color(GRIS));
                 ui.label(RichText::new(degats).strong());
+                if let Some(d) = combo.drive {
+                    ui.add_space(12.0);
+                    ui.label(RichText::new("Drive").color(GRIS));
+                    ui.label(RichText::new(d.to_string()).strong());
+                }
+                if let Some(sa) = combo.super_ {
+                    ui.add_space(12.0);
+                    ui.label(RichText::new("Super").color(GRIS));
+                    ui.label(RichText::new(sa.to_string()).strong());
+                }
                 ui.add_space(20.0);
                 let lance = en_cours == self.choisi;
                 let bouton = egui::Button::new(
@@ -563,18 +613,121 @@ impl Interface {
                     })
                     .size(16.0),
                 );
-                if ui.add_enabled(!lance, bouton).clicked()
+                if ui.add_enabled(!lance && jouable, bouton).clicked()
                     && let Ok(mut p) = self.partage.lock()
                 {
                     p.combo_demande = Some(self.choisi);
                 }
             });
-            if combo.hits.is_none() {
-                self.completer_combo(ui, &combo.nom, hits_connus.is_none(), en_cours);
+            if combo.hits.is_none() && jouable {
+                let incomplet = hits_connus.is_none() && degats_connus.is_none();
+                self.completer_combo(ui, &combo.nom, incomplet, en_cours);
             }
             ui.add_space(6.0);
             ui.separator();
             self.videos_du_combo(ui, &combo.nom);
+        });
+    }
+}
+
+// ---------------------------------------------------------------- Personnages
+
+/// Les combos dont la notation est reconnue (les autres sont à lire seulement).
+fn jouables(combos: &[ComboFichier]) -> Vec<bool> {
+    combos
+        .iter()
+        .map(|c| crate::combo::parser(&c.inputs).is_ok())
+        .collect()
+}
+
+impl Interface {
+    /// Le choix de la liste : `combos.toml`, ou un personnage de la feuille communautaire.
+    fn choix_personnage(&mut self, ui: &mut egui::Ui) {
+        let mes_combos = format!("Mes combos ({})", self.mes_combos.personnage);
+        let actuel = self.bibliotheque.clone();
+        let mut choix = actuel.clone();
+        ui.horizontal(|ui| {
+            ui.label("Liste");
+            egui::ComboBox::from_id_salt("personnage")
+                .width(220.0)
+                .selected_text(match &actuel {
+                    Some(p) => format!("{p} (feuille communautaire)"),
+                    None => mes_combos.clone(),
+                })
+                .height(500.0)
+                .show_ui(ui, |ui| {
+                    ui.selectable_value(&mut choix, None, &mes_combos);
+                    ui.separator();
+                    for (p, _) in crate::combo::BIBLIOTHEQUE {
+                        ui.selectable_value(&mut choix, Some(p.to_string()), *p);
+                    }
+                });
+        })
+        .response
+        .on_hover_text(
+            "Feuille communautaire : les combos de tous les persos (dégâts, Drive, super, \
+             conseils) et la fiche Modern sans motion (NMM)",
+        );
+        if choix == actuel {
+            return;
+        }
+        let fichier = match &choix {
+            Some(p) => match crate::combo::bibliotheque(p) {
+                Some(f) => f,
+                None => return,
+            },
+            None => self.mes_combos.clone(),
+        };
+        self.bibliotheque = choix;
+        self.jouables = jouables(&fichier.combo);
+        self.combos = fichier.combo;
+        self.modern = fichier.modern;
+        // Le premier combo que le trainer sait suivre.
+        let premier = self.jouables.iter().position(|j| *j);
+        self.choisi = premier.unwrap_or(0);
+        self.saisie.0.clear();
+        if let Ok(mut p) = self.partage.lock() {
+            p.combos = self.combos.iter().map(|c| c.nom.clone()).collect();
+            p.combo_index = usize::MAX;
+            p.avance_prevue = None;
+            p.liste_demandee = Some((fichier.personnage, self.combos.clone()));
+            p.combo_demande = premier;
+        }
+    }
+
+    /// La fiche Modern sans motion (NMM) du personnage : à lire, en bas de la liste.
+    fn fiche_modern(&self, ui: &mut egui::Ui) {
+        if self.modern.is_empty() {
+            return;
+        }
+        ui.add_space(8.0);
+        egui::CollapsingHeader::new(
+            RichText::new(format!("Modern sans motion (NMM)  ({})", self.modern.len())).strong(),
+        )
+        .id_salt("modern")
+        .default_open(false)
+        .show(ui, |ui| {
+            ui.label(
+                RichText::new(
+                    "Contrôles Modern sans quart de cercle : L/M/H = léger/moyen/fort, \
+                     SP = bouton spécial, [AUTO] = bouton assist, > = enchaîner. \
+                     À lire seulement : le trainer suit les contrôles Classic.",
+                )
+                .small()
+                .color(GRIS),
+            );
+            let mut categorie = None;
+            for m in &self.modern {
+                if categorie != Some(&m.categorie) {
+                    categorie = Some(&m.categorie);
+                    ui.add_space(4.0);
+                    ui.label(RichText::new(&m.categorie).strong().color(CYAN));
+                }
+                ui.label(RichText::new(&m.inputs).monospace());
+                if !m.notes.is_empty() {
+                    ui.label(RichText::new(&m.notes).small().color(GRIS));
+                }
+            }
         });
     }
 }

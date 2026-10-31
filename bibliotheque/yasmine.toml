@@ -1,0 +1,694 @@
+# Yasmine : combos de la feuille communautaire SF6 (Google Sheets), importés tels quels.
+# degats = dégâts du combo complet, drive = barres de Drive, super = barres de super.
+# [[modern]] : les mêmes infos en contrôles Modern sans motion (NMM), pour référence.
+personnage = "Yasmine"
+
+[[combo]]
+nom = "cr. lp, cr. lk, cr. lp xx srk+hk"
+categorie = "Sans jauge"
+inputs = "cr. lp, cr. lk, cr. lp xx srk+hk"
+degats = 1450
+drive = 0
+super = 0
+
+[[combo]]
+nom = "cr. lp, cr. lk, st. lp xx lp xx srk+hk"
+categorie = "Sans jauge"
+inputs = "cr. lp, cr. lk, st. lp xx lp xx srk+hk"
+degats = 1560
+drive = 0
+super = 0
+
+[[combo]]
+nom = "cr. lp, cr. lk, st. lp xx lp xx qcf+mp xx f+p"
+categorie = "Sans jauge"
+inputs = "cr. lp, cr. lk, st. lp xx lp xx qcf+mp xx f+p"
+degats = 1350
+drive = 0
+super = 0
+notes = "Light string. Sets up Bayani Mode"
+
+[[combo]]
+nom = "cr. mp xx qcf+hp xx f+p, srk+lk"
+categorie = "Sans jauge"
+inputs = "cr. mp xx qcf+hp xx f+p, srk+lk"
+degats = 2180
+drive = 0
+super = 0
+notes = "Corner only. Sets up Bayani Mode."
+
+[[combo]]
+nom = "mp xx mp xx srk+hk"
+categorie = "Sans jauge"
+inputs = "mp xx mp xx srk+hk"
+degats = 1910
+drive = 0
+super = 0
+
+[[combo]]
+nom = "mp xx mp xx qcf+mp xx f+p"
+categorie = "Sans jauge"
+inputs = "mp xx mp xx qcf+mp xx f+p"
+degats = 1640
+drive = 0
+super = 0
+notes = "Medium string. Sets up Bayani Mode"
+
+[[combo]]
+nom = "cr. mk xx cr. hk"
+categorie = "Sans jauge"
+inputs = "cr. mk xx cr. hk"
+degats = 900
+drive = 0
+super = 0
+notes = "Hitconfirmable low string that snags a knockdown."
+
+[[combo]]
+nom = "st. mk xx mk xx hk"
+categorie = "Sans jauge"
+inputs = "st. mk xx mk xx hk"
+degats = 1500
+drive = 0
+super = 0
+notes = "One of Yasmine's longer range pokes that lunges forward, a situational confirm at best."
+
+[[combo]]
+nom = "cr. hp xx qcb+hp"
+categorie = "Sans jauge"
+inputs = "cr. hp xx qcb+hp"
+degats = 2000
+drive = 0
+super = 0
+notes = "Heavy cancel. Sets up Bayani Mode"
+
+[[combo]]
+nom = "cr. hp xx dd+mp, cr. lp xx qcf+lp, st. hp xx srk+hk"
+categorie = "Sans jauge"
+inputs = "cr. hp xx dd+mp, cr. lp xx qcf+lp, st. hp xx srk+hk"
+degats = 2450
+drive = 0
+super = 0
+notes = "Corner only. Example use of projectile to extend combos off of cr. hp in the corner."
+
+[[combo]]
+nom = "st. hp xx qcf+hp xx f+p"
+categorie = "Sans jauge"
+inputs = "st. hp xx qcf+hp xx f+p"
+degats = 1280
+drive = 0
+super = 0
+notes = "Weirdly inconsistent if you don't cancel the first available frame into qcf+hp. I wouldn't use this. Sets up Bayani Mode."
+
+[[combo]]
+nom = "b+hk xx qcf+mp xx f+p"
+categorie = "Sans jauge"
+inputs = "b+hk xx qcf+mp xx f+p"
+degats = 1540
+drive = 0
+super = 0
+notes = "Just a reminder that the backsway b+hk can cancel into specials."
+
+[[combo]]
+nom = "cr. lp, cr. lk, st. lp xx lp xx qcf+lp xx f+p (b)"
+categorie = "Bayani Mode"
+inputs = "cr. lp, cr. lk, st. lp xx lp xx qcf+lp xx f+p (b)"
+degats = 1470
+drive = 0
+super = 0
+
+[[combo]]
+nom = "cr. lp, cr. lk, st. lp xx lp xx qcf+mp xx f+p (b)"
+categorie = "Bayani Mode"
+inputs = "cr. lp, cr. lk, st. lp xx lp xx qcf+mp xx f+p (b)"
+degats = 1390
+drive = 0
+super = 0
+notes = "Though less damage, this offers a midscreen safejump."
+
+[[combo]]
+nom = "cr. lp, cr. lk, st. lp xx lp xx qcf+mp xx f+p (b), srk+mk"
+categorie = "Bayani Mode"
+inputs = "cr. lp, cr. lk, st. lp xx lp xx qcf+mp xx f+p (b), srk+mk"
+degats = 1630
+drive = 0
+super = 0
+notes = "qcf+mp xx f+p (b) gives a ground bounce that nets a srk+mk or SA1 followup in the corner"
+
+[[combo]]
+nom = "mp xx mp xx qcf+lp xx f+p (b)"
+categorie = "Bayani Mode"
+inputs = "mp xx mp xx qcf+lp xx f+p (b)"
+degats = 1820
+drive = 0
+super = 0
+notes = "+44 knockdown."
+
+[[combo]]
+nom = "mp xx mp xx qcf+mp xx f+p (b)"
+categorie = "Bayani Mode"
+inputs = "mp xx mp xx qcf+mp xx f+p (b)"
+degats = 1700
+drive = 0
+super = 0
+notes = "+45 knockdown."
+
+[[combo]]
+nom = "cr. hp xx qcf+hp xx f+p (b), st. hp xx srk+hk"
+categorie = "Bayani Mode"
+inputs = "cr. hp xx qcf+hp xx f+p (b), st. hp xx srk+hk"
+degats = 2680
+drive = 0
+super = 0
+
+[[combo]]
+nom = "cr. hp xx qcf+hp xx f+p (b), st. hp xx dd+lp"
+categorie = "Bayani Mode"
+inputs = "cr. hp xx qcf+hp xx f+p (b), st. hp xx dd+lp"
+degats = 1900
+drive = 0
+super = 0
+notes = "Sets up a projectile return."
+
+[[combo]]
+nom = "cr. lp, cr. lk, st. lp xx lp xx qcf+pp xx f+p"
+categorie = "OD"
+inputs = "cr. lp, cr. lk, st. lp xx lp xx qcf+pp xx f+p"
+degats = 1830
+drive = 0
+super = 0
+notes = "Preserves Bayani Mode if you have the stock."
+
+[[combo]]
+nom = "mp xx mp xx qcb+pp, st. hp xx srk+hk"
+categorie = "OD"
+inputs = "mp xx mp xx qcb+pp, st. hp xx srk+hk"
+degats = 2330
+drive = 0
+super = 0
+notes = "Grants Bayani Mode."
+
+[[combo]]
+nom = "cr. hp xx dd+lp+mp, st. lk xx qcb+hp, st. hp xx srk+hk"
+categorie = "OD"
+inputs = "cr. hp xx dd+lp+mp, st. lk xx qcb+hp, st. hp xx srk+hk"
+degats = 3170
+drive = 0
+super = 0
+notes = "Corner only. Grants Bayani Mode."
+
+[[combo]]
+nom = "cr. lp xx dr xx st. lk"
+categorie = "Extensions Drive Rush"
+inputs = "cr. lp xx dr xx st. lk"
+drive = 3
+super = 0
+notes = "5f or less"
+
+[[combo]]
+nom = "st. lp xx dr xx cr. lp"
+categorie = "Extensions Drive Rush"
+inputs = "st. lp xx dr xx cr. lp"
+drive = 3
+super = 0
+notes = "4f or less"
+
+[[combo]]
+nom = "st. lk xx dr xx st. lp"
+categorie = "Extensions Drive Rush"
+inputs = "st. lk xx dr xx st. lp"
+drive = 3
+super = 0
+notes = "5f or less"
+
+[[combo]]
+nom = "cr. mp xx dr xx st. mk"
+categorie = "Extensions Drive Rush"
+inputs = "cr. mp xx dr xx st. mk"
+drive = 3
+super = 0
+notes = "13f or less"
+
+[[combo]]
+nom = "cr. mk xx dr xx st. hp"
+categorie = "Extensions Drive Rush"
+inputs = "cr. mk xx dr xx st. hp"
+drive = 3
+super = 0
+notes = "9f or less"
+
+[[combo]]
+nom = "cr. hp xx dr xx st. hk"
+categorie = "Extensions Drive Rush"
+inputs = "cr. hp xx dr xx st. hk"
+drive = 3
+super = 0
+notes = "21f or less"
+
+[[combo]]
+nom = "st. hp xx dr xx st. mk"
+categorie = "Extensions Drive Rush"
+inputs = "st. hp xx dr xx st. mk"
+drive = 3
+super = 0
+notes = "13f or less"
+
+[[combo]]
+nom = "b+hk xx dr xx cr. hp"
+categorie = "Extensions Drive Rush"
+inputs = "b+hk xx dr xx cr. hp"
+drive = 3
+super = 0
+notes = "8f or less truestrings on block"
+
+[[combo]]
+nom = "st. lp xx lp xx dr xx st. lk"
+categorie = "Extensions Drive Rush"
+inputs = "st. lp xx lp xx dr xx st. lk"
+drive = 3
+super = 0
+notes = "5f or less. Not possible to truestring."
+
+[[combo]]
+nom = "st. mp xx mp xx dr xx cr. mp"
+categorie = "Extensions Drive Rush"
+inputs = "st. mp xx mp xx dr xx cr. mp"
+drive = 3
+super = 0
+notes = "6f or less truestrings on block"
+
+[[combo]]
+nom = "cr. mk xx dr xx cr. lp, cr. lk, st. lp xx lp xx srk+hk"
+categorie = "Drive Rush"
+inputs = "cr. mk xx dr xx cr. lp, cr. lk, st. lp xx lp xx srk+hk"
+degats = 1584
+drive = 3
+super = 0
+notes = "Standard cr. mk drive rush opener."
+
+[[combo]]
+nom = "cr. mk xx dr xx cr. mp, cr. hp xx qcf+hp xx f+p (b), st. hp xx srk+hk"
+categorie = "Drive Rush"
+inputs = "cr. mk xx dr xx cr. mp, cr. hp xx qcf+hp xx f+p (b), st. hp xx srk+hk"
+degats = 2269
+drive = 3
+super = 0
+notes = "Slightly more damaging drive rush opener."
+
+[[combo]]
+nom = "cr. mp xx dr xx cr. mp, cr. hp xx qcf+hp xx f+p (b), dr xx cr. mp xx qcb+hp, st. hp xx srk+hk"
+categorie = "Drive Rush"
+inputs = "cr. mp xx dr xx cr. mp, cr. hp xx qcf+hp xx f+p (b), dr xx cr. mp xx qcb+hp, st. hp xx srk+hk"
+degats = 3225
+drive = 4
+super = 0
+notes = "Example extension of qcf+hp (b) into a drive rush juggle."
+
+[[combo]]
+nom = "dr xx f+mp, st. mp xx mp xx qcf+mp xx f+p"
+categorie = "Drive Rush"
+inputs = "dr xx f+mp, st. mp xx mp xx qcf+mp xx f+p"
+degats = 2060
+drive = 1
+super = 0
+notes = "Example drive rush overhead combo. Grants Bayani Mode."
+
+[[combo]]
+nom = "dr xx cr. lk, st. mp xx mp xx qcf+mp xx f+p"
+categorie = "Drive Rush"
+inputs = "dr xx cr. lk, st. mp xx mp xx qcf+mp xx f+p"
+degats = 1400
+drive = 1
+super = 0
+notes = "Example drive rush low combo. Grants Bayani Mode."
+
+[[combo]]
+nom = "dr xx st. hp, cr. mp xx qcb+mp"
+categorie = "Drive Rush"
+inputs = "dr xx st. hp, cr. mp xx qcb+mp"
+degats = 2280
+drive = 1
+super = 0
+notes = "Use of Yasmine's 3-hit dr xx st. hp."
+
+[[combo]]
+nom = "cr. hp xx dr xx cr. mp, cr. hp xx dr xx cr. mp, cr. hp xx qcb+hp"
+categorie = "Drive Rush"
+inputs = "cr. hp xx dr xx cr. mp, cr. hp xx dr xx cr. mp, cr. hp xx qcb+hp"
+degats = 3120
+drive = 6
+super = 0
+notes = "Example drive rush loop."
+
+[[combo]]
+nom = "cr. lp, cr. lk, cr. lp xx dr xx cr. lp, cr. hp xx qcb+hp"
+categorie = "Drive Rush"
+inputs = "cr. lp, cr. lk, cr. lp xx dr xx cr. lp, cr. hp xx qcb+hp"
+degats = 1567
+drive = 3
+super = 0
+notes = "Example of \"climbing\" from lights to heavies."
+
+[[combo]]
+nom = "dr xx st. hp, cr. mp xx dr xx cr. mp, cr. hp xx dd+lp, cr. lp xx qcb+hp, st. hp xx srk+hk"
+categorie = "Drive Rush"
+inputs = "dr xx st. hp, cr. mp xx dr xx cr. mp, cr. hp xx dd+lp, cr. lp xx qcb+hp, st. hp xx srk+hk"
+degats = 3107
+drive = 4
+super = 0
+notes = "Corner only, making use of Yasmine's projectile."
+
+[[combo]]
+nom = "cr. hp xx qcf+hp xx f+p (b), dr xx cr. hp xx dr xx cr. hp xx qcb+hp, qcf+pp xx f+p xx qcfx2+p"
+categorie = "Drive Rush"
+inputs = "cr. hp xx qcf+hp xx f+p (b), dr xx cr. hp xx dr xx cr. hp xx qcb+hp, qcf+pp xx f+p xx qcfx2+p"
+degats = 5730
+drive = 6
+super = 3
+notes = "Maximum damage from cr. hp starter at this time (8/3/2026). Requires a delay after the cr. hp drive rush to get the qcb+hp to cancel as well as connect."
+
+[[combo]]
+nom = "st. hp xx qcf+pp xx f+p xx qcbx2+p, qcb+hp, st. hp xx srk+hp"
+categorie = "Exemples SA2"
+inputs = "st. hp xx qcf+pp xx f+p xx qcbx2+p, qcb+hp, st. hp xx srk+hp"
+degats = 3650
+drive = 2
+super = 2
+
+[[combo]]
+nom = "cr. mp xx qcb+pp xx qcbx2+p, cr. hp xx qcf+hp xx f+p (b), dr xx cr. mp xx qcb+hp, st. hp xx srk+hk"
+categorie = "Exemples SA2"
+inputs = "cr. mp xx qcb+pp xx qcbx2+p, cr. hp xx qcf+hp xx f+p (b), dr xx cr. mp xx qcb+hp, st. hp xx srk+hk"
+degats = 3220
+drive = 3
+super = 2
+notes = "Surprisingly drive efficient, you regenerate most of the drive you spend during the combo."
+
+[[combo]]
+nom = "st. mp xx mp xx qcbx2+p, st. hp xx srk+hk"
+categorie = "Exemples SA2"
+inputs = "st. mp xx mp xx qcbx2+p, st. hp xx srk+hk"
+degats = 2060
+drive = 0
+super = 2
+notes = "Can also cancel the st. hp into a projectile to cover your opponent's wakeup."
+
+[[combo]]
+nom = "cr. lp (pc), cr. hp xx qcb+hp"
+categorie = "Punish Counter"
+inputs = "cr. lp (pc), cr. hp xx qcb+hp"
+degats = 1840
+drive = 0
+super = 0
+notes = "4f pc, point blank. Grants Bayani Mode"
+
+[[combo]]
+nom = "cr. lp (pc), cr. mk xx srk+hk"
+categorie = "Punish Counter"
+inputs = "cr. lp (pc), cr. mk xx srk+hk"
+degats = 1670
+drive = 0
+super = 0
+notes = "4f pc, mid/long range."
+
+[[combo]]
+nom = "cr. mp (pc), cr. hp xx qcb+hp"
+categorie = "Punish Counter"
+inputs = "cr. mp (pc), cr. hp xx qcb+hp"
+degats = 2480
+drive = 0
+super = 0
+notes = "6f pc, point blank. Grants Bayani Mode"
+
+[[combo]]
+nom = "cr. mp (pc), cr. mk xx qcf+mp xx f+p"
+categorie = "Punish Counter"
+inputs = "cr. mp (pc), cr. mk xx qcf+mp xx f+p"
+degats = 1960
+drive = 0
+super = 0
+notes = "6f pc, tip range. Grants Bayani Mode"
+
+[[combo]]
+nom = "cr. mk (pc) xx qcf+hp xx f+p"
+categorie = "Punish Counter"
+inputs = "cr. mk (pc) xx qcf+hp xx f+p"
+degats = 1340
+drive = 0
+super = 0
+notes = "8f pc. Tip range. Grants Bayani Mode"
+
+[[combo]]
+nom = "cr. hp (pc) xx qcf+hp xx f+p"
+categorie = "Punish Counter"
+inputs = "cr. hp (pc) xx qcf+hp xx f+p"
+degats = 1840
+drive = 0
+super = 0
+notes = "8f pc. Point blank. Grants Bayani Mode"
+
+[[combo]]
+nom = "st. hp (pc), cr. mp xx srk+hk"
+categorie = "Punish Counter"
+inputs = "st. hp (pc), cr. mp xx srk+hk"
+degats = 2600
+drive = 0
+super = 0
+notes = "9f pc."
+
+[[combo]]
+nom = "st. hk (pc), qcb+mp"
+categorie = "Punish Counter"
+inputs = "st. hk (pc), qcb+mp"
+degats = 1730
+drive = 0
+super = 0
+notes = "14f pc."
+
+[[combo]]
+nom = "st. hk (pc), dr xx cr. mp xx qcb+hp, st. hp xx srk+hk"
+categorie = "Punish Counter"
+inputs = "st. hk (pc), dr xx cr. mp xx qcb+hp, st. hp xx srk+hk"
+degats = 2535
+drive = 0
+super = 0
+notes = "14f pc."
+
+[[combo]]
+nom = "st. hk (pc), qcb+mp, srk+hk"
+categorie = "Punish Counter"
+inputs = "st. hk (pc), qcb+mp, srk+hk"
+degats = 2510
+drive = 0
+super = 0
+notes = "14f pc. Corner only."
+
+[[combo]]
+nom = "b+hk (pc) xx qcb+hp, st. hp xx srk+hk"
+categorie = "Punish Counter"
+inputs = "b+hk (pc) xx qcb+hp, st. hp xx srk+hk"
+degats = 2980
+drive = 0
+super = 0
+notes = "22f pc. Point blank only."
+
+[[combo]]
+nom = "b+hk (pc) xx dr xx cr. hp xx qcb+hp, st. hp xx srk+hk"
+categorie = "Punish Counter"
+inputs = "b+hk (pc) xx dr xx cr. hp xx qcb+hp, st. hp xx srk+hk"
+degats = 2960
+drive = 0
+super = 0
+notes = "22f pc. Any range."
+
+[[combo]]
+nom = "qcb+mp (pc), cr. mp xx qcf+hp xx f+p (b), dr xx cr. mp xx qcb+hp, st. hp xx srk+hk"
+categorie = "Punish Counter"
+inputs = "qcb+mp (pc), cr. mp xx qcf+hp xx f+p (b), dr xx cr. mp xx qcb+hp, st. hp xx srk+hk"
+degats = 2648
+drive = 1
+super = 0
+notes = "21f pc. Any range. Grants, uses, then grants Bayani Mode."
+
+[[combo]]
+nom = "dr xx cr. hp (pc), cr. hp xx qcb+pp, qcf+pp xx f+p xx qcfx2+p"
+categorie = "Punish Counter"
+inputs = "dr xx cr. hp (pc), cr. hp xx qcb+pp, qcf+pp xx f+p xx qcfx2+p"
+degats = 5760
+drive = 4
+super = 3
+notes = "29f pc."
+
+[[combo]]
+nom = "dr xx cr. hp (pc), cr. hp xx dd+mp, cr. mp xx qcb+hp, qcf+pp xx f+p xx qcfx2+p"
+categorie = "Punish Counter"
+inputs = "dr xx cr. hp (pc), cr. hp xx dd+mp, cr. mp xx qcb+hp, qcf+pp xx f+p xx qcfx2+p"
+degats = 5840
+drive = 3
+super = 3
+notes = "29f pc. Corner only."
+
+[[combo]]
+nom = "dr xx cr. hp (pc), cr. hp xx qcf+hp xx f+p (b), dr xx cr. mp xx qcb+hp, qcf+pp xx f+p xx qcfx2+p"
+categorie = "Punish Counter"
+inputs = "dr xx cr. hp (pc), cr. hp xx qcf+hp xx f+p (b), dr xx cr. mp xx qcb+hp, qcf+pp xx f+p xx qcfx2+p"
+degats = 5966
+drive = 4
+super = 3
+notes = "29f pc. Requires Bayani Mode."
+
+[[combo]]
+nom = "dr xx st. hp (pc), cr. hp xx dd+lp+hp, st. lk xx qcf+lp, qcf+pp xx f+p xx qcfx2+p"
+categorie = "Punish Counter"
+inputs = "dr xx st. hp (pc), cr. hp xx dd+lp+hp, st. lk xx qcf+lp, qcf+pp xx f+p xx qcfx2+p"
+degats = 5260
+drive = 5
+super = 3
+notes = "30f pc. Works midscreen."
+
+[[combo]]
+nom = "DI (pc), qcb+hp, st. hp xx srk+hk"
+categorie = "Après DI (crumple)"
+inputs = "DI (pc), qcb+hp, st. hp xx srk+hk"
+degats = 2980
+drive = 1
+super = 0
+notes = "Grants Bayani Mode"
+
+[[combo]]
+nom = "DI (pc), n.j hp, dr xx cr. mp xx qcb+hp, st. hp xx srk+hk"
+categorie = "Après DI (crumple)"
+inputs = "DI (pc), n.j hp, dr xx cr. mp xx qcb+hp, st. hp xx srk+hk"
+degats = 3175
+drive = 1
+super = 0
+notes = "Grants Bayani Mode"
+
+[[combo]]
+nom = "DI (pc), cr. hp xx qcf+hp xx f+p (b), dr xx cr. mp xx qcb+hp, st. hp xx srk+hk"
+categorie = "Après DI (crumple)"
+inputs = "DI (pc), cr. hp xx qcf+hp xx f+p (b), dr xx cr. mp xx qcb+hp, st. hp xx srk+hk"
+degats = 3280
+drive = 2
+super = 0
+notes = "Grants Bayani Mode"
+
+[[combo]]
+nom = "DI (ws), cr. hp xx qcb+mp, srk+hk"
+categorie = "Après DI (wallsplat)"
+inputs = "DI (ws), cr. hp xx qcb+mp, srk+hk"
+degats = 2351
+drive = 1
+super = 0
+
+[[combo]]
+nom = "DI (ws), cr. hp xx dr xx cr. hp xx qcb+hp, st. hp xx srk+hk"
+categorie = "Après DI (wallsplat)"
+inputs = "DI (ws), cr. hp xx dr xx cr. hp xx qcb+hp, st. hp xx srk+hk"
+degats = 2540
+drive = 4
+super = 0
+
+[[combo]]
+nom = "DI (st), j. hp, cr. hp xx qcf+hp xx f+p, srk+lk"
+categorie = "Après DI (stun)"
+inputs = "DI (st), j. hp, cr. hp xx qcf+hp xx f+p, srk+lk"
+degats = 2340
+drive = 1
+super = 0
+notes = "Grants Bayani Mode"
+
+[[combo]]
+nom = "DI (st), j. hp, cr. hp xx dd+lp, cr. lp xx qcb+hp, srk+hk"
+categorie = "Après DI (stun)"
+inputs = "DI (st), j. hp, cr. hp xx dd+lp, cr. lp xx qcb+hp, srk+hk"
+degats = 2440
+drive = 1
+super = 0
+notes = "Grants Bayani Mode"
+
+[[combo]]
+nom = "DI (st), j. hp, cr. hp xx qcf+hp xx f+p (b), dr xx cr. hp xx dr xx cr. hp xx qcb+hp, qcf+pp xx f+p xx qcfx2+p"
+categorie = "Après DI (stun)"
+inputs = "DI (st), j. hp, cr. hp xx qcf+hp xx f+p (b), dr xx cr. hp xx dr xx cr. hp xx qcb+hp, qcf+pp xx f+p xx qcfx2+p"
+degats = 4842
+drive = 7
+super = 3
+notes = "Example meter dump combo into SA3 post stun."
+
+[[modern]]
+categorie = "Anti-airs"
+inputs = "D+H"
+notes = "Nice, wide arc on an upwards slash."
+
+[[modern]]
+categorie = "Anti-airs"
+inputs = "F+SP"
+notes = "Air invincible uppercut."
+
+[[modern]]
+categorie = "Anti-airs"
+inputs = "U+L"
+notes = "Air-to-air, works as an anti crossup tool"
+
+[[modern]]
+categorie = "Pokes"
+inputs = "M+[AUTO]"
+notes = "Yasmine's cr. mp. Disjointed, good for stopping rushdown and converting off of whiffs."
+
+[[modern]]
+categorie = "Pokes"
+inputs = "D+M"
+notes = "Yasmine's cr. mk. Long reaching low poke. Has a target combo (D+M>D+M)"
+
+[[modern]]
+categorie = "Pokes"
+inputs = "L"
+notes = "Yasmine's st. lk, good for attacking opposing cr. mks"
+
+[[modern]]
+categorie = "Pokes"
+inputs = "H+[AUTO]"
+notes = "Yasmine's st. hp. Steps forward, good for whiff punishes and off of drive rush."
+
+[[modern]]
+categorie = "Punitions"
+inputs = "D+L, D+H > F+SP"
+notes = "4f punish counter."
+
+[[modern]]
+categorie = "Punitions"
+inputs = "M+[AUTO], D+H > SP > F+SP"
+notes = "6f punish counter."
+
+[[modern]]
+categorie = "Punitions"
+inputs = "B+H > QCB+H > H+[AUTO] > SRK+H"
+notes = "22f punish counter."
+
+[[modern]]
+categorie = "Combos de base"
+inputs = "D+L > D+L > L > L > SP > F+SP"
+
+[[modern]]
+categorie = "Combos de base"
+inputs = "M > M > SP > F+SP"
+
+[[modern]]
+categorie = "Combos de base"
+inputs = "D+M > DR > D+L > D+L > L > L > F+SP"
+notes = "cr. mk drive rush example"
+
+[[modern]]
+categorie = "Combos de base"
+inputs = "DR > F+M > M > M > SP > F+SP"
+notes = "Drive rush into overhead example"
+
+[[modern]]
+categorie = "Combos de base"
+inputs = "DR > L+[AUTO] > M > M > SP > F+SP"
+notes = "Drive rush into low example"
+
+[[modern]]
+categorie = "Combos de base"
+inputs = "DR > H+[AUTO] > M+[AUTO] > SP > F+SP"
+notes = "Drive rush into st. hp example"

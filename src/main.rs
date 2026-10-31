@@ -48,7 +48,7 @@ fn main() {
 
 fn lancer() -> Result<(), String> {
     let controles = controles::charger()?;
-    let (personnage, combos, choisi) = choisir_combo()?;
+    let (personnage, combos, modern, choisi) = choisir_combo()?;
     let timings = timings::charger()?;
     let trial = combo::creer_trial(&combos[choisi], &timings)?;
     let inputs = combos[choisi].inputs.clone();
@@ -93,7 +93,11 @@ fn lancer() -> Result<(), String> {
             // Pour afficher les icônes SVG des boutons.
             egui_extras::install_image_loaders(&ctx);
             let partage_manette = Arc::clone(&partage);
-            let combos_interface = combos.clone();
+            let combos_interface = combo::Fichier {
+                personnage: personnage.clone(),
+                combo: combos.clone(),
+                modern: modern.clone(),
+            };
             std::thread::spawn(move || {
                 entrees::boucle(
                     controles,
@@ -120,8 +124,10 @@ fn lancer() -> Result<(), String> {
 
 /// Charge `combos.toml` et prend le combo demandé (`cargo run -- 2`), le premier par défaut.
 /// On peut ensuite en changer avec les flèches de l'overlay.
-/// Renvoie le personnage, tous les combos et le numéro (à partir de 0) du combo choisi.
-fn choisir_combo() -> Result<(String, Vec<combo::ComboFichier>, usize), String> {
+/// Renvoie le personnage, tous les combos, la fiche Modern et le numéro (à partir de 0) du combo choisi.
+type Choix = (String, Vec<combo::ComboFichier>, Vec<combo::Modern>, usize);
+
+fn choisir_combo() -> Result<Choix, String> {
     let fichier = combo::charger()?;
     let numero: usize = match std::env::args().nth(1) {
         Some(arg) => arg
@@ -141,5 +147,10 @@ fn choisir_combo() -> Result<(String, Vec<combo::ComboFichier>, usize), String> 
         let marque = if i + 1 == numero { "►" } else { " " };
         println!("  {marque} {:>2}. {}", i + 1, c.nom);
     }
-    Ok((fichier.personnage, fichier.combo, numero - 1))
+    Ok((
+        fichier.personnage,
+        fichier.combo,
+        fichier.modern,
+        numero - 1,
+    ))
 }

@@ -1,0 +1,687 @@
+# Marisa : combos de la feuille communautaire SF6 (Google Sheets), importés tels quels.
+# degats = dégâts du combo complet, drive = barres de Drive, super = barres de super.
+# [[modern]] : les mêmes infos en contrôles Modern sans motion (NMM), pour référence.
+personnage = "Marisa"
+
+[[combo]]
+nom = "cr. lk, cr. lp, cr. lp xx qcb+lp xx f+lp"
+categorie = "Sans jauge"
+inputs = "cr. lk, cr. lp, cr. lp xx qcb+lp xx f+lp"
+degats = 1410
+drive = 0
+super = 0
+notes = "Standard low starter combo"
+
+[[combo]]
+nom = "cr. lp, cr. lp, cr. lp xx qcb+lp xx f+lp"
+categorie = "Sans jauge"
+inputs = "cr. lp, cr. lp, cr. lp xx qcb+lp xx f+lp"
+degats = 1410
+drive = 0
+super = 0
+notes = "Standard chain combo. Stuffs reversal 4f/throw."
+
+[[combo]]
+nom = "mp xx mp xx qcb+mp xx f+mp"
+categorie = "Sans jauge"
+inputs = "mp xx mp xx qcb+mp xx f+mp"
+degats = 2280
+drive = 0
+super = 0
+
+[[combo]]
+nom = "b+hp xx qcb+hp xx f+p, qcf+hp"
+categorie = "Sans jauge"
+inputs = "b+hp xx qcb+hp xx f+p, qcf+hp"
+degats = 3140
+drive = 0
+super = 0
+notes = "Easy to execute punish combo."
+
+[[combo]]
+nom = "b+hp xx qcb+hp xx f+p, qcf+lk"
+categorie = "Sans jauge"
+inputs = "b+hp xx qcb+hp xx f+p, qcf+lk"
+degats = 3020
+drive = 0
+super = 0
+notes = "Similar, but better oki"
+
+[[combo]]
+nom = "b+hp xx qcb+hp xx f+p, cr. hp (held), qcf+mp"
+categorie = "Sans jauge"
+inputs = "b+hp xx qcb+hp xx f+p, cr. hp (held), qcf+mp"
+degats = 3480
+drive = 0
+super = 0
+notes = "Corner only"
+
+[[combo]]
+nom = "b+hp xx qcb+hp xx f+p, b+hp (held) xx qcf+hp"
+categorie = "Sans jauge"
+inputs = "b+hp xx qcb+hp xx f+p, b+hp (held) xx qcf+hp"
+degats = 3580
+drive = 0
+super = 0
+notes = "Corner only."
+
+[[combo]]
+nom = "b+hp xx qcb+hp xx f+p, b+hp (held) xx srk+lp"
+categorie = "Sans jauge"
+inputs = "b+hp xx qcb+hp xx f+p, b+hp (held) xx srk+lp"
+degats = 3530
+drive = 0
+super = 0
+notes = "Corner only. Sets up a safejump."
+
+[[combo]]
+nom = "b+hp xx qcb+hp xx f+p, d/f+hp"
+categorie = "Sans jauge"
+inputs = "b+hp xx qcb+hp xx f+p, d/f+hp"
+degats = 2720
+drive = 0
+super = 0
+notes = "Sets up an immediate j. lk safejump."
+
+[[combo]]
+nom = "b+hp (held), st. hp xx st. hp"
+categorie = "Sans jauge"
+inputs = "b+hp (held), st. hp xx st. hp"
+degats = 2800
+drive = 0
+super = 0
+
+[[combo]]
+nom = "b+hp (held), b+hp xx qcb+hp xx f+hp, qcf+hp"
+categorie = "Sans jauge"
+inputs = "b+hp (held), b+hp xx qcb+hp xx f+hp, qcf+hp"
+degats = 3760
+drive = 0
+super = 0
+notes = "Used to punish big things. 20f startup"
+
+[[combo]]
+nom = "b+hp (held), b+hp xx qcb+hp xx f+hp, qcfx2+p"
+categorie = "Sans jauge"
+inputs = "b+hp (held), b+hp xx qcb+hp xx f+hp, qcfx2+p"
+degats = 4060
+drive = 0
+super = 1
+notes = "SA1 Confirm example"
+
+[[combo]]
+nom = "b+hp (held), b+hp xx qcb+hp xx f+hp, qcbx2+p"
+categorie = "Sans jauge"
+inputs = "b+hp (held), b+hp xx qcb+hp xx f+hp, qcbx2+p"
+degats = 4160
+drive = 0
+super = 2
+notes = "SA2 Confirm example. Not much more damage."
+
+[[combo]]
+nom = "b+hp (held), b+hp xx qcb+hp xx f+hp, qcf+hp xx qcfx2+k"
+categorie = "Sans jauge"
+inputs = "b+hp (held), b+hp xx qcb+hp xx f+hp, qcf+hp xx qcfx2+k"
+degats = 5760
+drive = 0
+super = 3
+notes = "SA3 Confirm example"
+
+[[combo]]
+nom = "d/f+hp (held), cr. lp xx qcb+lp xx f+p"
+categorie = "Sans jauge"
+inputs = "d/f+hp (held), cr. lp xx qcb+lp xx f+p"
+degats = 2200
+drive = 0
+super = 0
+notes = "Charged overhead combo."
+
+[[combo]]
+nom = "f+hk (held), b+hp xx qcb+hp xx f+p, qcf+hp"
+categorie = "Sans jauge"
+inputs = "f+hk (held), b+hp xx qcb+hp xx f+p, qcf+hp"
+degats = 3760
+drive = 0
+super = 0
+notes = "Used to punish really big things. 27f startup."
+
+[[combo]]
+nom = "st. mp xx mp xx qcf+pp"
+categorie = "OD"
+inputs = "st. mp xx mp xx qcf+pp"
+degats = 2660
+drive = 2
+super = 0
+notes = "Lets you remain safe, even if they DI after the second punch you can armor it"
+
+[[combo]]
+nom = "st. mp xx mp xx qcb+pp xx f+p, qcf+hp"
+categorie = "OD"
+inputs = "st. mp xx mp xx qcb+pp xx f+p, qcf+hp"
+degats = 3000
+drive = 2
+super = 0
+notes = "Any qcb+hp route can be mimicked with qcb+pp"
+
+[[combo]]
+nom = "f+hk xx qcf+kk, b+hp xx qcf+hp"
+categorie = "OD"
+inputs = "f+hk xx qcf+kk, b+hp xx qcf+hp"
+degats = 4240
+drive = 2
+super = 0
+notes = "Corner only"
+
+[[combo]]
+nom = "b+hp xx qcb+hp xx f+p, dr xx b+hp xx srk+pp, d+hp (held) xx SA1 (held)"
+categorie = "OD"
+inputs = "b+hp xx qcb+hp xx f+p, dr xx b+hp xx srk+pp, d+hp (held) xx SA1 (held)"
+degats = 4347
+drive = 3
+super = 1
+notes = "Example SA1 corner route with new cr. hp (held) super cancel (6/3/2025)"
+
+[[combo]]
+nom = "st. mp xx mp xx qcb+pp xx f+p, dr xx f+hk xx qcf+hk"
+categorie = "Parry Drive Rush Variants"
+inputs = "st. mp xx mp xx qcb+pp xx f+p, dr xx f+hk xx qcf+hk"
+degats = 3122
+drive = 3
+super = 0
+
+[[combo]]
+nom = "b+hp xx qcb+hp xx f+p, dr xx b+hp xx qcf+hk"
+categorie = "Parry Drive Rush Variants"
+inputs = "b+hp xx qcb+hp xx f+p, dr xx b+hp xx qcf+hk"
+degats = 3311
+drive = 1
+super = 0
+
+[[combo]]
+nom = "b+hp xx qcb+hp xx f+p, dr xx b+hp xx qcf+kk, qcf+lp"
+categorie = "Parry Drive Rush Variants"
+inputs = "b+hp xx qcb+hp xx f+p, dr xx b+hp xx qcf+kk, qcf+lp"
+degats = 3667
+drive = 3
+super = 0
+
+[[combo]]
+nom = "cr. hp (held), dr xx b+hp xx qcf+hk"
+categorie = "Parry Drive Rush Variants"
+inputs = "cr. hp (held), dr xx b+hp xx qcf+hk"
+degats = 2853
+drive = 1
+super = 0
+
+[[combo]]
+nom = "dr xx st. mk, b+hp xx qcb+hp xx f+p, qcf+lk"
+categorie = "Parry Drive Rush Variants"
+inputs = "dr xx st. mk, b+hp xx qcb+hp xx f+p, qcf+lk"
+degats = 3460
+drive = 1
+super = 0
+
+[[combo]]
+nom = "dr xx f+mp, cr. lp, cr. lp xx qcb+lp xx f+p"
+categorie = "Parry Drive Rush Variants"
+inputs = "dr xx f+mp, cr. lp, cr. lp xx qcb+lp xx f+p"
+degats = 2120
+drive = 1
+super = 0
+
+[[combo]]
+nom = "dr xx st. hp, mp xx mp xx qcb+mp xx f+p"
+categorie = "Parry Drive Rush Variants"
+inputs = "dr xx st. hp, mp xx mp xx qcb+mp xx f+p"
+degats = 2960
+drive = 1
+super = 0
+
+[[combo]]
+nom = "dr xx cr. mp, mp xx mp xx qcb+mp xx f+p"
+categorie = "Parry Drive Rush Variants"
+inputs = "dr xx cr. mp, mp xx mp xx qcb+mp xx f+p"
+degats = 2730
+drive = 1
+super = 0
+
+[[combo]]
+nom = "mp xx mp xx DR xx cr. mk"
+categorie = "Extensions Drive Rush"
+inputs = "mp xx mp xx DR xx cr. mk"
+drive = 3
+super = 0
+notes = "9f or less"
+
+[[combo]]
+nom = "cr. mp xx DR xx st. hp"
+categorie = "Extensions Drive Rush"
+inputs = "cr. mp xx DR xx st. hp"
+drive = 3
+super = 0
+notes = "12f or less"
+
+[[combo]]
+nom = "b+hp xx DR xx st. hp"
+categorie = "Extensions Drive Rush"
+inputs = "b+hp xx DR xx st. hp"
+drive = 3
+super = 0
+notes = "12f or less"
+
+[[combo]]
+nom = "b+hp (held) xx DR xx b+hp (held)"
+categorie = "Extensions Drive Rush"
+inputs = "b+hp (held) xx DR xx b+hp (held)"
+drive = 3
+super = 0
+notes = "20f or less"
+
+[[combo]]
+nom = "f+hk (held) xx DR xx cr. hp (held)"
+categorie = "Extensions Drive Rush"
+inputs = "f+hk (held) xx DR xx cr. hp (held)"
+drive = 3
+super = 0
+notes = "21f or less"
+
+[[combo]]
+nom = "mp xx mp xx DR xx b+hp, mp xx mp xx qcb+mp xx f+p"
+categorie = "Drive Rush"
+inputs = "mp xx mp xx DR xx b+hp, mp xx mp xx qcb+mp xx f+p"
+degats = 3129
+drive = 3
+super = 0
+
+[[combo]]
+nom = "mp xx mp xx DR xx b+hp xx qcb+hp xx f+p, qcf+hp"
+categorie = "Drive Rush"
+inputs = "mp xx mp xx DR xx b+hp xx qcb+hp xx f+p, qcf+hp"
+degats = 3234
+drive = 3
+super = 0
+
+[[combo]]
+nom = "mp xx mp xx qcb+pp xx f+p, dr xx f+hk xx f+hk"
+categorie = "Drive Rush"
+inputs = "mp xx mp xx qcb+pp xx f+p, dr xx f+hk xx f+hk"
+degats = 2918
+drive = 3
+super = 0
+notes = "whiff cr. lp into safejump"
+
+[[combo]]
+nom = "mp xx mp xx qcb+pp xx f+p, dr xx f+hk xx f+hk, dr xx st. lk xx qcf+hp"
+categorie = "Drive Rush"
+inputs = "mp xx mp xx qcb+pp xx f+p, dr xx f+hk xx f+hk, dr xx st. lk xx qcf+hp"
+degats = 3290
+drive = 0
+super = 4
+notes = "New f+hk juggle combo"
+
+[[combo]]
+nom = "b+hp xx DR xx b+hp xx qcb+hp xx f+hp, dr xx b+hp xx qcf+hk"
+categorie = "Drive Rush"
+inputs = "b+hp xx DR xx b+hp xx qcb+hp xx f+hp, dr xx b+hp xx qcf+hk"
+degats = 3485
+drive = 4
+super = 0
+
+[[combo]]
+nom = "b+hp xx qcb+hp xx f+hp, dr xx b+hp xx srk+hp"
+categorie = "Drive Rush"
+inputs = "b+hp xx qcb+hp xx f+hp, dr xx b+hp xx srk+hp"
+degats = 3353
+drive = 1
+super = 0
+
+[[combo]]
+nom = "b+hp xx qcb+hp xx f+hp, dr xx b+hp xx srk+pp, qcfx2+p (charged)"
+categorie = "Drive Rush"
+inputs = "b+hp xx qcb+hp xx f+hp, dr xx b+hp xx srk+pp, qcfx2+p (charged)"
+degats = 4097
+drive = 3
+super = 1
+
+[[combo]]
+nom = "b+hp xx qcb+hp xx f+hp, dr xx f+mp xx hk xx qcbx2+p"
+categorie = "Drive Rush"
+inputs = "b+hp xx qcb+hp xx f+hp, dr xx f+mp xx hk xx qcbx2+p"
+degats = 4124
+drive = 1
+super = 2
+
+[[combo]]
+nom = "dr xx f+hk (held), f+hk xx qcf+kk, b+hp xx dr xx f+hk xx f+hk, dr xx cr. mp xx qcf+hk xx qcfx2+k"
+categorie = "Drive Rush"
+inputs = "dr xx f+hk (held), f+hk xx qcf+kk, b+hp xx dr xx f+hk xx f+hk, dr xx cr. mp xx qcf+hk xx qcfx2+k"
+degats = 7247
+drive = 6
+super = 3
+notes = "Corner only. Offered off of a juggled qcf+lk/mk/hk as okizeme."
+
+[[combo]]
+nom = "cr. lp, st. mp xx mp xx qcb+mp xx f+p"
+categorie = "Punish Counter"
+inputs = "cr. lp, st. mp xx mp xx qcb+mp xx f+p"
+degats = 2060
+drive = 0
+super = 0
+notes = "4f punish"
+
+[[combo]]
+nom = "cr. lp, b+hp xx qcb+hp xx f+p, qcf+lk"
+categorie = "Punish Counter"
+inputs = "cr. lp, b+hp xx qcb+hp xx f+p, qcf+lk"
+degats = 2560
+drive = 0
+super = 0
+notes = "4f punish. New +4 conversion, good against drive reversal (6/3/2025)"
+
+[[combo]]
+nom = "cr. mp, st. mp xx mp xx qcb+mp xx f+p"
+categorie = "Punish Counter"
+inputs = "cr. mp, st. mp xx mp xx qcb+mp xx f+p"
+degats = 2870
+drive = 0
+super = 0
+notes = "8f punish"
+
+[[combo]]
+nom = "b+hp, st. mp xx st. mp xx qcb+mp xx f+p"
+categorie = "Punish Counter"
+inputs = "b+hp, st. mp xx st. mp xx qcb+mp xx f+p"
+degats = 3110
+drive = 0
+super = 0
+notes = "8f punish"
+
+[[combo]]
+nom = "st. mk, b+hp xx qcb+hp xx f+p, qcf+lk"
+categorie = "Punish Counter"
+inputs = "st. mk, b+hp xx qcb+hp xx f+p, qcf+lk"
+degats = 3620
+drive = 0
+super = 0
+notes = "11f punish. Off a long range poke."
+
+[[combo]]
+nom = "st. hp, st. mp xx st. mp xx qcb+mp xx f+p"
+categorie = "Punish Counter"
+inputs = "st. hp, st. mp xx st. mp xx qcb+mp xx f+p"
+degats = 3160
+drive = 0
+super = 0
+notes = "12f punish"
+
+[[combo]]
+nom = "f+hk, b+hp xx qcb+hp xx f+p, st. hp (held) xx hp"
+categorie = "Punish Counter"
+inputs = "f+hk, b+hp xx qcb+hp xx f+p, st. hp (held) xx hp"
+degats = 4040
+drive = 0
+super = 0
+notes = "14f punish. New tech from f+hk frame improvements (8/3/2026)"
+
+[[combo]]
+nom = "st. hk, qcf+mk"
+categorie = "Punish Counter"
+inputs = "st. hk, qcf+mk"
+degats = 2550
+drive = 0
+super = 0
+notes = "14f punish"
+
+[[combo]]
+nom = "st. hk, dr xx b+hp xx srk+hp"
+categorie = "Punish Counter"
+inputs = "st. hk, dr xx b+hp xx srk+hp"
+degats = 3040
+drive = 1
+super = 0
+notes = "14f punish"
+
+[[combo]]
+nom = "st. hk, qcf+kk, dr xx b+hp xx dr xx b+hp (held) xx dr xx b+hp xx qcf+hk xx qcfx2+k"
+categorie = "Punish Counter"
+inputs = "st. hk, qcf+kk, dr xx b+hp xx dr xx b+hp (held) xx dr xx b+hp xx qcf+hk xx qcfx2+k"
+degats = 6991
+drive = 9
+super = 3
+notes = "14f punish. Corner. Good for catching whiffed cr. mks"
+
+[[combo]]
+nom = "st. hk, dr xx f+hk xx f+hk, dr xx st. lk xx qcb+hp xx f+p, dr xx b+hp xx qcf+hk"
+categorie = "Punish Counter"
+inputs = "st. hk, dr xx f+hk xx f+hk, dr xx st. lk xx qcb+hp xx f+p, dr xx b+hp xx qcf+hk"
+degats = 3957
+drive = 3
+super = 0
+notes = "14f punish."
+
+[[combo]]
+nom = "st. hk, qcf+kk, b+hp xx dr xx f+hk xx f+hk, dr xx cr. mp xx dr xx b+hp (held) xx qcf+hp xx qcfx2+k"
+categorie = "Punish Counter"
+inputs = "st. hk, qcf+kk, b+hp xx dr xx f+hk xx f+hk, dr xx cr. mp xx dr xx b+hp (held) xx qcf+hp xx qcfx2+k"
+degats = 7345
+drive = 9
+super = 3
+notes = "14 punish. Corner."
+
+[[combo]]
+nom = "b+hp (held), f+hk xx qcf+kk, b+hp xx dr xx b+hp (held) xx dr xx b+hp xx qcf+hk xx qcfx2+k"
+categorie = "Punish Counter"
+inputs = "b+hp (held), f+hk xx qcf+kk, b+hp xx dr xx b+hp (held) xx dr xx b+hp xx qcf+hk xx qcfx2+k"
+degats = 7362
+drive = 8
+super = 3
+notes = "20f punish"
+
+[[combo]]
+nom = "d+hp (held), dr xx f+hk xx f+hk, dr xx b+hp xx qcf+kk, b+hp xx dr xx f+hk xx f+hk, qcf+lp xx qcfx2+k"
+categorie = "Punish Counter"
+inputs = "d+hp (held), dr xx f+hk xx f+hk, dr xx b+hp xx qcf+kk, b+hp xx dr xx f+hk xx f+hk, qcf+lp xx qcfx2+k"
+degats = 7079
+drive = 8
+super = 3
+notes = "21f punish. Works from about midscreen to drive the opponent into the corner. New route from 12/1/2024 adj"
+
+[[combo]]
+nom = "st. hp (held), f+hk xx qcf+kk, b+hp xx DR xx b+hp xx DR xx b+hp xx qcf+hk xx qcfx2+k"
+categorie = "Punish Counter"
+inputs = "st. hp (held), f+hk xx qcf+kk, b+hp xx DR xx b+hp xx DR xx b+hp xx qcf+hk xx qcfx2+k"
+degats = 7461
+drive = 8
+super = 3
+notes = "26f punish. Corner only."
+
+[[combo]]
+nom = "f+hk (held), f+hk xx qcb+hp xx f+p, qcf+hp"
+categorie = "Punish Counter"
+inputs = "f+hk (held), f+hk xx qcb+hp xx f+p, qcf+hp"
+degats = 3960
+drive = 0
+super = 0
+notes = "27f punish. Forward moving"
+
+[[combo]]
+nom = "f+hk (held), f+hk xx qcf+kk, b+hp xx dr xx f+hk xx f+hk, dr xx cr. mp xx dr xx b+hp (held) xx qcf+hp xx qcfx2+k"
+categorie = "Punish Counter"
+inputs = "f+hk (held), f+hk xx qcf+kk, b+hp xx dr xx f+hk xx f+hk, dr xx cr. mp xx dr xx b+hp (held) xx qcf+hp xx qcfx2+k"
+degats = 7569
+drive = 7
+super = 3
+notes = "27f punish. Corner only."
+
+[[combo]]
+nom = "DI, b+hp (held), b+hp xx qcb+hp xx f+p, qcf+lk"
+categorie = "Après DI (crumple)"
+inputs = "DI, b+hp (held), b+hp xx qcb+hp xx f+p, qcf+lk"
+degats = 3590
+drive = 1
+super = 0
+notes = "Really any charged b+hp combo works here."
+
+[[combo]]
+nom = "DI, j. lk, qcf+lp"
+categorie = "Après DI (crumple)"
+inputs = "DI, j. lk, qcf+lp"
+degats = 2040
+drive = 1
+super = 0
+notes = "Sideswitch"
+
+[[combo]]
+nom = "DI, b+hp (held), b+hp xx qcb+hp xx f+p, cr. hp (held), qcf+lp"
+categorie = "Après DI (crumple)"
+inputs = "DI, b+hp (held), b+hp xx qcb+hp xx f+p, cr. hp (held), qcf+lp"
+degats = 3710
+drive = 1
+super = 0
+
+[[combo]]
+nom = "DI, b+hp xx srk+mp"
+categorie = "Après DI (wallsplat)"
+inputs = "DI, b+hp xx srk+mp"
+degats = 2000
+drive = 1
+super = 0
+
+[[combo]]
+nom = "DI, b+hp xx srk+pp, qcfx2+p (held)"
+categorie = "Après DI (wallsplat)"
+inputs = "DI, b+hp xx srk+pp, qcfx2+p (held)"
+degats = 3464
+drive = 3
+super = 1
+
+[[combo]]
+nom = "DI, b+hp xx srk+pp, b+hp (held) xx qcf+hp"
+categorie = "Après DI (wallsplat)"
+inputs = "DI, b+hp xx srk+pp, b+hp (held) xx qcf+hp"
+degats = 3168
+drive = 3
+super = 0
+
+[[combo]]
+nom = "DI, qcb+hp xx f+hp, DR xx b+hp xx srk+hp"
+categorie = "Après DI (wallsplat)"
+inputs = "DI, qcb+hp xx f+hp, DR xx b+hp xx srk+hp"
+degats = 2223
+drive = 1
+super = 0
+notes = "Safejump setup."
+
+[[combo]]
+nom = "DI, b+hp (held), b+hp xx qcb+hp xx f+p, d+hp (held), qcf+lp"
+categorie = "Après DI (stun)"
+inputs = "DI, b+hp (held), b+hp xx qcb+hp xx f+p, d+hp (held), qcf+lp"
+degats = 2750
+drive = 1
+super = 0
+notes = "Really any charged b+hp combo works here."
+
+[[modern]]
+categorie = "Anti-airs"
+inputs = "D+H"
+notes = "Excellent disjointed hitbox, though a bit slow."
+
+[[modern]]
+categorie = "Anti-airs"
+inputs = "SP"
+notes = "Gladius (SP) has armor that can shut down jump-ins"
+
+[[modern]]
+categorie = "Anti-airs"
+inputs = "U+M"
+notes = "Jump back M will stop people crossing you up."
+
+[[modern]]
+categorie = "Anti-airs"
+inputs = "B+SP+[AUTO]"
+notes = "OD Launcher has significant air invulnerability, allowing it to counter tough to anti-air options like divekicks."
+
+[[modern]]
+categorie = "Pokes"
+inputs = "M"
+notes = "Lunges forward. Nonconvertible normal. Disjointed."
+
+[[modern]]
+categorie = "Pokes"
+inputs = "D+M"
+notes = "Disjointed hitbox. Special cancellable. Good as a whiff punish, good to stop drive rush."
+
+[[modern]]
+categorie = "Pokes"
+inputs = "M+[AUTO]"
+notes = "Disjointed hitbox. Target combo option."
+
+[[modern]]
+categorie = "Pokes"
+inputs = "F+H"
+notes = "Special cancellable. Forward advancing. F+H into SP is excellent for drive gauge chip."
+
+[[modern]]
+categorie = "Pokes"
+inputs = "H"
+notes = "Excellent whiff punish tool. Gives good rewards on counterhit/punish counter."
+
+[[modern]]
+categorie = "Pokes"
+inputs = "F+M"
+notes = "Excellent counterpoke/whiff punish tool. Gives good rewards on counterhit/punish counter."
+
+[[modern]]
+categorie = "Punitions"
+inputs = "D+L > M+[AUTO] > M > B+SP > F+L"
+notes = "4f punish."
+
+[[modern]]
+categorie = "Punitions"
+inputs = "D+M > M+[AUTO] > M > B+SP > F+L"
+notes = "8f punish"
+
+[[modern]]
+categorie = "Punitions"
+inputs = "B+H > M+[AUTO] > M > B+SP > F+L"
+notes = "8f punish"
+
+[[modern]]
+categorie = "Punitions"
+inputs = "B+H (held) > H+[AUTO] > H+[AUTO] > SP"
+notes = "20f punish."
+
+[[modern]]
+categorie = "Punitions"
+inputs = "H > M+[AUTO] > M > B+SP > F+L"
+notes = "12f punish. Good as a whiff punish."
+
+[[modern]]
+categorie = "Combos de base"
+inputs = "M+[AUTO] > M > SP"
+notes = "This will take you pretty far. Vary between SP, SP (held), and SP+[AUTO] to counter various options."
+
+[[modern]]
+categorie = "Combos de base"
+inputs = "F+H > SP"
+notes = "Good drive gauge damage on block."
+
+[[modern]]
+categorie = "Combos de base"
+inputs = "DR > H > M+[AUTO] > M > B+SP > F+L"
+notes = "Forward lunging drive rush starter."
+
+[[modern]]
+categorie = "Combos de base"
+inputs = "DR > M > B+H > B+SP+[AUTO] > F+L, SP"
+notes = "Replace B+SP+[AUTO] with QCB+H once you are comfortable with motion inputs"
+
+[[modern]]
+categorie = "Combos de base"
+inputs = "B+H (held) > B+H > B+SP+[AUTO] > F+L, DR > B+H > D+SP"
+notes = "Sets up a safejump in the corner. Replace B+SP+[AUTO] with QCB+H once you are comfortable with motion inputs to save on meter."
+
+[[modern]]
+categorie = "Combos de base"
+inputs = "M+[AUTO] > M > DR > B+H > B+SP+[AUTO] > SP"
+notes = "Replace B+SP+[AUTO] with QCB+H once you are comfortable with motion inputs"

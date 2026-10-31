@@ -1,0 +1,697 @@
+# Arjun : combos de la feuille communautaire SF6 (Google Sheets), importés tels quels.
+# degats = dégâts du combo complet, drive = barres de Drive, super = barres de super.
+# [[modern]] : les mêmes infos en contrôles Modern sans motion (NMM), pour référence.
+personnage = "Arjun"
+
+[[combo]]
+nom = "st. lp, cr. lk, cr. lp xx qcf+lp"
+categorie = "Sans jauge"
+inputs = "st. lp, cr. lk, cr. lp xx qcf+lp"
+degats = 1230
+drive = 0
+super = 0
+notes = "Standard 3 piece light string with a low fish."
+
+[[combo]]
+nom = "cr. mk, cr. lp xx qcf+lp"
+categorie = "Sans jauge"
+inputs = "cr. mk, cr. lp xx qcf+lp"
+degats = 1400
+drive = 0
+super = 0
+notes = "Medium low starter."
+
+[[combo]]
+nom = "hp xx hp xx hk"
+categorie = "Sans jauge"
+inputs = "hp xx hp xx hk"
+degats = 1600
+drive = 0
+super = 0
+notes = "Hitconfirmable target combo"
+
+[[combo]]
+nom = "hp xx hp xx qcbx2+p"
+categorie = "Sans jauge"
+inputs = "hp xx hp xx qcbx2+p"
+degats = 3400
+drive = 0
+super = 2
+notes = "SA2 conversion from the hitconfirmable target combo."
+
+[[combo]]
+nom = "hp xx hp xx hp"
+categorie = "Sans jauge"
+inputs = "hp xx hp xx hp"
+degats = 2800
+drive = 0
+super = 0
+notes = "Hitconfirmable target combo. Corner only."
+
+[[combo]]
+nom = "hp xx hp xx hp xx qcfx2+p"
+categorie = "Sans jauge"
+inputs = "hp xx hp xx hp xx qcfx2+p"
+degats = 4800
+drive = 0
+super = 0
+notes = "SA3 conversion from the hitconfirmable target combo. Corner only."
+
+[[combo]]
+nom = "mk xx hk"
+categorie = "Sans jauge"
+inputs = "mk xx hk"
+degats = 1600
+drive = 0
+super = 0
+notes = "Not hitconfirmable as a target combo, but safe on block and offers a frametrap."
+
+[[combo]]
+nom = "mk xx hk xx qcfx2+k"
+categorie = "Sans jauge"
+inputs = "mk xx hk xx qcfx2+k"
+degats = 3000
+drive = 0
+super = 1
+notes = "SA1 conversion from the safe on block target combo."
+
+[[combo]]
+nom = "st. mk xx qcf+lp"
+categorie = "Sans jauge"
+inputs = "st. mk xx qcf+lp"
+degats = 1500
+drive = 0
+super = 0
+notes = "1f gap on block. As a harassment tool, leaves Arjun -2 outside of throw range with a possibility of doing the f+p followup for gray damage and pressure."
+
+[[combo]]
+nom = "st. mp xx qcf+lp"
+categorie = "Sans jauge"
+inputs = "st. mp xx qcf+lp"
+degats = 1500
+drive = 0
+super = 0
+notes = "Truestrings on block. As a harassment tool, leaves Arjun -2 outside of throw range with a possibility of doing the f+p followup for gray damage and pressure."
+
+[[combo]]
+nom = "hk xx hp xx qcb+hk"
+categorie = "Sans jauge"
+inputs = "hk xx hp xx qcb+hk"
+degats = 1600
+drive = 0
+super = 0
+notes = "From midscreen, sets up a meaty pillar on the opponent's wakeup. Also functions as an anti-air."
+
+[[combo]]
+nom = "st. hk (air), cr. hk xx qcf+mp xx f+p"
+categorie = "Sans jauge"
+inputs = "st. hk (air), cr. hk xx qcf+mp xx f+p"
+degats = 2710
+drive = 0
+super = 0
+notes = "Anti-air combo. Slightly more finicky than the hk xx hp TC."
+
+[[combo]]
+nom = "cr. hp xx qcb+lk"
+categorie = "Sans jauge"
+inputs = "cr. hp xx qcb+lk"
+degats = 1600
+drive = 0
+super = 0
+notes = "Decent option if you can get it off of a jump-in."
+
+[[combo]]
+nom = "cr. hp xx srk+mp"
+categorie = "Sans jauge"
+inputs = "cr. hp xx srk+mp"
+degats = 1900
+drive = 0
+super = 0
+notes = "Decent option if you can get it off of a jump-in."
+
+[[combo]]
+nom = "cr. hk xx qcf+lp"
+categorie = "Sans jauge"
+inputs = "cr. hk xx qcf+lp"
+degats = 800
+drive = 0
+super = 0
+notes = "Leaves you +18 on hit, -2 on block otherwise."
+
+[[combo]]
+nom = "srk+p (pillar), f+hk"
+categorie = "Sans jauge"
+inputs = "srk+p (pillar), f+hk"
+degats = 3400
+drive = 0
+super = 0
+notes = "Example meterless pillar conversion. 2600 damage if the initial shoulder tackle doesn't connect."
+
+[[combo]]
+nom = "srk+p (pillar), dd+hk xx p"
+categorie = "Sans jauge"
+inputs = "srk+p (pillar), dd+hk xx p"
+degats = 4000
+drive = 0
+super = 0
+notes = "Example meterless pillar conversion."
+
+[[combo]]
+nom = "srk+hk, cr. hk xx qcf+mp xx p"
+categorie = "Sans jauge"
+inputs = "srk+hk, cr. hk xx qcf+mp xx p"
+degats = 3110
+drive = 0
+super = 0
+notes = "If you get the shoulder check to connect in neutral, Arjun can combo after it."
+
+[[combo]]
+nom = "st. mp xx qcf+pp xx f+p"
+categorie = "OD"
+inputs = "st. mp xx qcf+pp xx f+p"
+degats = 2340
+drive = 2
+super = 0
+notes = "If st. mp doesn't hit, qcf+pp will leave you +5. Not bad, as far as buffers go."
+
+[[combo]]
+nom = "st. mp xx srk+kk, qcfx2+k"
+categorie = "OD"
+inputs = "st. mp xx srk+kk, qcfx2+k"
+drive = 2
+super = 1
+notes = "Works at tip range for st. mp, switches side with the opponent."
+
+[[combo]]
+nom = "st. mk xx qcf+kk xx f+lp"
+categorie = "OD"
+inputs = "st. mk xx qcf+kk xx f+lp"
+degats = 1860
+drive = 2
+super = 0
+notes = "If st. mk doesn't hit, this is a 3f frametrap into being +1 on block."
+
+[[combo]]
+nom = "cr. hp xx qcf+kk xx f+mp, qcf+lp xx f+p"
+categorie = "OD"
+inputs = "cr. hp xx qcf+kk xx f+mp, qcf+lp xx f+p"
+degats = 2680
+drive = 2
+super = 0
+notes = "Corner only."
+
+[[combo]]
+nom = "st. lp xx dr xx st. lk"
+categorie = "Extensions Drive Rush"
+inputs = "st. lp xx dr xx st. lk"
+drive = 3
+super = 0
+notes = "6f or less on hit"
+
+[[combo]]
+nom = "cr. lp xx dr xx st. lk"
+categorie = "Extensions Drive Rush"
+inputs = "cr. lp xx dr xx st. lk"
+drive = 3
+super = 0
+notes = "6f or less on hit"
+
+[[combo]]
+nom = "st. lk xx dr xx st. lp"
+categorie = "Extensions Drive Rush"
+inputs = "st. lk xx dr xx st. lp"
+drive = 3
+super = 0
+notes = "4f or less on hit"
+
+[[combo]]
+nom = "st. mk xx dr xx st. mp"
+categorie = "Extensions Drive Rush"
+inputs = "st. mk xx dr xx st. mp"
+drive = 3
+super = 0
+notes = "12f or less on hit"
+
+[[combo]]
+nom = "st. mp xx dr xx st. hp"
+categorie = "Extensions Drive Rush"
+inputs = "st. mp xx dr xx st. hp"
+drive = 3
+super = 0
+notes = "15f or less on hit"
+
+[[combo]]
+nom = "cr. hp xx dr xx st. hp"
+categorie = "Extensions Drive Rush"
+inputs = "cr. hp xx dr xx st. hp"
+drive = 3
+super = 0
+notes = "18f or less on hit"
+
+[[combo]]
+nom = "cr. hk xx dr xx st. lp"
+categorie = "Extensions Drive Rush"
+inputs = "cr. hk xx dr xx st. lp"
+drive = 3
+super = 0
+notes = "Truestrings on block. KD on hit (+31)."
+
+[[combo]]
+nom = "hk xx hp xx dr xx st. mp"
+categorie = "Extensions Drive Rush"
+inputs = "hk xx hp xx dr xx st. mp"
+drive = 3
+super = 0
+notes = "Truestrings on block (up to 12f). KD on hit (+33)."
+
+[[combo]]
+nom = "dr xx cr. mk, st. mk xx srk+lp"
+categorie = "Drive Rush"
+inputs = "dr xx cr. mk, st. mk xx srk+lp"
+degats = 1860
+drive = 1
+super = 0
+notes = "Example drive rush into a low."
+
+[[combo]]
+nom = "dr xx cr mk, hcb+p"
+categorie = "Drive Rush"
+inputs = "dr xx cr mk, hcb+p"
+degats = 1880
+drive = 1
+super = 0
+notes = "Caveat, does gray damage. Example of Arjun's hitgrab comboing."
+
+[[combo]]
+nom = "dr xx cr. lk, st. lk xx qcf+lp"
+categorie = "Drive Rush"
+inputs = "dr xx cr. lk, st. lk xx qcf+lp"
+degats = 1180
+drive = 1
+super = 0
+notes = "Example drive rush into a low."
+
+[[combo]]
+nom = "st. mk xx dr xx cr. hp xx qcf+hp xx f+p"
+categorie = "Drive Rush"
+inputs = "st. mk xx dr xx cr. hp xx qcf+hp xx f+p"
+degats = 2532
+drive = 3
+super = 0
+notes = "Example drive rush cancel."
+
+[[combo]]
+nom = "cr. lk, cr. lp, cr. lp xx dr xx cr. lp, st. mk xx dr xx cr. hp xx qcf+hp xx f+p xx qcfx2+p"
+categorie = "Drive Rush"
+inputs = "cr. lk, cr. lp, cr. lp xx dr xx cr. lp, st. mk xx dr xx cr. hp xx qcf+hp xx f+p xx qcfx2+p"
+degats = 3855
+drive = 6
+super = 3
+notes = "Example drive rush climbing from lights to mediums to heavies."
+
+[[combo]]
+nom = "cr. hp xx dr xx cr. mk, st. mk xx dr xx cr. hp xx qcf+hp xx f+p xx qcfx2+p"
+categorie = "Drive Rush"
+inputs = "cr. hp xx dr xx cr. mk, st. mk xx dr xx cr. hp xx qcf+hp xx f+p xx qcfx2+p"
+degats = 5104
+drive = 6
+super = 3
+notes = "Example cash-out combo using level 3."
+
+[[combo]]
+nom = "st. lp (pc), hcb+p"
+categorie = "Punish Counter"
+inputs = "st. lp (pc), hcb+p"
+degats = 1640
+drive = 0
+super = 0
+notes = "4f punish. Point blank. Most of this damage is gray damage."
+
+[[combo]]
+nom = "st. lp (pc), st. mk xx qcf+mp"
+categorie = "Punish Counter"
+inputs = "st. lp (pc), st. mk xx qcf+mp"
+degats = 1550
+drive = 0
+super = 0
+notes = "4f punish. Point blank."
+
+[[combo]]
+nom = "st. lp (pc), st. mk xx srk+lp"
+categorie = "Punish Counter"
+inputs = "st. lp (pc), st. mk xx srk+lp"
+degats = 1620
+drive = 0
+super = 0
+notes = "4f punish. Point blank."
+
+[[combo]]
+nom = "cr. lp (pc), cr. mp"
+categorie = "Punish Counter"
+inputs = "cr. lp (pc), cr. mp"
+degats = 920
+drive = 0
+super = 0
+notes = "5f punish. Snags people at tip range for cr. lp."
+
+[[combo]]
+nom = "cr. lp (pc), cr. mk, cr. lp xx qcf+lp"
+categorie = "Punish Counter"
+inputs = "cr. lp (pc), cr. mk, cr. lp xx qcf+lp"
+degats = 1530
+drive = 0
+super = 0
+notes = "5f punish. Point blank."
+
+[[combo]]
+nom = "st. lk (pc) xx srk+lp"
+categorie = "Punish Counter"
+inputs = "st. lk (pc) xx srk+lp"
+degats = 1280
+drive = 0
+super = 0
+notes = "6f punish. Works against 6f punishable situations but doesn't quite combo if spaced improperly."
+
+[[combo]]
+nom = "st. lk (pc) xx qcf+mp"
+categorie = "Punish Counter"
+inputs = "st. lk (pc) xx qcf+mp"
+degats = 1200
+drive = 0
+super = 0
+notes = "6f punish. The forward lunge of qcf+mp whiff punishes cr. mks nicely."
+
+[[combo]]
+nom = "st. mk (pc), st. lk xx qcf+lp"
+categorie = "Punish Counter"
+inputs = "st. mk (pc), st. lk xx qcf+lp"
+degats = 1880
+drive = 0
+super = 0
+notes = "7f punish. Tip range"
+
+[[combo]]
+nom = "st. mk (pc) xx dr xx cr. hp xx qcf+hp xx f+p"
+categorie = "Punish Counter"
+inputs = "st. mk (pc) xx dr xx cr. hp xx qcf+hp xx f+p"
+degats = 2672
+drive = 3
+super = 0
+notes = "7f punish."
+
+[[combo]]
+nom = "st. mk (pc) xx dr xx st. hk xx hp xx qcb+hk"
+categorie = "Punish Counter"
+inputs = "st. mk (pc) xx dr xx st. hk xx hp xx qcb+hk"
+degats = 2064
+drive = 3
+super = 0
+notes = "7f punish. Sets up a rock pillar as okizeme."
+
+[[combo]]
+nom = "cr. mk (pc), st. mk xx qcf+mp"
+categorie = "Punish Counter"
+inputs = "cr. mk (pc), st. mk xx qcf+mp"
+degats = 1910
+drive = 0
+super = 0
+notes = "8f punish. Point blank"
+
+[[combo]]
+nom = "cr. mk (pc), cr. mp"
+categorie = "Punish Counter"
+inputs = "cr. mk (pc), cr. mp"
+degats = 1280
+drive = 0
+super = 0
+notes = "8f punish. Tip range."
+
+[[combo]]
+nom = "cr. hp (pc) xx qcf+hp xx f+p"
+categorie = "Punish Counter"
+inputs = "cr. hp (pc) xx qcf+hp xx f+p"
+degats = 2600
+drive = 0
+super = 0
+notes = "10f punish. Point blank."
+
+[[combo]]
+nom = "cr. hp (pc) xx srk+hp"
+categorie = "Punish Counter"
+inputs = "cr. hp (pc) xx srk+hp"
+degats = 2160
+drive = 0
+super = 0
+notes = "10f punish. Point blank. Side switches."
+
+[[combo]]
+nom = "cr. hk (pc) xx qcf+hp xx f+p"
+categorie = "Punish Counter"
+inputs = "cr. hk (pc) xx qcf+hp xx f+p"
+degats = 2410
+drive = 0
+super = 0
+notes = "14f punish. Any range."
+
+[[combo]]
+nom = "cr. hk (pc) xx dr xx cr. hp xx qcf+hp xx f+p"
+categorie = "Punish Counter"
+inputs = "cr. hk (pc) xx dr xx cr. hp xx qcf+hp xx f+p"
+degats = 2606
+drive = 3
+super = 0
+notes = "14f punish. Any range. Good as a hedge if you're unsure if cr. hk will PC."
+
+[[combo]]
+nom = "cr. hk (pc) xx srk+hp"
+categorie = "Punish Counter"
+inputs = "cr. hk (pc) xx srk+hp"
+degats = 1980
+drive = 0
+super = 0
+notes = "14f punish. Any range. Offers a side switch."
+
+[[combo]]
+nom = "st. hk (pc), cr. hk xx qcf+hp xx f+p"
+categorie = "Punish Counter"
+inputs = "st. hk (pc), cr. hk xx qcf+hp xx f+p"
+degats = 2940
+drive = 0
+super = 0
+notes = "14f punish. Standing only."
+
+[[combo]]
+nom = "st. hk (pc) xx hp (held) xx qcb+kk, srk+p, dd+hk xx p xx qcbx2+p"
+categorie = "Punish Counter"
+inputs = "st. hk (pc) xx hp (held) xx qcb+kk, srk+p, dd+hk xx p xx qcbx2+p"
+degats = 5680
+drive = 2
+super = 2
+notes = "14f punish. Standing only. Corner only."
+
+[[combo]]
+nom = "st. hk (pc) xx hp (held), hp xx hp xx hp xx qcfx2+p"
+categorie = "Punish Counter"
+inputs = "st. hk (pc) xx hp (held), hp xx hp xx hp xx qcfx2+p"
+degats = 5600
+drive = 0
+super = 3
+notes = "14f punish. Standing only. Corner only."
+
+[[combo]]
+nom = "qcf+hp (pc), cr. hk xx qcf+mp xx f+p"
+categorie = "Punish Counter"
+inputs = "qcf+hp (pc), cr. hk xx qcf+mp xx f+p"
+degats = 3110
+drive = 0
+super = 0
+notes = "28f punish."
+
+[[combo]]
+nom = "qcf+hp (pc), hp xx hp xx hp"
+categorie = "Punish Counter"
+inputs = "qcf+hp (pc), hp xx hp xx hp"
+degats = 3640
+drive = 0
+super = 0
+notes = "28f punish. Corner only."
+
+[[combo]]
+nom = "qcf+hp (pc), cr. hk xx qcb+kk, srk+hp, dd+hk xx p"
+categorie = "Punish Counter"
+inputs = "qcf+hp (pc), cr. hk xx qcb+kk, srk+hp, dd+hk xx p"
+degats = 4520
+drive = 2
+super = 0
+notes = "28f punish."
+
+[[combo]]
+nom = "qcf+hp (pc), cr. hk xx qcb+kk, srk+hp, dd+hk xx p, qcfx2+p"
+categorie = "Punish Counter"
+inputs = "qcf+hp (pc), cr. hk xx qcb+kk, srk+hp, dd+hk xx p, qcfx2+p"
+degats = 6520
+drive = 2
+super = 3
+notes = "28f punish. Same as before, but tacking on the SA3 gives a huge chunk of damage"
+
+[[combo]]
+nom = "DI (pc), cr. hk xx qcf+mp xx f+p"
+categorie = "Après DI (crumple)"
+inputs = "DI (pc), cr. hk xx qcf+mp xx f+p"
+degats = 2540
+drive = 1
+super = 0
+notes = "Requires the opponent to fall to their knees before starting the cr. hk conversion."
+
+[[combo]]
+nom = "DI (pc), hp xx hp xx hp"
+categorie = "Après DI (crumple)"
+inputs = "DI (pc), hp xx hp xx hp"
+degats = 2960
+drive = 1
+super = 0
+notes = "Corner only."
+
+[[combo]]
+nom = "DI (pc), cr. hk xx qcb+kk, srk+hp, f+hk"
+categorie = "Après DI (crumple)"
+inputs = "DI (pc), cr. hk xx qcb+kk, srk+hp, f+hk"
+degats = 3500
+drive = 3
+super = 0
+notes = "Example DI crumple combo using OD pillar."
+
+[[combo]]
+nom = "DI (pc), cr. hk xx qcb+kk, srk+hp, dd+hk xx p"
+categorie = "Après DI (crumple)"
+inputs = "DI (pc), cr. hk xx qcb+kk, srk+hp, dd+hk xx p"
+degats = 3650
+drive = 3
+super = 0
+notes = "Minor improvement over the f+hk version."
+
+[[combo]]
+nom = "DI (pc), cr. hk xx qcb+kk, srk+hp, dd+hk xx p, qcfx2+p"
+categorie = "Après DI (crumple)"
+inputs = "DI (pc), cr. hk xx qcb+kk, srk+hp, dd+hk xx p, qcfx2+p"
+degats = 5650
+drive = 3
+super = 3
+notes = "Tacking on a SA3 adds a considerable jump in damage."
+
+[[combo]]
+nom = "DI (ws), hp xx hp xx hp"
+categorie = "Après DI (wallsplat)"
+inputs = "DI (ws), hp xx hp xx hp"
+degats = 2240
+drive = 3
+super = 0
+
+[[combo]]
+nom = "DI (ws), cr. hk xx qcb+kk, srk+hk, dd+hk xx p"
+categorie = "Après DI (wallsplat)"
+inputs = "DI (ws), cr. hk xx qcb+kk, srk+hk, dd+hk xx p"
+degats = 3220
+drive = 3
+super = 0
+notes = "Floating opponent into OD Spire again."
+
+[[combo]]
+nom = "DI (stun), jump back, qcb+hk, dd+hk xx p, srk+hp, dd+hk xx p xx SA3"
+categorie = "Après DI (stun)"
+inputs = "DI (stun), jump back, qcb+hk, dd+hk xx p, srk+hp, dd+hk xx p xx SA3"
+degats = 5600
+drive = 1
+super = 3
+notes = "Example DI stun with pillar setup into SA3."
+
+[[combo]]
+nom = "DI (stun), jump back, qcb+hk, f+hk, srk+hp, dd+hk xx p"
+categorie = "Après DI (stun)"
+inputs = "DI (stun), jump back, qcb+hk, f+hk, srk+hp, dd+hk xx p"
+degats = 3250
+drive = 1
+super = 3
+notes = "Example DI stun with pillar setup. 250 more damage than the dd+hk xx p option from above and definitely easier to execute."
+
+[[modern]]
+categorie = "Anti-airs"
+inputs = "D+H"
+notes = "Very active hitbox with a decent startup."
+
+[[modern]]
+categorie = "Anti-airs"
+inputs = "H"
+notes = "Slow anti-air, but offers juggle followups with H > H"
+
+[[modern]]
+categorie = "Anti-airs"
+inputs = "J. L"
+notes = "Anti-crossup option"
+
+[[modern]]
+categorie = "Anti-airs"
+inputs = "F+SP"
+notes = "Oddly enough, has anti-air invincibility after frame 11, allowing for a strange anti-air callout."
+
+[[modern]]
+categorie = "Pokes"
+inputs = "M"
+notes = "Serves as a buffer option."
+
+[[modern]]
+categorie = "Pokes"
+inputs = "D+M"
+notes = "Arjun's D+M is a functional sweep that is safe unless spaced improperly (-4)"
+
+[[modern]]
+categorie = "Pokes"
+inputs = "M+[AUTO]"
+notes = "Arjun buffers a lot of fist of justice (SP) off of this normal."
+
+[[modern]]
+categorie = "Pokes"
+inputs = "H+[AUTO]"
+notes = "Lunges pretty far forward, decent for whiff punishes."
+
+[[modern]]
+categorie = "Pokes"
+inputs = "D/F+H"
+notes = "Arjun's sweep is special cancellable, allowing you to buffer it in relative safety."
+
+[[modern]]
+categorie = "Punitions"
+inputs = "D+L, D+M"
+notes = "5f punish. Works at tip range, fishes for a knockdown with relative safety."
+
+[[modern]]
+categorie = "Punitions"
+inputs = "M+[AUTO] > F+SP"
+notes = "11f punish."
+
+[[modern]]
+categorie = "Punitions"
+inputs = "H+[AUTO] > H+[AUTO] > F+H"
+notes = "15f punish."
+
+[[modern]]
+categorie = "Punitions"
+inputs = "H+[AUTO] > H+[AUTO] > H+[AUTO]"
+notes = "15f punish. Corner only."
+
+[[modern]]
+categorie = "Punitions"
+inputs = "QCF+H > D/F+H > D+[AUTO]+SP > F+SP > DD+H > SP"
+notes = "28f punish."
+
+[[modern]]
+categorie = "Combos de base"
+inputs = "D+L > D+L > D+L > SP"
+
+[[modern]]
+categorie = "Combos de base"
+inputs = "M+[AUTO] > SP"
+
+[[modern]]
+categorie = "Combos de base"
+inputs = "M > DR > D+H > QCF+H > H"

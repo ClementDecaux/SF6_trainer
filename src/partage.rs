@@ -107,6 +107,9 @@ pub struct Partage {
     pub combos: Vec<String>,
     pub combo_index: usize,
     pub combo_demande: Option<usize>,
+    /// Un autre personnage choisi dans l'interface : son nom et ses combos (le thread de la
+    /// manette remplace sa liste, puis lance `combo_demande`).
+    pub liste_demandee: Option<(String, Vec<crate::combo::ComboFichier>)>,
     /// Hits attendus du combo en cours (combos.toml ou appris). Aucun : combo incomplet,
     /// il ne peut pas être validé.
     pub hits_attendus: Option<u32>,
@@ -169,6 +172,7 @@ impl Partage {
             combos: Vec::new(),
             combo_index: 0,
             combo_demande: None,
+            liste_demandee: None,
             overlay_visible: true,
             hits_attendus: None,
             syntaxe: crate::syntaxe::Syntaxe::default(),

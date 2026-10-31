@@ -1,0 +1,807 @@
+# Ingrid : combos de la feuille communautaire SF6 (Google Sheets), importés tels quels.
+# degats = dégâts du combo complet, drive = barres de Drive, super = barres de super.
+# [[modern]] : les mêmes infos en contrôles Modern sans motion (NMM), pour référence.
+personnage = "Ingrid"
+
+[[combo]]
+nom = "cr. lp, cr. lk, cr. lp xx qcf+mk"
+categorie = "Sans jauge — 0 Crest"
+inputs = "cr. lp, cr. lk, cr. lp xx qcf+mk"
+degats = 1390
+drive = 0
+super = 0
+notes = "Standard low fish light string"
+
+[[combo]]
+nom = "cr. mp, st. lk xx qcf+mk"
+categorie = "Sans jauge — 0 Crest"
+inputs = "cr. mp, st. lk xx qcf+mk"
+degats = 1860
+drive = 0
+super = 0
+
+[[combo]]
+nom = "b+mk xx hp"
+categorie = "Sans jauge — 0 Crest"
+inputs = "b+mk xx hp"
+degats = 1500
+drive = 0
+super = 0
+notes = "Decent target combo for conversions from neutral, doesn't really lead into anything fantastic, but b+mk is a fantastic poke by itself."
+
+[[combo]]
+nom = "st. hk, st. lp, st. lk xx qcf+mk"
+categorie = "Sans jauge — 0 Crest"
+inputs = "st. hk, st. lp, st. lk xx qcf+mk"
+degats = 2180
+drive = 0
+super = 0
+
+[[combo]]
+nom = "b+hp xx hp xx qcb+lp"
+categorie = "Sans jauge — 0 Crest"
+inputs = "b+hp xx hp xx qcb+lp"
+degats = 1600
+drive = 0
+super = 0
+notes = "Gains a stock and leaves you +18. Standing only."
+
+[[combo]]
+nom = "b+hp xx hp xx qcb+hp (0)"
+categorie = "Sans jauge — 0 Crest"
+inputs = "b+hp xx hp xx qcb+hp (0)"
+degats = 2320
+drive = 0
+super = 0
+notes = "If you can land b+hp, this is a fairly sane route. Rockets them fullscreen"
+
+[[combo]]
+nom = "b+hp xx hp xx qcb+hp (0), qcf+lk"
+categorie = "Sans jauge — 0 Crest"
+inputs = "b+hp xx hp xx qcb+hp (0), qcf+lk"
+degats = 2920
+drive = 0
+super = 0
+notes = "Corner only."
+
+[[combo]]
+nom = "b+hp xx hp xx f+kkk"
+categorie = "Sans jauge — 0 Crest"
+inputs = "b+hp xx hp xx f+kkk"
+degats = 2400
+drive = 0
+super = 0
+notes = "A fairly inconsistent anti-air combo."
+
+[[combo]]
+nom = "st. hk xx qcfx2+k"
+categorie = "Sans jauge — 0 Crest"
+inputs = "st. hk xx qcfx2+k"
+degats = 2700
+drive = 0
+super = 1
+notes = "A single button hit confirm into super (cancels on second hit)"
+
+[[combo]]
+nom = "f+hp xx qcb+lp"
+categorie = "Sans jauge — 0 Crest"
+inputs = "f+hp xx qcb+lp"
+degats = 900
+drive = 0
+super = 0
+notes = "Gains a stock, leaving you +10"
+
+[[combo]]
+nom = "f+hp xx qcb+hp (0)"
+categorie = "Sans jauge — 0 Crest"
+inputs = "f+hp xx qcb+hp (0)"
+degats = 1800
+drive = 0
+super = 0
+notes = "Situational confirm that jumps lows."
+
+[[combo]]
+nom = "cr. mk xx qcb+hp"
+categorie = "Sans jauge — 1 Crest"
+inputs = "cr. mk xx qcb+hp"
+degats = 1380
+drive = 0
+super = 0
+notes = "Becomes a 5f frametrap with a stock, baits DI handily on block."
+
+[[combo]]
+nom = "cr. mk xx qcb+hp (1), qcf+mk"
+categorie = "Sans jauge — 1 Crest"
+inputs = "cr. mk xx qcb+hp (1), qcf+mk"
+degats = 2100
+drive = 0
+super = 0
+notes = "Corner only"
+
+[[combo]]
+nom = "b+hp xx hp xx qcb+hp (1), f+kkk"
+categorie = "Sans jauge — 1 Crest"
+inputs = "b+hp xx hp xx qcb+hp (1), f+kkk"
+degats = 3080
+drive = 0
+super = 0
+notes = "Corner only. Standing only."
+
+[[combo]]
+nom = "cr. hp xx qcb+hp (2), f+kkk"
+categorie = "Sans jauge — 2 Crest"
+inputs = "cr. hp xx qcb+hp (2), f+kkk"
+degats = 2850
+drive = 0
+super = 0
+notes = "Now works midscreen."
+
+[[combo]]
+nom = "cr. hp xx qcb+hp (2), qcf+mk"
+categorie = "Sans jauge — 2 Crest"
+inputs = "cr. hp xx qcb+hp (2), qcf+mk"
+degats = 2990
+drive = 0
+super = 0
+notes = "Corner only"
+
+[[combo]]
+nom = "cr. hp xx qcb+hp (2), qcf+hp, qcf+hp"
+categorie = "Sans jauge — 2 Crest"
+inputs = "cr. hp xx qcb+hp (2), qcf+hp, qcf+hp"
+degats = 2990
+drive = 0
+super = 0
+notes = "Corner only, sets up a +42 situation (Thanks Zephry)"
+
+[[combo]]
+nom = "qcb+hp (2), f+kkk"
+categorie = "Sans jauge — 2 Crest"
+inputs = "qcb+hp (2), f+kkk"
+degats = 2320
+drive = 0
+super = 0
+notes = "Converts from just about everywhere as a raw projectile."
+
+[[combo]]
+nom = "cr. mp xx qcf+kk xx qcbx2+hp, cr. hp xx qcf+mk, qcb+lp, qcf+hp xx qcb+hp, qcf+mk"
+categorie = "OD — 0 Crest"
+inputs = "cr. mp xx qcf+kk xx qcbx2+hp, cr. hp xx qcf+mk, qcb+lp, qcf+hp xx qcb+hp, qcf+mk"
+degats = 3780
+drive = 2
+super = 2
+notes = "Example SA2 conversion on-hit."
+
+[[combo]]
+nom = "cr. hp xx qcbx2+mp, st. hk, st. lp xx qcb+lp, qcf+hk xx qcb+pp, dr xx st. hk xx qcfx2+k"
+categorie = "OD — 0 Crest"
+inputs = "cr. hp xx qcbx2+mp, st. hk, st. lp xx qcb+lp, qcf+hk xx qcb+pp, dr xx st. hk xx qcfx2+k"
+degats = 4064
+drive = 3
+super = 3
+notes = "SA2 conversion with no stocks."
+
+[[combo]]
+nom = "cr. hp xx qcbx2+mp (1), st. hk, st. lp xx qcb+lp (2), qcb+pp, qcf+hk, qcb+mp, qcfx2+k"
+categorie = "OD — 1 Crest"
+inputs = "cr. hp xx qcbx2+mp (1), st. hk, st. lp xx qcb+lp (2), qcb+pp, qcf+hk, qcb+mp, qcfx2+k"
+degats = 4600
+drive = 2
+super = 3
+notes = "1 stock SA2 conversion."
+
+[[combo]]
+nom = "cr. hp xx qcb+pp, d+kkk, qcf+mk"
+categorie = "OD — 2 Crest"
+inputs = "cr. hp xx qcb+pp, d+kkk, qcf+mk"
+degats = 3790
+drive = 2
+super = 0
+notes = "Example use of OD Sun Ray with 2 crests in a combo."
+
+[[combo]]
+nom = "cr. hp xx qcb+pp, dash, b+hp xx hp xx f+kkk"
+categorie = "OD — 2 Crest"
+inputs = "cr. hp xx qcb+pp, dash, b+hp xx hp xx f+kkk"
+degats = 4140
+drive = 2
+super = 0
+notes = "Example use of OD Sun Ray with 2 crests in a combo"
+
+[[combo]]
+nom = "qcb+pp, d+kkk, qcf+mk"
+categorie = "OD — 2 Crest"
+inputs = "qcb+pp, d+kkk, qcf+mk"
+degats = 3530
+drive = 2
+super = 0
+notes = "Pretty much what this character is looking for when she hits 2 crests in neutral."
+
+[[combo]]
+nom = "mp xx mk xx qcb+pp (2) xx qcbx2+hp, d+kkk, d+kkk, d+kkk, qcf+mk"
+categorie = "OD — 2 Crest"
+inputs = "mp xx mk xx qcb+pp (2) xx qcbx2+hp, d+kkk, d+kkk, d+kkk, qcf+mk"
+degats = 4090
+drive = 2
+super = 2
+notes = "Works midscreen, juggle into SA2"
+
+[[combo]]
+nom = "st. lp xx dr xx st. lk"
+categorie = "Extensions Drive Rush"
+inputs = "st. lp xx dr xx st. lk"
+drive = 3
+super = 0
+notes = "5f or less"
+
+[[combo]]
+nom = "st. lk xx dr xx st. lp"
+categorie = "Extensions Drive Rush"
+inputs = "st. lk xx dr xx st. lp"
+drive = 3
+super = 0
+notes = "4f or less"
+
+[[combo]]
+nom = "st. mp xx dr xx st. hk"
+categorie = "Extensions Drive Rush"
+inputs = "st. mp xx dr xx st. hk"
+drive = 3
+super = 0
+notes = "9f or less"
+
+[[combo]]
+nom = "cr. mp xx dr xx st. hp"
+categorie = "Extensions Drive Rush"
+inputs = "cr. mp xx dr xx st. hp"
+drive = 3
+super = 0
+notes = "12f or less"
+
+[[combo]]
+nom = "cr. mk xx dr xx cr. hk"
+categorie = "Extensions Drive Rush"
+inputs = "cr. mk xx dr xx cr. hk"
+drive = 3
+super = 0
+notes = "11f or less"
+
+[[combo]]
+nom = "st. mk xx dr xx st. hp"
+categorie = "Extensions Drive Rush"
+inputs = "st. mk xx dr xx st. hp"
+drive = 3
+super = 0
+notes = "13f or less"
+
+[[combo]]
+nom = "cr. hp xx dr xx b+hp"
+categorie = "Extensions Drive Rush"
+inputs = "cr. hp xx dr xx b+hp"
+drive = 3
+super = 0
+notes = "14f or less"
+
+[[combo]]
+nom = "mp xx mk xx dr xx st. hp"
+categorie = "Extensions Drive Rush"
+inputs = "mp xx mk xx dr xx st. hp"
+drive = 3
+super = 0
+notes = "13f or less hits, 5f or less truestrings"
+
+[[combo]]
+nom = "b+hp xx hp xx dr xx cr. lp"
+categorie = "Extensions Drive Rush"
+inputs = "b+hp xx hp xx dr xx cr. lp"
+drive = 3
+super = 0
+notes = "4f or less is a truestring. Can offer juggles if this hits and you send it."
+
+[[combo]]
+nom = "dr xx cr. lk, cr. mp xx qcf+mk"
+categorie = "Drive Rush — 0 Crest"
+inputs = "dr xx cr. lk, cr. mp xx qcf+mk"
+degats = 1520
+drive = 1
+super = 0
+notes = "Example drive rush into a low"
+
+[[combo]]
+nom = "dr xx f+mp, st. mp xx mk xx qcf+mk"
+categorie = "Drive Rush — 0 Crest"
+inputs = "dr xx f+mp, st. mp xx mk xx qcf+mk"
+degats = 2480
+drive = 1
+super = 0
+notes = "Example drive rush into an overhead"
+
+[[combo]]
+nom = "dr xx f+hp xx qcb+mp"
+categorie = "Drive Rush — 0 Crest"
+inputs = "dr xx f+hp xx qcb+mp"
+degats = 1800
+drive = 1
+super = 0
+notes = "I only note this here because dr xx f+hp is an incredible lunging attack that covers a significant amount of the screen"
+
+[[combo]]
+nom = "cr. mk xx dr xx st. hk, mp xx mk xx qcf+mk"
+categorie = "Drive Rush — 0 Crest"
+inputs = "cr. mk xx dr xx st. hk, mp xx mk xx qcf+mk"
+degats = 2163
+drive = 3
+super = 0
+notes = "Example cr. mk drive rush combo starter."
+
+[[combo]]
+nom = "st. mk xx dr xx cr. hp xx qcf+hk xx qcb+lp"
+categorie = "Drive Rush — 0 Crest"
+inputs = "st. mk xx dr xx cr. hp xx qcf+hk xx qcb+lp"
+degats = 2404
+drive = 3
+super = 0
+notes = "Example st. mk drive rush starter. Stocks a sun crest."
+
+[[combo]]
+nom = "cr. lp, cr. lk, cr. lp xx dr xx st. lp xx st. mp xx st. mk xx dr xx cr. hp xx qcf+hk, qcb+mp"
+categorie = "Drive Rush — 0 Crest"
+inputs = "cr. lp, cr. lk, cr. lp xx dr xx st. lp xx st. mp xx st. mk xx dr xx cr. hp xx qcf+hk, qcb+mp"
+degats = 1625
+drive = 6
+super = 0
+notes = "Example of climbing from lights to heavies. Also demonstrates dr xx cr. hp xx qcf+hk converts."
+
+[[combo]]
+nom = "cr. hp xx dr xx st. hk, mp xx mk xx dr xx cr. hp xx qcf+hk xx qcb+mp"
+categorie = "Drive Rush — 0 Crest"
+inputs = "cr. hp xx dr xx st. hk, mp xx mk xx dr xx cr. hp xx qcf+hk xx qcb+mp"
+degats = 3232
+drive = 6
+super = 0
+notes = "Best example of a drive rush \"loop\" that Ingrid has. Really not her forte"
+
+[[combo]]
+nom = "cr. hp xx qcb+pp (1), dr xx cr. hp xx qcf+mk"
+categorie = "Drive Rush — 1 Crest"
+inputs = "cr. hp xx qcb+pp (1), dr xx cr. hp xx qcf+mk"
+degats = 3234
+drive = 3
+super = 0
+notes = "Works midscreen, requires a significant delay on the cr. hp"
+
+[[combo]]
+nom = "cr. hp xx qcb+hp (1), dr xx b+mk xx hp, dr xx st. lk xx qcf+mk"
+categorie = "Drive Rush — 1 Crest"
+inputs = "cr. hp xx qcb+hp (1), dr xx b+mk xx hp, dr xx st. lk xx qcf+mk"
+degats = 3255
+drive = 2
+super = 0
+notes = "Corner only."
+
+[[combo]]
+nom = "dr xx f+hp xx qcb+pp, dr xx cr. hp xx qcf+hk xx qcb+mp"
+categorie = "Drive Rush — 2 Crest"
+inputs = "dr xx f+hp xx qcb+pp, dr xx cr. hp xx qcf+hk xx qcb+mp"
+degats = 4261
+drive = 4
+super = 0
+notes = "The aforementioned lunging starter becomes somewhat more terrifying if you're carrying any crests."
+
+[[combo]]
+nom = "f+hp xx qcb+hp (2), dr xx cr. lp xx qcf+mk"
+categorie = "Drive Rush — 2 Crest"
+inputs = "f+hp xx qcb+hp (2), dr xx cr. lp xx qcf+mk"
+degats = 3162
+drive = 1
+super = 0
+notes = "Corner only."
+
+[[combo]]
+nom = "cr. hp xx qcb+hp (2), dr xx b+mk xx hp, qcf+mk"
+categorie = "Drive Rush — 2 Crest"
+inputs = "cr. hp xx qcb+hp (2), dr xx b+mk xx hp, qcf+mk"
+degats = 3475
+drive = 1
+super = 0
+notes = "Corner only."
+
+[[combo]]
+nom = "st. lp (pc), mp xx mk xx qcf+mk"
+categorie = "Punish Counter — 0 Crest"
+inputs = "st. lp (pc), mp xx mk xx qcf+mk"
+degats = 1930
+drive = 0
+super = 0
+notes = "4f punish counter. Point blank"
+
+[[combo]]
+nom = "st. lp (pc), st. hk, st. lp, st. lk xx qcf+mk"
+categorie = "Punish Counter — 0 Crest"
+inputs = "st. lp (pc), st. hk, st. lp, st. lk xx qcf+mk"
+degats = 1990
+drive = 0
+super = 0
+notes = "4f punish counter. Midrange."
+
+[[combo]]
+nom = "st. lp (pc), cr. mk xx qcf+mk"
+categorie = "Punish Counter — 0 Crest"
+inputs = "st. lp (pc), cr. mk xx qcf+mk"
+degats = 1600
+drive = 0
+super = 0
+notes = "4f punish counter. Tip range."
+
+[[combo]]
+nom = "st. mp (pc) xx qcb+mp"
+categorie = "Punish Counter — 0 Crest"
+inputs = "st. mp (pc) xx qcb+mp"
+degats = 1620
+drive = 0
+super = 0
+notes = "6f punish counter. Any range."
+
+[[combo]]
+nom = "st. mp xx mk xx qcf+mk"
+categorie = "Punish Counter — 0 Crest"
+inputs = "st. mp xx mk xx qcf+mk"
+degats = 2260
+drive = 0
+super = 0
+notes = "6f punish counter. As long as the TC can connect."
+
+[[combo]]
+nom = "cr. mp (pc), st. mp xx mk xx qcf+mk"
+categorie = "Punish Counter — 0 Crest"
+inputs = "cr. mp (pc), st. mp xx mk xx qcf+mk"
+degats = 2600
+drive = 0
+super = 0
+notes = "7f punish counter. On paper, should convert without it, but the pushback is too much from cr. mp normally. Point blank"
+
+[[combo]]
+nom = "cr. mp (pc), cr. mk xx qcf+mk"
+categorie = "Punish Counter — 0 Crest"
+inputs = "cr. mp (pc), cr. mk xx qcf+mk"
+degats = 2180
+drive = 0
+super = 0
+notes = "7f punish counter. Midrange."
+
+[[combo]]
+nom = "cr. mp (pc), cr. hk"
+categorie = "Punish Counter — 0 Crest"
+inputs = "cr. mp (pc), cr. hk"
+degats = 1620
+drive = 0
+super = 0
+notes = "7f punish counter. Tip range."
+
+[[combo]]
+nom = "st. mk (pc), cr. mp xx qcf+mk"
+categorie = "Punish Counter — 0 Crest"
+inputs = "st. mk (pc), cr. mp xx qcf+mk"
+degats = 2400
+drive = 0
+super = 0
+notes = "8f punish counter. Point blank"
+
+[[combo]]
+nom = "st. mk (pc) xx qcb+mp"
+categorie = "Punish Counter — 0 Crest"
+inputs = "st. mk (pc) xx qcb+mp"
+degats = 1740
+drive = 0
+super = 0
+notes = "8f punish counter. Any range. Can work as a whiff punish buffer."
+
+[[combo]]
+nom = "st. mk (pc) xx qcf+hk, qcb+lp"
+categorie = "Punish Counter — 0 Crest"
+inputs = "st. mk (pc) xx qcf+hk, qcb+lp"
+degats = 2140
+drive = 0
+super = 0
+notes = "8f punish counter. Now possible after st. mk became +4 on hit. Grants a Crest (8/3/2026)"
+
+[[combo]]
+nom = "st. hk (pc), mp xx mk xx qcf+mk"
+categorie = "Punish Counter — 0 Crest"
+inputs = "st. hk (pc), mp xx mk xx qcf+mk"
+degats = 2840
+drive = 0
+super = 0
+notes = "9f punish counter. Point blank"
+
+[[combo]]
+nom = "st. hp (pc), dr xx cr. hp xx qcf+hk xx qcb+mp"
+categorie = "Punish Counter — 0 Crest"
+inputs = "st. hp (pc), dr xx cr. hp xx qcf+hk xx qcb+mp"
+degats = 2769
+drive = 1
+super = 0
+notes = "12f punish counter"
+
+[[combo]]
+nom = "st. hp (pc), f+hp xx qcb+mp"
+categorie = "Punish Counter — 0 Crest"
+inputs = "st. hp (pc), f+hp xx qcb+mp"
+degats = 2430
+drive = 0
+super = 0
+notes = "12f punish counter. Much better with stocks."
+
+[[combo]]
+nom = "st. hk (pc), mp xx mk xx qcb+hp, f+kkk"
+categorie = "Punish Counter — 2 Crest"
+inputs = "st. hk (pc), mp xx mk xx qcb+hp, f+kkk"
+degats = 3330
+drive = 0
+super = 0
+notes = "9f punish counter"
+
+[[combo]]
+nom = "st. hp (pc), f+hp xx qcb+pp, dr xx st. hk xx SA3"
+categorie = "Punish Counter — 2 Crest"
+inputs = "st. hp (pc), f+hp xx qcb+pp, dr xx st. hk xx SA3"
+degats = 5428
+drive = 3
+super = 3
+notes = "12f punish counter. A lot more economical than the 4 crest version for about 1200 less damage"
+
+[[combo]]
+nom = "st. hp (pc), f+hp xx qcb+pp, f+hp xx qcb+pp, dr xx st. hk xx SA3"
+categorie = "Punish Counter — 4 Crest"
+inputs = "st. hp (pc), f+hp xx qcb+pp, f+hp xx qcb+pp, dr xx st. hk xx SA3"
+degats = 6563
+drive = 5
+super = 3
+notes = "12f punish counter. Better route for 4 crests with the same starter that doesn't burn you out."
+
+[[combo]]
+nom = "st. hp (pc), f+hp xx qcb+pp, f+hp xx qcb+pp, dr xx cr. hp xx dr xx st. hk xx SA3"
+categorie = "Punish Counter — 4 Crest"
+inputs = "st. hp (pc), f+hp xx qcb+pp, f+hp xx qcb+pp, dr xx cr. hp xx dr xx st. hk xx SA3"
+degats = 6699
+drive = 8
+super = 3
+notes = "12f punish counter. Full cash-out route from st. hp (pc)"
+
+[[combo]]
+nom = "f+hp (pc) xx qcb+pp, f+hp xx qcb+pp, dr xx cr. hp xx dr xx st. hk xx SA3"
+categorie = "Punish Counter — 4 Crest"
+inputs = "f+hp (pc) xx qcb+pp, f+hp xx qcb+pp, dr xx cr. hp xx dr xx st. hk xx SA3"
+degats = 7331
+drive = 8
+super = 3
+notes = "17f punish counter. Example meter dump combo from f+hp (pc) starter."
+
+[[combo]]
+nom = "DI, b+hp xx hp xx qcb+mp"
+categorie = "Après DI (crumple) — 0 Crest"
+inputs = "DI, b+hp xx hp xx qcb+mp"
+degats = 2700
+drive = 1
+super = 0
+
+[[combo]]
+nom = "DI, qcf+hk xx qcb+lp"
+categorie = "Après DI (crumple) — 0 Crest"
+inputs = "DI, qcf+hk xx qcb+lp"
+degats = 2000
+drive = 1
+super = 0
+notes = "Definitely less damage, but sets you up with a crest."
+
+[[combo]]
+nom = "DI, b+hp xx hp xx qcb+pp, f+kkk"
+categorie = "Après DI (crumple) — 1 Crest"
+inputs = "DI, b+hp xx hp xx qcb+pp, f+kkk"
+degats = 3370
+drive = 3
+super = 0
+notes = "Only way to catch this midscreen is by spending meter."
+
+[[combo]]
+nom = "DI, b+hp xx hp xx qcb+hp, f+kkk"
+categorie = "Après DI (crumple) — 1 Crest"
+inputs = "DI, b+hp xx hp xx qcb+hp, f+kkk"
+degats = 3220
+drive = 1
+super = 0
+notes = "Close to the corner only"
+
+[[combo]]
+nom = "DI, b+hp xx hp xx qcb+hp, f+kkk (2)"
+categorie = "Après DI (crumple) — 2 Crest"
+inputs = "DI, b+hp xx hp xx qcb+hp, f+kkk"
+degats = 3220
+drive = 1
+super = 0
+
+[[combo]]
+nom = "DI, cr. hp xx qcb+pp, d+kkk, qcf+mk"
+categorie = "Après DI (crumple) — 2 Crest"
+inputs = "DI, cr. hp xx qcb+pp, d+kkk, qcf+mk"
+degats = 3770
+drive = 3
+super = 0
+
+[[combo]]
+nom = "DI, f+hp xx qcb+pp, dr xx cr. hp xx qcf+hk, qcb+mp, qcfx2+k"
+categorie = "Après DI (crumple) — 2 Crest"
+inputs = "DI, f+hp xx qcb+pp, dr xx cr. hp xx qcf+hk, qcb+mp, qcfx2+k"
+degats = 4561
+drive = 3
+super = 1
+notes = "SA1 conversion, requires a beam close to the ground."
+
+[[combo]]
+nom = "DI, n.j hp, dr xx cr. hp xx qcb+pp, dash, dr xx cr. hp xx dr xx st. hk xx qcfx2+p"
+categorie = "Après DI (crumple) — 2 Crest"
+inputs = "DI, n.j hp, dr xx cr. hp xx qcb+pp, dash, dr xx cr. hp xx dr xx st. hk xx qcfx2+p"
+degats = 5460
+drive = 7
+super = 3
+notes = "SA3 conversion dump from a DI."
+
+[[combo]]
+nom = "DI, cr. hp xx qcb+mp, qcf+lk"
+categorie = "Après DI (wallsplat) — 0 Crest"
+inputs = "DI, cr. hp xx qcb+mp, qcf+lk"
+degats = 1920
+drive = 1
+super = 0
+
+[[combo]]
+nom = "DI, b+hp xx hp xx qcb+pp, qcf+mk"
+categorie = "Après DI (wallsplat) — 0 Crest"
+inputs = "DI, b+hp xx hp xx qcb+pp, qcf+mk"
+degats = 2560
+drive = 3
+super = 0
+
+[[combo]]
+nom = "DI, b+hp xx hp xx qcf+hp, qcf+hp"
+categorie = "Après DI (wallsplat) — 0 Crest"
+inputs = "DI, b+hp xx hp xx qcf+hp, qcf+hp"
+degats = 2064
+drive = 1
+super = 0
+notes = "Sets up a +42 safejump (Thanks Zephry)"
+
+[[combo]]
+nom = "DI, b+hp xx hp xx qcb+pp, d+kkk, qcf+mk"
+categorie = "Après DI (wallsplat) — 1 Crest"
+inputs = "DI, b+hp xx hp xx qcb+pp, d+kkk, qcf+mk"
+degats = 3056
+drive = 3
+super = 0
+
+[[combo]]
+nom = "DI, b+hp xx hp xx qcb+hp, d+kkk, qcf+mk"
+categorie = "Après DI (wallsplat) — 2 Crest"
+inputs = "DI, b+hp xx hp xx qcb+hp, d+kkk, qcf+mk"
+degats = 3056
+drive = 1
+super = 0
+notes = "Does the same as the 1 crest combo with qcb+pp."
+
+[[combo]]
+nom = "DI, qcb+lp (2 stocks), dr xx cr. hp xx qcf+hk xx qcb+lp"
+categorie = "Après DI (stun) — 0 Crest"
+inputs = "DI, qcb+lp (2 stocks), dr xx cr. hp xx qcf+hk xx qcb+lp"
+degats = 1511
+drive = 2
+super = 0
+notes = "Builds 3 crests."
+
+[[combo]]
+nom = "DI, qcb+lp (2 stocks), f+hp xx qcb+hp, qcf+mk"
+categorie = "Après DI (stun) — 0 Crest"
+inputs = "DI, qcb+lp (2 stocks), f+hp xx qcb+hp, qcf+mk"
+degats = 2585
+drive = 1
+super = 0
+
+[[combo]]
+nom = "DI, qcb+lp (2 stocks), f+hp xx qcb+pp, b+hp xx hp xx f+kkk"
+categorie = "Après DI (stun) — 0 Crest"
+inputs = "DI, qcb+lp (2 stocks), f+hp xx qcb+pp, b+hp xx hp xx f+kkk"
+degats = 3330
+drive = 3
+super = 0
+notes = "Can cancel b+hp xx hp into a super as well."
+
+[[combo]]
+nom = "DI, qcb+lp (2 stocks), b+hp xx hp xx qcb+hp, qcb+hp, f+kkk"
+categorie = "Après DI (stun) — 2 Crest"
+inputs = "DI, qcb+lp (2 stocks), b+hp xx hp xx qcb+hp, qcb+hp, f+kkk"
+degats = 2950
+drive = 1
+super = 0
+
+[[combo]]
+nom = "DI, qcb+lp (2 stocks), f+hp xx qcb+pp, f+hp xx qcb+pp, st. hk xx SA3"
+categorie = "Après DI (stun) — 2 Crest"
+inputs = "DI, qcb+lp (2 stocks), f+hp xx qcb+pp, f+hp xx qcb+pp, st. hk xx SA3"
+degats = 5603
+drive = 5
+super = 3
+notes = "Takes 5 drive, but you'll regenerate most of it due to not using a drive rush."
+
+[[modern]]
+categorie = "Anti-airs"
+inputs = "F+SP"
+notes = "Strong invincible anti-air"
+
+[[modern]]
+categorie = "Anti-airs"
+inputs = "J+L"
+notes = "Anti-Crossup"
+
+[[modern]]
+categorie = "Anti-airs"
+inputs = "B+H"
+notes = "Situational anti-air juggle."
+
+[[modern]]
+categorie = "Pokes"
+inputs = "B+M"
+notes = "Long range, hard to whiff punish, goes into a target combo"
+
+[[modern]]
+categorie = "Pokes"
+inputs = "D+M"
+notes = "Low poke that's special cancellable"
+
+[[modern]]
+categorie = "Pokes"
+inputs = "M"
+notes = "Decent forward lunging medium attack."
+
+[[modern]]
+categorie = "Pokes"
+inputs = "M+[AUTO]"
+notes = "Good disjoint for stopping drive rush."
+
+[[modern]]
+categorie = "Pokes"
+inputs = "D+H"
+notes = "Great whiff punish tool"
+
+[[modern]]
+categorie = "Punitions"
+inputs = "L+[AUTO], H, L+[AUTO] > F+SP"
+notes = "4f punish counter, point blank."
+
+[[modern]]
+categorie = "Punitions"
+inputs = "H, H+[AUTO] > H+[AUTO] > F+SP"
+notes = "9f punish counter."
+
+[[modern]]
+categorie = "Combos de base"
+inputs = "D+L > D+L > D+L > F+SP"
+notes = "Basic light combo"
+
+[[modern]]
+categorie = "Combos de base"
+inputs = "H, L+[AUTO] > F+SP"
+notes = "Basic heavy starter into a light combo."
+
+[[modern]]
+categorie = "Combos de base"
+inputs = "D+M > DR > H > H+[AUTO] > H+[AUTO] > F+SP"
+notes = "Low DRC starter"
+
+[[modern]]
+categorie = "Combos de base"
+inputs = "DR > D+L, M+[AUTO] > F+SP"
+notes = "DR into a low"
+
+[[modern]]
+categorie = "Combos de base"
+inputs = "DR > F+M, H+[AUTO] > H+[AUTO] > F+SP"
+notes = "DR into an overhead."

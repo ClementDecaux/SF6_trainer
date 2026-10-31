@@ -1,0 +1,776 @@
+# Bison : combos de la feuille communautaire SF6 (Google Sheets), importés tels quels.
+# degats = dégâts du combo complet, drive = barres de Drive, super = barres de super.
+# [[modern]] : les mêmes infos en contrôles Modern sans motion (NMM), pour référence.
+personnage = "Bison"
+
+[[combo]]
+nom = "cr. lk, cr. lp, st. lk xx qcf+lk"
+categorie = "Sans jauge"
+inputs = "cr. lk, cr. lp, st. lk xx qcf+lk"
+degats = 1130
+drive = 0
+super = 0
+notes = "Low starter"
+
+[[combo]]
+nom = "cr. lk, cr. lp, st. lk xx qcb+lp"
+categorie = "Sans jauge"
+inputs = "cr. lk, cr. lp, st. lk xx qcb+lp"
+degats = 1070
+drive = 0
+super = 0
+notes = "Low starter into mine placement."
+
+[[combo]]
+nom = "cr. lp, cr. lp, st. lp xx qcf+lk"
+categorie = "Sans jauge"
+inputs = "cr. lp, cr. lp, st. lp xx qcf+lk"
+degats = 1230
+drive = 0
+super = 0
+notes = "4f starter"
+
+[[combo]]
+nom = "cr. lp, cr. lp, cr. lp xx qcf+lk"
+categorie = "Sans jauge"
+inputs = "cr. lp, cr. lp, cr. lp xx qcf+lk"
+degats = 1230
+drive = 0
+super = 0
+notes = "4f crouch mash conversion."
+
+[[combo]]
+nom = "cr. lp, cr. lk, st. lp xx qcf+lk"
+categorie = "Sans jauge"
+inputs = "cr. lp, cr. lk, st. lp xx qcf+lk"
+degats = 1150
+drive = 0
+super = 0
+notes = "4f starter. Low fish string."
+
+[[combo]]
+nom = "cr. lp, cr. lk, cr. lp xx b~f+lp"
+categorie = "Sans jauge"
+inputs = "cr. lp, cr. lk, cr. lp xx b~f+lp"
+degats = 1390
+drive = 0
+super = 0
+notes = "4f starter. Low fish string. Bison's preferred light ender midscreen, as the okizeme from his bombs were nerfed in the Elena patch."
+
+[[combo]]
+nom = "cr. mp, st. lk xx qcb+lp"
+categorie = "Sans jauge"
+inputs = "cr. mp, st. lk xx qcb+lp"
+degats = 1460
+drive = 0
+super = 0
+
+[[combo]]
+nom = "cr. mp, st. lk xx qcf+lk"
+categorie = "Sans jauge"
+inputs = "cr. mp, st. lk xx qcf+lk"
+degats = 1540
+drive = 0
+super = 0
+
+[[combo]]
+nom = "st. mp xx d+hk"
+categorie = "Sans jauge"
+inputs = "st. mp xx d+hk"
+degats = 1300
+drive = 0
+super = 0
+notes = "One of Bison's target combos. necessary to create pressure off of medium strings, as st. mp by itself is only +0, while this forms a frametrap"
+
+[[combo]]
+nom = "st. mp xx d+hk (ch), cr. lp, st. lp xx qcf+lk"
+categorie = "Sans jauge"
+inputs = "st. mp xx d+hk (ch), cr. lp, st. lp xx qcf+lk"
+degats = 1940
+drive = 0
+super = 0
+notes = "Standard conversion if bison's d+hk counterhits the opponent."
+
+[[combo]]
+nom = "st. mp, cr. mp xx b~f+mp"
+categorie = "Sans jauge"
+inputs = "st. mp, cr. mp xx b~f+mp"
+degats = 2320
+drive = 0
+super = 0
+notes = "Medium combo"
+
+[[combo]]
+nom = "st. mp, cr. mp xx qcb+mp"
+categorie = "Sans jauge"
+inputs = "st. mp, cr. mp xx qcb+mp"
+degats = 1840
+drive = 0
+super = 0
+notes = "Medium combo into mine placement."
+
+[[combo]]
+nom = "b+hk, cr. lp, st. lk xx qcb+lp"
+categorie = "Sans jauge"
+inputs = "b+hk, cr. lp, st. lk xx qcb+lp"
+degats = 1830
+drive = 0
+super = 0
+notes = "Conversion from b+hk into mine placement."
+
+[[combo]]
+nom = "b+hk, cr. lp, st. lk xx qcf+lk"
+categorie = "Sans jauge"
+inputs = "b+hk, cr. lp, st. lk xx qcf+lk"
+degats = 1900
+drive = 0
+super = 0
+notes = "Conversion from b+hk"
+
+[[combo]]
+nom = "st. hk, cr. mp xx b~f+mp"
+categorie = "Sans jauge"
+inputs = "st. hk, cr. mp xx b~f+mp"
+degats = 2620
+drive = 0
+super = 0
+notes = "Heavy combo"
+
+[[combo]]
+nom = "st. hk, cr. mp xx qcb+mp"
+categorie = "Sans jauge"
+inputs = "st. hk, cr. mp xx qcb+mp"
+degats = 2140
+drive = 0
+super = 0
+notes = "Heavy combo into mine placement."
+
+[[combo]]
+nom = "st. hp, st. lk xx qcb+lp"
+categorie = "Sans jauge"
+inputs = "st. hp, st. lk xx qcb+lp"
+degats = 1730
+drive = 0
+super = 0
+notes = "Long range lunge normal into mine placement."
+
+[[combo]]
+nom = "st. hp, st. lk xx qcf+lk"
+categorie = "Sans jauge"
+inputs = "st. hp, st. lk xx qcf+lk"
+degats = 1800
+drive = 0
+super = 0
+notes = "Long range lunge normal conversion."
+
+[[combo]]
+nom = "st. hp, st. lp xx b~f+lp"
+categorie = "Sans jauge"
+inputs = "st. hp, st. lp xx b~f+lp"
+degats = 2080
+drive = 0
+super = 0
+notes = "Long range conversion into a 5f. (8/3/2026)"
+
+[[combo]]
+nom = "cr. mk xx qcb+mp"
+categorie = "Sans jauge"
+inputs = "cr. mk xx qcb+mp"
+degats = 1140
+drive = 0
+super = 0
+notes = "Neutral buffer into mine placement"
+
+[[combo]]
+nom = "cr. hp xx qcb+hp"
+categorie = "Sans jauge"
+inputs = "cr. hp xx qcb+hp"
+degats = 1800
+drive = 0
+super = 0
+notes = "Heavy buffer into mine placement"
+
+[[combo]]
+nom = "cr. hp xx b~f+hp"
+categorie = "Sans jauge"
+inputs = "cr. hp xx b~f+hp"
+degats = 2500
+drive = 0
+super = 0
+notes = "Heavy buffer into damage with back charge."
+
+[[combo]]
+nom = "st. mp, cr. mp xx qcf+kk, st. hp"
+categorie = "OD"
+inputs = "st. mp, cr. mp xx qcf+kk, st. hp"
+degats = 2440
+drive = 2
+super = 0
+notes = "Safejump against OD or slow anti-air DPs (6f+ startup) (+41)"
+
+[[combo]]
+nom = "st. mp, cr. mp xx qcf+kk, qcf+hk"
+categorie = "OD"
+inputs = "st. mp, cr. mp xx qcf+kk, qcf+hk"
+degats = 2560
+drive = 2
+super = 0
+
+[[combo]]
+nom = "st. mp, cr. mp xx qcf+kk, b~f+mp"
+categorie = "OD"
+inputs = "st. mp, cr. mp xx qcf+kk, b~f+mp"
+degats = 2320
+drive = 2
+super = 0
+
+[[combo]]
+nom = "st. mp, cr. mp xx qcf+kk, st. hp xx qcfx2+k"
+categorie = "OD"
+inputs = "st. mp, cr. mp xx qcf+kk, st. hp xx qcfx2+k"
+degats = 3440
+drive = 2
+super = 1
+
+[[combo]]
+nom = "st. mp, cr. mp xx qcf+kk, qcb+hp"
+categorie = "OD"
+inputs = "st. mp, cr. mp xx qcf+kk, qcb+hp"
+degats = 2380
+drive = 2
+super = 0
+notes = "Sets up Bison's HP backfist mine."
+
+[[combo]]
+nom = "cr. lk, cr. lp, st. lk xx qcb+pp xx qcbx2+k"
+categorie = "OD"
+inputs = "cr. lk, cr. lp, st. lk xx qcb+pp xx qcbx2+k"
+degats = 2870
+drive = 2
+super = 2
+notes = "By holding backward during the Psycho Punisher, you retain the same side. Otherwise, this side switches."
+
+[[combo]]
+nom = "cr. lp xx dr xx st. lp"
+categorie = "Extensions Drive Rush"
+inputs = "cr. lp xx dr xx st. lp"
+drive = 3
+notes = "5f at fastest"
+
+[[combo]]
+nom = "st. lk xx dr xx st. lp"
+categorie = "Extensions Drive Rush"
+inputs = "st. lk xx dr xx st. lp"
+drive = 3
+notes = "5f at fastest"
+
+[[combo]]
+nom = "st. lp xx dr xx st. lp"
+categorie = "Extensions Drive Rush"
+inputs = "st. lp xx dr xx st. lp"
+drive = 3
+notes = "5f at fastest"
+
+[[combo]]
+nom = "cr. mp xx dr xx b+hk"
+categorie = "Extensions Drive Rush"
+inputs = "cr. mp xx dr xx b+hk"
+drive = 3
+notes = "10f at fastest"
+
+[[combo]]
+nom = "st. mp xx dr xx st. hk"
+categorie = "Extensions Drive Rush"
+inputs = "st. mp xx dr xx st. hk"
+drive = 3
+notes = "13f at fastest"
+
+[[combo]]
+nom = "cr. mk xx dr xx st. mp"
+categorie = "Extensions Drive Rush"
+inputs = "cr. mk xx dr xx st. mp"
+drive = 3
+notes = "8f at fastest"
+
+[[combo]]
+nom = "cr. hp xx dr xx st. hk"
+categorie = "Extensions Drive Rush"
+inputs = "cr. hp xx dr xx st. hk"
+drive = 3
+notes = "13f at fastest"
+
+[[combo]]
+nom = "b+hk xx dr xx st. hk"
+categorie = "Extensions Drive Rush"
+inputs = "b+hk xx dr xx st. hk"
+drive = 3
+notes = "13f at fastest"
+
+[[combo]]
+nom = "cr. mk xx dr xx cr. lp, st. mp, cr. mp xx qcf+mk"
+categorie = "Drive Rush"
+inputs = "cr. mk xx dr xx cr. lp, st. mp, cr. mp xx qcf+mk"
+degats = 1742
+drive = 3
+super = 0
+notes = "No gap on block between cr. mk and cr. lp"
+
+[[combo]]
+nom = "cr. mk xx dr xx st. mp, cr. hp xx b~f+hp"
+categorie = "Drive Rush"
+inputs = "cr. mk xx dr xx st. mp, cr. hp xx b~f+hp"
+degats = 2255
+drive = 3
+super = 0
+
+[[combo]]
+nom = "cr. mk xx dr xx st. mp, cr. hp xx qcb+hp"
+categorie = "Drive Rush"
+inputs = "cr. mk xx dr xx st. mp, cr. hp xx qcb+hp"
+degats = 1898
+drive = 3
+super = 0
+notes = "HP backfist combos off of st. mp, giving Bison good okizeme and a bomb."
+
+[[combo]]
+nom = "cr. mp xx dr xx b+hk, st. mp, cr. mp xx b~f+mp"
+categorie = "Drive Rush"
+inputs = "cr. mp xx dr xx b+hk, st. mp, cr. mp xx b~f+mp"
+degats = 2756
+drive = 3
+super = 0
+
+[[combo]]
+nom = "b+hk xx dr xx st. hk, b+hk xx dr xx st. hk, b+hk xx b~f+hp xx qcfx2+p"
+categorie = "Drive Rush"
+inputs = "b+hk xx dr xx st. hk, b+hk xx dr xx st. hk, b+hk xx b~f+hp xx qcfx2+p"
+degats = 5720
+drive = 6
+super = 3
+notes = "Example drive rush loop for meter dump"
+
+[[combo]]
+nom = "dr xx cr. lk, cr. mk xx qcf+mk"
+categorie = "Drive Rush"
+inputs = "dr xx cr. lk, cr. mk xx qcf+mk"
+degats = 1230
+drive = 1
+super = 0
+notes = "Lunge into low"
+
+[[combo]]
+nom = "dr xx f+hp, cr. mp xx b~f+mp"
+categorie = "Drive Rush"
+inputs = "dr xx f+hp, cr. mp xx b~f+mp"
+degats = 2520
+drive = 1
+super = 0
+notes = "Lunge into overhead."
+
+[[combo]]
+nom = "dr xx b+hk, st. mp, cr. mp xx b~f+mp"
+categorie = "Drive Rush"
+inputs = "dr xx b+hk, st. mp, cr. mp xx b~f+mp"
+degats = 2860
+drive = 1
+super = 0
+notes = "Lunge into a mid. You wouldn't expect it from bison's b+hk, but its behavior during drive rush allows him to lunge about 50% of the screen."
+
+[[combo]]
+nom = "st. mp, cr. mp xx qcf+kk, dr xx cr. hp xx qcf+hk"
+categorie = "Drive Rush"
+inputs = "st. mp, cr. mp xx qcf+kk, dr xx cr. hp xx qcf+hk"
+degats = 2803
+drive = 3
+super = 0
+notes = "Carries for about 50% of the stage."
+
+[[combo]]
+nom = "st. mp, cr. mp xx qcf+kk, dr xx cr. hp xx qcb+hp"
+categorie = "Drive Rush"
+inputs = "st. mp, cr. mp xx qcf+kk, dr xx cr. hp xx qcb+hp"
+degats = 2677
+drive = 3
+super = 0
+notes = "Similar to qcf+kk into qcb+hp, this trades an additional bar of drive to get more corner carry."
+
+[[combo]]
+nom = "b~f+pp, dr xx mp xx f+hp, qcb+mp"
+categorie = "Mine Conversions"
+inputs = "b~f+pp, dr xx mp xx f+hp, qcb+mp"
+degats = 2298
+drive = 3
+super = 0
+notes = "Midscreen psycho crusher mine pop. Can be from a meaty or yolo OD PC"
+
+[[combo]]
+nom = "b~f+pp, dr xx mp xx f+hp, qcb+pp xx SA3"
+categorie = "Mine Conversions"
+inputs = "b~f+pp, dr xx mp xx f+hp, qcb+pp xx SA3"
+degats = 4466
+drive = 5
+super = 3
+notes = "Above when used as a meaty after lp mine set, cashing out with level 3."
+
+[[combo]]
+nom = "st. mp, cr. mp xx b~f+pp, dr xx mp xx f+hp, qcb+pp xx SA3"
+categorie = "Mine Conversions"
+inputs = "st. mp, cr. mp xx b~f+pp, dr xx mp xx f+hp, qcb+pp xx SA3"
+degats = 5746
+drive = 5
+super = 3
+notes = "Midscreen from psycho crusher mine pop."
+
+[[combo]]
+nom = "st. mp, cr. mp xx b~f+pp, d~u+kk > k, f+hp, qcb+pp xx SA3"
+categorie = "Mine Conversions"
+inputs = "st. mp, cr. mp xx b~f+pp, d~u+kk > k, f+hp, qcb+pp xx SA3"
+degats = 6400
+drive = 6
+super = 3
+notes = "Corner only with psycho crusher mine pop."
+
+[[combo]]
+nom = "dr xx st. hk, b+hk xx b~f+pp, d~u+kk > k, f+hp, qcb+pp xx SA3"
+categorie = "Mine Conversions"
+inputs = "dr xx st. hk, b+hk xx b~f+pp, d~u+kk > k, f+hp, qcb+pp xx SA3"
+degats = 6900
+drive = 7
+super = 3
+notes = "Opponent cornered, qcb+lp mine set into dr xx st. hk okizeme."
+
+[[combo]]
+nom = "dr xx b+hk, st. mp, cr. mp xx qcf+kk, qcf+hk, (pop), d~u+kk > k, f+hp, qcb+pp xx SA3"
+categorie = "Mine Conversions"
+inputs = "dr xx b+hk, st. mp, cr. mp xx qcf+kk, qcf+hk, (pop), d~u+kk > k, f+hp, qcb+pp xx SA3"
+degats = 5880
+drive = 7
+super = 3
+notes = "Corner only. Gives a fair bit of drive back, leaving you at ~2 drive. Followup to qcb+mp mine."
+
+[[combo]]
+nom = "st. mp, cr. mp xx qcb+pp (mine), qcf+kk, qcb+hp"
+categorie = "Mine Conversions"
+inputs = "st. mp, cr. mp xx qcb+pp (mine), qcf+kk, qcb+hp"
+degats = 3650
+drive = 4
+super = 0
+notes = "Example conversion using the new juggle from qcb+pp (mine) (8/3/2026)"
+
+[[combo]]
+nom = "cr. lp (pc), st. mp, cr. mp xx b~f+mp"
+categorie = "Punish Counter"
+inputs = "cr. lp (pc), st. mp, cr. mp xx b~f+mp"
+degats = 2100
+drive = 0
+super = 0
+notes = "4f pc. Point blank."
+
+[[combo]]
+nom = "cr. lp (pc), cr. mk xx qcf+mk"
+categorie = "Punish Counter"
+inputs = "cr. lp (pc), cr. mk xx qcf+mk"
+degats = 1390
+drive = 0
+super = 0
+notes = "4f pc. Tip range."
+
+[[combo]]
+nom = "cr. mp (pc), st. mp, cr. mp xx b~f+mp"
+categorie = "Punish Counter"
+inputs = "cr. mp (pc), st. mp, cr. mp xx b~f+mp"
+degats = 2780
+drive = 0
+super = 0
+notes = "6f pc. Point blank"
+
+[[combo]]
+nom = "cr. mp (pc), st. mp xx qcb+hp"
+categorie = "Punish Counter"
+inputs = "cr. mp (pc), st. mp xx qcb+hp"
+degats = 2040
+drive = 0
+super = 0
+notes = "6f pc, Point blank."
+
+[[combo]]
+nom = "cr. mp (pc), cr. mk xx qcf+mk"
+categorie = "Punish Counter"
+inputs = "cr. mp (pc), cr. mk xx qcf+mk"
+degats = 1940
+drive = 0
+super = 0
+notes = "6f pc. Tip range."
+
+[[combo]]
+nom = "st. mp (pc), b+hk xx b~f+hp"
+categorie = "Punish Counter"
+inputs = "st. mp (pc), b+hk xx b~f+hp"
+degats = 2800
+drive = 0
+super = 0
+notes = "8f pc. Point blank"
+
+[[combo]]
+nom = "st. mp (pc), cr. mk xx qcf+mk"
+categorie = "Punish Counter"
+inputs = "st. mp (pc), cr. mk xx qcf+mk"
+degats = 1940
+drive = 0
+super = 0
+notes = "8f pc. Tip range."
+
+[[combo]]
+nom = "b+hk (pc), st. mp, cr. mp xx b~f+mp"
+categorie = "Punish Counter"
+inputs = "b+hk (pc), st. mp, cr. mp xx b~f+mp"
+degats = 3020
+drive = 0
+super = 0
+notes = "10f pc. Point blank"
+
+[[combo]]
+nom = "b+hk (pc), cr. mp xx b~f+mp"
+categorie = "Punish Counter"
+inputs = "b+hk (pc), cr. mp xx b~f+mp"
+degats = 2680
+drive = 0
+super = 0
+notes = "10f pc. Tip range."
+
+[[combo]]
+nom = "st. hk (pc), st. mp xx f+hp, qcf+lk"
+categorie = "Punish Counter"
+inputs = "st. hk (pc), st. mp xx f+hp, qcf+lk"
+degats = 2880
+drive = 0
+super = 0
+notes = "13f pc. Tip range. Walk/dash before performing the st. mp xx f+hp tc."
+
+[[combo]]
+nom = "st. hk (pc), dash, cr. hp xx qcf+hk"
+categorie = "Punish Counter"
+inputs = "st. hk (pc), dash, cr. hp xx qcf+hk"
+degats = 2940
+drive = 0
+super = 0
+notes = "13f pc. Dash before the cr. hp."
+
+[[combo]]
+nom = "st. hk (pc), dash, cr. hp xx qcb+hp"
+categorie = "Punish Counter"
+inputs = "st. hk (pc), dash, cr. hp xx qcb+hp"
+degats = 2700
+drive = 0
+super = 0
+notes = "13f pc."
+
+[[combo]]
+nom = "st. hk (pc), b+hk xx b~f+hp"
+categorie = "Punish Counter"
+inputs = "st. hk (pc), b+hk xx b~f+hp"
+degats = 3160
+drive = 0
+super = 0
+notes = "13f pc. Point blank."
+
+[[combo]]
+nom = "st. hk (pc), cr. hp xx b~f+hp"
+categorie = "Punish Counter"
+inputs = "st. hk (pc), cr. hp xx b~f+hp"
+degats = 3260
+drive = 0
+super = 0
+notes = "13f pc. Point blank. Harder than the previous combo, requires you to charge during the st. hk, and then wait for your opponent to hit their knees before doing the cr. hp cancel into hp crusher."
+
+[[combo]]
+nom = "st. hk (pc), d~u+mk xx kk, st. hp xx qcfx2+k"
+categorie = "Punish Counter"
+inputs = "st. hk (pc), d~u+mk xx kk, st. hp xx qcfx2+k"
+degats = 3820
+drive = 2
+super = 1
+notes = "13f pc. Can be changed to a hk stomp with a slight delay into the kk stomp to sideswitch."
+
+[[combo]]
+nom = "st. hp (pc), b+hk xx b~f+hp"
+categorie = "Punish Counter"
+inputs = "st. hp (pc), b+hk xx b~f+hp"
+degats = 2960
+drive = 0
+super = 0
+notes = "19f pc. Point blank"
+
+[[combo]]
+nom = "st. hp (pc), dr xx cr. mp, st. mp, cr. mp xx b~f+mp"
+categorie = "Punish Counter"
+inputs = "st. hp (pc), dr xx cr. mp, st. mp, cr. mp xx b~f+mp"
+degats = 2856
+drive = 1
+super = 0
+notes = "19f pc. Tip range."
+
+[[combo]]
+nom = "qcf+hk (pc), cr. mp xx dr xx st. mp, cr. hp xx dr xx st. hk, b+hk xx b~f+hp xx qcfx2+p"
+categorie = "Punish Counter"
+inputs = "qcf+hk (pc), cr. mp xx dr xx st. mp, cr. hp xx dr xx st. hk, b+hk xx b~f+hp xx qcfx2+p"
+degats = 6318
+drive = 6
+super = 3
+notes = "22f pc. Drive dump for maximum damage."
+
+[[combo]]
+nom = "DI (pc), cr. hp xx b~f+hp"
+categorie = "Après DI (crumple)"
+inputs = "DI (pc), cr. hp xx b~f+hp"
+degats = 2800
+drive = 1
+super = 0
+
+[[combo]]
+nom = "DI (pc), st. hk, cr. mp xx b~f+mp"
+categorie = "Après DI (crumple)"
+inputs = "DI (pc), st. hk, cr. mp xx b~f+mp"
+degats = 2940
+drive = 1
+super = 0
+
+[[combo]]
+nom = "DI (pc), j. hk, dr xx mp xx f+hp, dr xx cr. lp xx qcf+hk"
+categorie = "Après DI (crumple)"
+inputs = "DI (pc), j. hk, dr xx mp xx f+hp, dr xx cr. lp xx qcf+hk"
+degats = 2896
+drive = 3
+super = 0
+notes = "Carries about 50% of the stage."
+
+[[combo]]
+nom = "DI (pc), j. hk, st. hp xx qcfx2+k"
+categorie = "Après DI (crumple)"
+inputs = "DI (pc), j. hk, st. hp xx qcfx2+k"
+degats = 3500
+drive = 1
+super = 1
+notes = "Can be cancelled into any of Bison's supers for a reasonable chunk of damage."
+
+[[combo]]
+nom = "DI (pc), d~u+hk xx kk, qcb+mp"
+categorie = "Après DI (crumple)"
+inputs = "DI (pc), d~u+hk xx kk, qcb+mp"
+degats = 2480
+drive = 3
+super = 0
+notes = "The hk shadow rise into OD stomp is delayed to cross the opponent up. Sideswitches the opponent."
+
+[[combo]]
+nom = "DI (pc), d~u+hk xx kk, st. hp xx qcfx2+k"
+categorie = "Après DI (crumple)"
+inputs = "DI (pc), d~u+hk xx kk, st. hp xx qcfx2+k"
+degats = 3820
+drive = 3
+super = 1
+notes = "The hk shadow rise into OD stomp is delayed to cross the opponent up. Sideswitches the opponent."
+
+[[combo]]
+nom = "DI (crush), mp xx f+hp, qcb+lp"
+categorie = "Après DI (wallsplat)"
+inputs = "DI (crush), mp xx f+hp, qcb+lp"
+degats = 1568
+drive = 1
+super = 0
+notes = "Applies a mine."
+
+[[combo]]
+nom = "DI (crush), mp xx f+hp, qcf+lk"
+categorie = "Après DI (wallsplat)"
+inputs = "DI (crush), mp xx f+hp, qcf+lk"
+degats = 1632
+drive = 1
+super = 0
+
+[[combo]]
+nom = "DI (crush), cr. hp xx b~f+hp"
+categorie = "Après DI (wallsplat)"
+inputs = "DI (crush), cr. hp xx b~f+hp"
+degats = 2000
+drive = 1
+super = 0
+
+[[combo]]
+nom = "DI (stun), j. hp, st. hk, cr. mp xx b~f+mp"
+categorie = "Après DI (stun)"
+inputs = "DI (stun), j. hp, st. hk, cr. mp xx b~f+mp"
+degats = 2530
+drive = 1
+super = 0
+
+[[modern]]
+categorie = "Anti-airs"
+inputs = "D+H"
+notes = "Strikes above Bison's head."
+
+[[modern]]
+categorie = "Anti-airs"
+inputs = "J. M"
+notes = "Good as a preemptive air-to-air"
+
+[[modern]]
+categorie = "Anti-airs"
+inputs = "J. L"
+notes = "Works as an anti-crossup option if you jump backwards."
+
+[[modern]]
+categorie = "Pokes"
+inputs = "M"
+notes = "Good noncommittal poke."
+
+[[modern]]
+categorie = "Pokes"
+inputs = "M+[AUTO]"
+notes = "Bufferable medium option, good to check drive rushes and opposing cr. mks"
+
+[[modern]]
+categorie = "Pokes"
+inputs = "D+M"
+notes = "Low option, good as a buffer into drive rush or scissor"
+
+[[modern]]
+categorie = "Pokes"
+inputs = "D/F+H"
+notes = "Bison's sweep is fast, has good range, and pulls him back on whiff."
+
+[[modern]]
+categorie = "Pokes"
+inputs = "H"
+notes = "Good whiff punish tool"
+
+[[modern]]
+categorie = "Punitions"
+inputs = "D+L > F+SP"
+notes = "4f punish"
+
+[[modern]]
+categorie = "Punitions"
+inputs = "M+[AUTO] > B+SP"
+notes = "6f punish"
+
+[[modern]]
+categorie = "Punitions"
+inputs = "D+H > B+SP"
+notes = "10f punish"
+
+[[modern]]
+categorie = "Combos de base"
+inputs = "D+L > D+L > D+L > F+SP"
+
+[[modern]]
+categorie = "Combos de base"
+inputs = "B+H > D+L > F+SP"
+
+[[modern]]
+categorie = "Combos de base"
+inputs = "D+M > DR > H+[AUTO] > D+H > B+SP"
+
+[[modern]]
+categorie = "Combos de base"
+inputs = "DR > L+[AUTO] > D+M > F+SP"

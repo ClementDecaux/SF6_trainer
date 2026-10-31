@@ -1,0 +1,667 @@
+# Mai : combos de la feuille communautaire SF6 (Google Sheets), importés tels quels.
+# degats = dégâts du combo complet, drive = barres de Drive, super = barres de super.
+# [[modern]] : les mêmes infos en contrôles Modern sans motion (NMM), pour référence.
+personnage = "Mai"
+
+[[combo]]
+nom = "st. lp, st. lp, st. lp xx srk+hk"
+categorie = "Sans jauge"
+inputs = "st. lp, st. lp, st. lp xx srk+hk"
+degats = 1470
+drive = 0
+super = 0
+
+[[combo]]
+nom = "st. lp, st. lp, st. lp xx qcb+mp"
+categorie = "Sans jauge"
+inputs = "st. lp, st. lp, st. lp xx qcb+mp"
+degats = 1350
+drive = 0
+super = 0
+
+[[combo]]
+nom = "st. lp, st. lp, st. lp xx qcf+lk"
+categorie = "Sans jauge"
+inputs = "st. lp, st. lp, st. lp xx qcf+lk"
+degats = 1230
+drive = 0
+super = 0
+
+[[combo]]
+nom = "cr. lp, cr. lk, st. lp xx srk+hk"
+categorie = "Sans jauge"
+inputs = "cr. lp, cr. lk, st. lp xx srk+hk"
+degats = 1390
+drive = 0
+super = 0
+
+[[combo]]
+nom = "cr. lp, cr. lk, st. lp xx qcb+mp"
+categorie = "Sans jauge"
+inputs = "cr. lp, cr. lk, st. lp xx qcb+mp"
+degats = 1270
+drive = 0
+super = 0
+
+[[combo]]
+nom = "cr. lp, cr. lk, st. lp xx qcf+lk"
+categorie = "Sans jauge"
+inputs = "cr. lp, cr. lk, st. lp xx qcf+lk"
+degats = 1150
+drive = 0
+super = 0
+
+[[combo]]
+nom = "cr. lk, cr. lk, st. lp xx srk+hk"
+categorie = "Sans jauge"
+inputs = "cr. lk, cr. lk, st. lp xx srk+hk"
+degats = 1290
+drive = 0
+super = 0
+
+[[combo]]
+nom = "cr. lk, cr. lk, st. lp xx qcb+mp"
+categorie = "Sans jauge"
+inputs = "cr. lk, cr. lk, st. lp xx qcb+mp"
+degats = 1170
+drive = 0
+super = 0
+
+[[combo]]
+nom = "cr. lk, cr. lk, st. lp xx qcf+lk"
+categorie = "Sans jauge"
+inputs = "cr. lk, cr. lk, st. lp xx qcf+lk"
+degats = 1050
+drive = 0
+super = 0
+
+[[combo]]
+nom = "cr. lp, st. lk xx lk xx lk xx qcb+p"
+categorie = "Sans jauge"
+inputs = "cr. lp, st. lk xx lk xx lk xx qcb+p"
+degats = 1620
+drive = 0
+super = 0
+
+[[combo]]
+nom = "cr. hp, st. lp xx srk+hk"
+categorie = "Sans jauge"
+inputs = "cr. hp, st. lp xx srk+hk"
+degats = 2060
+drive = 0
+super = 0
+
+[[combo]]
+nom = "cr. hp, st. lp xx qcb+lp"
+categorie = "Sans jauge"
+inputs = "cr. hp, st. lp xx qcb+lp"
+degats = 1900
+drive = 0
+super = 0
+
+[[combo]]
+nom = "cr. hp, st. lp xx qcf+lk"
+categorie = "Sans jauge"
+inputs = "cr. hp, st. lp xx qcf+lk"
+degats = 1740
+drive = 0
+super = 0
+
+[[combo]]
+nom = "b+hk xx hk"
+categorie = "Sans jauge"
+inputs = "b+hk xx hk"
+degats = 2000
+drive = 0
+super = 0
+
+[[combo]]
+nom = "b+hk xx hk xx SA1"
+categorie = "Sans jauge"
+inputs = "b+hk xx hk xx SA1"
+degats = 3200
+drive = 0
+super = 1
+notes = "Meterless entry point to SA1. Corner only."
+
+[[combo]]
+nom = "cr. mk xx qcb+lp"
+categorie = "Sans jauge"
+inputs = "cr. mk xx qcb+lp"
+degats = 1140
+drive = 0
+super = 0
+notes = "Safe when spaced to tip range."
+
+[[combo]]
+nom = "st. hp xx qcb+hp, srk+hk"
+categorie = "Sans jauge"
+inputs = "st. hp xx qcb+hp, srk+hk"
+degats = 2440
+drive = 0
+super = 0
+notes = "Standing only"
+
+[[combo]]
+nom = "st. hp xx qcb+hp, qcf+lk"
+categorie = "Sans jauge"
+inputs = "st. hp xx qcb+hp, qcf+lk"
+degats = 2160
+drive = 0
+super = 0
+notes = "Standing only."
+
+[[combo]]
+nom = "st. hp xx qcb+hp, SA1"
+categorie = "Sans jauge"
+inputs = "st. hp xx qcb+hp, SA1"
+degats = 3000
+drive = 0
+super = 0
+notes = "Standing only. Entry point to SA1"
+
+[[combo]]
+nom = "cr. lp, cr. lk, st. lp xx qcb+mp (flame), SA1 (flame)"
+categorie = "Sans jauge"
+inputs = "cr. lp, cr. lk, st. lp xx qcb+mp (flame), SA1 (flame)"
+degats = 2250
+drive = 0
+super = 1
+notes = "Quick light combo to restock flame stocks. Only works with 2 flame stocks, or in the corner."
+
+[[combo]]
+nom = "st. hp xx qcb+pp"
+categorie = "OD"
+inputs = "st. hp xx qcb+pp"
+degats = 2100
+drive = 2
+super = 0
+notes = "Safe-ish buffer"
+
+[[combo]]
+nom = "st. hp xx qcb+pp xx SA2"
+categorie = "OD"
+inputs = "st. hp xx qcb+pp xx SA2"
+degats = 3710
+drive = 2
+super = 2
+notes = "Only continuation mid-screen (8/3/2026)"
+
+[[combo]]
+nom = "st. hp xx qcb+pp xx SA2, srk+hk"
+categorie = "OD"
+inputs = "st. hp xx qcb+pp xx SA2, srk+hk"
+degats = 4310
+drive = 2
+super = 2
+notes = "Corner only (8/3/2026)"
+
+[[combo]]
+nom = "st. hp xx qcb+pp, srk+mk"
+categorie = "OD"
+inputs = "st. hp xx qcb+pp, srk+mk"
+degats = 2870
+drive = 2
+super = 0
+notes = "Corner only (8/3/2026)"
+
+[[combo]]
+nom = "st. hp xx qcb+pp, SA1"
+categorie = "OD"
+inputs = "st. hp xx qcb+pp, SA1"
+degats = 3500
+drive = 2
+super = 1
+notes = "Corner only (8/3/2026)"
+
+[[combo]]
+nom = "cr. lp, cr. lk, st. lp xx qcf+kk, j. mp xx qcb+p"
+categorie = "OD"
+inputs = "cr. lp, cr. lk, st. lp xx qcf+kk, j. mp xx qcb+p"
+degats = 1690
+drive = 2
+super = 0
+
+[[combo]]
+nom = "cr. lp, cr. lk, st. lp xx qcf+kk, j. mp, SA1"
+categorie = "OD"
+inputs = "cr. lp, cr. lk, st. lp xx qcf+kk, j. mp, SA1"
+degats = 1990
+drive = 2
+super = 1
+notes = "New combo midscreen that allows Mai to connect SA1 (8/3/2026)"
+
+[[combo]]
+nom = "cr. lp, st. lk xx lk xx lk xx qcb+pp, srk+hk"
+categorie = "OD"
+inputs = "cr. lp, st. lk xx lk xx lk xx qcb+pp, srk+hk"
+degats = 2200
+drive = 2
+super = 0
+
+[[combo]]
+nom = "st. lp xx dr xx cr. lk"
+categorie = "Extensions Drive Rush"
+inputs = "st. lp xx dr xx cr. lk"
+drive = 3
+super = 0
+notes = "5f or less"
+
+[[combo]]
+nom = "cr. lp xx dr xx cr. lp"
+categorie = "Extensions Drive Rush"
+inputs = "cr. lp xx dr xx cr. lp"
+drive = 3
+super = 0
+notes = "4f or less"
+
+[[combo]]
+nom = "cr. mp xx dr xx st. hk"
+categorie = "Extensions Drive Rush"
+inputs = "cr. mp xx dr xx st. hk"
+drive = 3
+super = 0
+notes = "14f or less"
+
+[[combo]]
+nom = "cr. mk xx dr xx st. mp"
+categorie = "Extensions Drive Rush"
+inputs = "cr. mk xx dr xx st. mp"
+drive = 3
+super = 0
+notes = "8f or less"
+
+[[combo]]
+nom = "st. mp xx dr xx cr. hp"
+categorie = "Extensions Drive Rush"
+inputs = "st. mp xx dr xx cr. hp"
+drive = 3
+super = 0
+notes = "10f or less"
+
+[[combo]]
+nom = "st. hp xx dr xx st. hk"
+categorie = "Extensions Drive Rush"
+inputs = "st. hp xx dr xx st. hk"
+drive = 3
+super = 0
+notes = "14f or less"
+
+[[combo]]
+nom = "cr. mk xx dr xx b+hk, cr. mp xx qcb+hp, srk+hk"
+categorie = "Drive Rush"
+inputs = "cr. mk xx dr xx b+hk, cr. mp xx qcb+hp, srk+hk"
+degats = 2214
+drive = 3
+super = 0
+notes = "Forces stand"
+
+[[combo]]
+nom = "cr. mk xx dr xx cr. lp, cr. mp xx qcb+hp, srk+hk"
+categorie = "Drive Rush"
+inputs = "cr. mk xx dr xx cr. lp, cr. mp xx qcb+hp, srk+hk"
+degats = 1874
+drive = 3
+super = 0
+notes = "Standing only"
+
+[[combo]]
+nom = "cr. mk xx dr xx cr. lp, cr. lk, st. lk xx srk+hk"
+categorie = "Drive Rush"
+inputs = "cr. mk xx dr xx cr. lp, cr. lk, st. lk xx srk+hk"
+degats = 1479
+drive = 3
+super = 0
+
+[[combo]]
+nom = "cr. mp xx dr xx st. hp xx qcf+pp (held), st. hp xx qcb+hp, srk+hk"
+categorie = "Drive Rush"
+inputs = "cr. mp xx dr xx st. hp xx qcf+pp (held), st. hp xx qcb+hp, srk+hk"
+degats = 2976
+drive = 5
+super = 0
+notes = "Standing only. Example of OD Fan extension."
+
+[[combo]]
+nom = "st. hp xx dr xx st. mk, st. hp xx dr xx st. mk, st. hp xx qcb+hp, srk+hk"
+categorie = "Drive Rush"
+inputs = "st. hp xx dr xx st. mk, st. hp xx dr xx st. mk, st. hp xx qcb+hp, srk+hk"
+degats = 3396
+drive = 6
+super = 0
+notes = "Standing only."
+
+[[combo]]
+nom = "st. hp xx dr xx b+hk, cr. mp xx dr xx st. mk, st. hp xx qcb+hp, srk+hk"
+categorie = "Drive Rush"
+inputs = "st. hp xx dr xx b+hk, cr. mp xx dr xx st. mk, st. hp xx qcb+hp, srk+hk"
+degats = 3345
+drive = 6
+super = 0
+notes = "Incorporates a force stand"
+
+[[combo]]
+nom = "st. mp xx dr xx cr. hp, b+hk xx hk"
+categorie = "Drive Rush"
+inputs = "st. mp xx dr xx cr. hp, b+hk xx hk"
+degats = 2532
+drive = 3
+super = 0
+
+[[combo]]
+nom = "dr xx cr. lk, cr. mp, cr. lp xx qcf+lk"
+categorie = "Drive Rush"
+inputs = "dr xx cr. lk, cr. mp, cr. lp xx qcf+lk"
+degats = 1370
+drive = 1
+super = 0
+
+[[combo]]
+nom = "dr xx cr. mp, st. hp xx qcf+hk"
+categorie = "Drive Rush"
+inputs = "dr xx cr. mp, st. hp xx qcf+hk"
+degats = 2200
+drive = 1
+super = 0
+
+[[combo]]
+nom = "dr xx st. hp, cr. lk, st. lp xx srk+hk"
+categorie = "Drive Rush"
+inputs = "dr xx st. hp, cr. lk, st. lp xx srk+hk"
+degats = 2080
+drive = 1
+super = 0
+
+[[combo]]
+nom = "dr xx st. hp xx qcf+pp (held), st. hp xx qcf+hk"
+categorie = "Drive Rush"
+inputs = "dr xx st. hp xx qcf+pp (held), st. hp xx qcf+hk"
+degats = 2740
+drive = 3
+super = 0
+notes = "st. hp xx OD Fan (held) trades with 4f, can be alternated with uncharged fan to punish mashing."
+
+[[combo]]
+nom = "dr xx f+mp, cr. mp xx qcf+hk"
+categorie = "Drive Rush"
+inputs = "dr xx f+mp, cr. mp xx qcf+hk"
+degats = 2000
+drive = 1
+super = 0
+notes = "Overhead example."
+
+[[combo]]
+nom = "st. lp (pc), st. hp xx srk+hk"
+categorie = "Punish Counter"
+inputs = "st. lp (pc), st. hp xx srk+hk"
+degats = 1840
+drive = 0
+super = 0
+notes = "4f pc"
+
+[[combo]]
+nom = "cr. lp (pc), cr. mk xx qcb+mp"
+categorie = "Punish Counter"
+inputs = "cr. lp (pc), cr. mk xx qcb+mp"
+degats = 1460
+drive = 0
+super = 0
+notes = "4f pc"
+
+[[combo]]
+nom = "cr. mp (pc), st. hp xx srk+hk"
+categorie = "Punish Counter"
+inputs = "cr. mp (pc), st. hp xx srk+hk"
+degats = 2480
+drive = 0
+super = 0
+notes = "6f pc"
+
+[[combo]]
+nom = "b+hk (pc), cr. mp xx qcb+hp, srk+hk"
+categorie = "Punish Counter"
+inputs = "b+hk (pc), cr. mp xx qcb+hp, srk+hk"
+degats = 2920
+drive = 0
+super = 0
+notes = "8f pc"
+
+[[combo]]
+nom = "st. mk (pc), st. hp xx qcf+hk"
+categorie = "Punish Counter"
+inputs = "st. mk (pc), st. hp xx qcf+hk"
+degats = 2440
+drive = 0
+super = 0
+notes = "9f pc Near tip range. Mostly used as a whiff punish."
+
+[[combo]]
+nom = "st. mk (pc), cr. hk"
+categorie = "Punish Counter"
+inputs = "st. mk (pc), cr. hk"
+degats = 1740
+drive = 0
+super = 0
+notes = "9f pc"
+
+[[combo]]
+nom = "st. mk (pc), SA2"
+categorie = "Punish Counter"
+inputs = "st. mk (pc), SA2"
+degats = 3640
+drive = 0
+super = 2
+notes = "9f pc. Similar to Terry, can confirm into SA2 off a PC/CH st. mk"
+
+[[combo]]
+nom = "st. hp (pc) xx qcf+pp (held), st. hp xx qcf+hk"
+categorie = "Punish Counter"
+inputs = "st. hp (pc) xx qcf+pp (held), st. hp xx qcf+hk"
+degats = 2900
+drive = 2
+super = 0
+notes = "9f pc. Point blank."
+
+[[combo]]
+nom = "st. hp (pc) xx qcf+pp (held) xx f+p, qcb+lp, qcb+lp, srk+hp"
+categorie = "Punish Counter"
+inputs = "st. hp (pc) xx qcf+pp (held) xx f+p, qcb+lp, qcb+lp, srk+hp"
+degats = 3570
+drive = 2
+super = 0
+notes = "9f pc. Point blank. Corner."
+
+[[combo]]
+nom = "st. hp (pc), cr. mk xx qcf+mk"
+categorie = "Punish Counter"
+inputs = "st. hp (pc), cr. mk xx qcf+mk"
+degats = 2180
+drive = 0
+super = 0
+notes = "9f pc. Tip range hits on later active frames of st. hp."
+
+[[combo]]
+nom = "st. hp (pc) xx qcf+pp (held+flame), j. hk, st. hp xx qcb+hp (flame), qcf+lk (flame), srk+lk (flame)"
+categorie = "Punish Counter"
+inputs = "st. hp (pc) xx qcf+pp (held+flame), j. hk, st. hp xx qcb+hp (flame), qcf+lk (flame), srk+lk (flame)"
+degats = 4250
+drive = 2
+super = 0
+notes = "9f pc. Point blank."
+
+[[combo]]
+nom = "cr. hp (pc), b+hk xx hk"
+categorie = "Punish Counter"
+inputs = "cr. hp (pc), b+hk xx hk"
+degats = 2720
+drive = 0
+super = 0
+notes = "10f pc."
+
+[[combo]]
+nom = "cr. hp (pc), st. mp xx srk+hk"
+categorie = "Punish Counter"
+inputs = "cr. hp (pc), st. mp xx srk+hk"
+degats = 2520
+drive = 0
+super = 0
+notes = "10f pc"
+
+[[combo]]
+nom = "st. hk (pc), cr. mp xx qcb+hp, srk+hk"
+categorie = "Punish Counter"
+inputs = "st. hk (pc), cr. mp xx qcb+hp, srk+hk"
+degats = 2720
+drive = 0
+super = 0
+notes = "14f pc. Point blank"
+
+[[combo]]
+nom = "st. hk (pc), dash, cr. lp xx qcb+hp, qcf+lk"
+categorie = "Punish Counter"
+inputs = "st. hk (pc), dash, cr. lp xx qcb+hp, qcf+lk"
+degats = 2280
+drive = 0
+super = 0
+notes = "14f pc. Any range."
+
+[[combo]]
+nom = "st. hk (pc), dr xx st. hp xx qcb+hp, srk+hk"
+categorie = "Punish Counter"
+inputs = "st. hk (pc), dr xx st. hp xx qcb+hp, srk+hk"
+degats = 2600
+drive = 1
+super = 0
+notes = "14f pc. Any range."
+
+[[combo]]
+nom = "DI (pc), st. hp xx qcb+hp, srk+hk"
+categorie = "Après DI (crumple)"
+inputs = "DI (pc), st. hp xx qcb+hp, srk+hk"
+degats = 2760
+drive = 1
+super = 0
+
+[[combo]]
+nom = "DI (pc), j. hp, dr xx st. hp xx qcb+hp, srk+hk"
+categorie = "Après DI (crumple)"
+inputs = "DI (pc), j. hp, dr xx st. hp xx qcb+hp, srk+hk"
+degats = 2888
+drive = 2
+super = 0
+
+[[combo]]
+nom = "DI (crush), st. hp xx qcb+hp, srk+hk"
+categorie = "Après DI (wallsplat)"
+inputs = "DI (crush), st. hp xx qcb+hp, srk+hk"
+degats = 1952
+drive = 1
+super = 0
+
+[[combo]]
+nom = "DI (crush), st. hp xx qcb+hp (flame), qcf+lk (flame), srk+hk (flame)"
+categorie = "Après DI (wallsplat)"
+inputs = "DI (crush), st. hp xx qcb+hp (flame), qcf+lk (flame), srk+hk (flame)"
+degats = 2496
+drive = 1
+super = 0
+
+[[combo]]
+nom = "DI (crush), st. hp xx qcb+hp (flame), SA2 (flame), srk+hk (flame)"
+categorie = "Après DI (wallsplat)"
+inputs = "DI (crush), st. hp xx qcb+hp (flame), SA2 (flame), srk+hk (flame)"
+degats = 3904
+drive = 1
+super = 2
+
+[[combo]]
+nom = "DI (crush), st. hp xx qcb+hp (flame), SA2 (flame), SA1 (flame)"
+categorie = "Après DI (wallsplat)"
+inputs = "DI (crush), st. hp xx qcb+hp (flame), SA2 (flame), SA1 (flame)"
+degats = 4384
+drive = 1
+super = 3
+
+[[combo]]
+nom = "DI (stun), j. hk, st. hp xx qcb+hp, srk+hk"
+categorie = "Après DI (stun)"
+inputs = "DI (stun), j. hk, st. hp xx qcb+hp, srk+hk"
+degats = 2360
+drive = 1
+super = 0
+
+[[modern]]
+categorie = "Anti-airs"
+inputs = "B+H"
+
+[[modern]]
+categorie = "Anti-airs"
+inputs = "F+SP"
+
+[[modern]]
+categorie = "Anti-airs"
+inputs = "J+M"
+
+[[modern]]
+categorie = "Pokes"
+inputs = "M"
+notes = "Decent disjoint button, confirms into SA2 on CH/PC"
+
+[[modern]]
+categorie = "Pokes"
+inputs = "D+M"
+notes = "Special cancellable."
+
+[[modern]]
+categorie = "Pokes"
+inputs = "M+[AUTO]"
+notes = "Good for stuffing drive rush, special cancellable"
+
+[[modern]]
+categorie = "Pokes"
+inputs = "H+[AUTO]"
+notes = "Long range special cancellable attack. Additional plus frames on tip range hit."
+
+[[modern]]
+categorie = "Pokes"
+inputs = "H"
+notes = "Whiff punish tool. Crumples on PC."
+
+[[modern]]
+categorie = "Punitions"
+inputs = "D+L, B+H > H"
+notes = "4f pc"
+
+[[modern]]
+categorie = "Punitions"
+inputs = "M, H+[AUTO] > D+SP"
+notes = "9f pc"
+
+[[modern]]
+categorie = "Punitions"
+inputs = "D+H, B+H > H"
+notes = "10f pc"
+
+[[modern]]
+categorie = "Combos de base"
+inputs = "D+L > D+L > D+L > D+SP"
+
+[[modern]]
+categorie = "Combos de base"
+inputs = "D+L > L > L > L > SP (air)"
+
+[[modern]]
+categorie = "Combos de base"
+inputs = "DR > L+[AUTO], M+[AUTO] > D+SP"
+
+[[modern]]
+categorie = "Combos de base"
+inputs = "D+M > DR > D+M, H+[AUTO] > D+SP"
+
+[[modern]]
+categorie = "Combos de base"
+inputs = "M+[AUTO] > DR > D+H, B+H > H"
+
+[[modern]]
+categorie = "Combos de base"
+inputs = "M+[AUTO] > DR > B+H, D+M > D+SP"

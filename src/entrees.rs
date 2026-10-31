@@ -29,7 +29,7 @@ const SIMULTANE_FRAMES: u64 = 3;
 
 pub fn boucle(
     controles: Controles,
-    (mut trial, combos): (Trial, Vec<crate::combo::ComboFichier>),
+    (mut trial, mut combos): (Trial, Vec<crate::combo::ComboFichier>),
     mut timings: Timings,
     mut capture: Capture,
     partage: Arc<Mutex<Partage>>,
@@ -416,6 +416,11 @@ pub fn boucle(
                 p.combo_demande = Some(i);
             }
             trial.cote = p.entrainement.cote;
+            // Un autre personnage choisi dans l'interface : sa liste remplace l'ancienne.
+            if let Some((personnage, liste)) = p.liste_demandee.take() {
+                capture.personnage = personnage;
+                combos = liste;
+            }
             // Un autre combo choisi sur l'overlay.
             if let Some(i) = p.combo_demande.take()
                 && let Some(choisi) = combos.get(i)

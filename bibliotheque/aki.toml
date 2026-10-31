@@ -1,0 +1,836 @@
+# AKI : combos de la feuille communautaire SF6 (Google Sheets), importés tels quels.
+# degats = dégâts du combo complet, drive = barres de Drive, super = barres de super.
+# [[modern]] : les mêmes infos en contrôles Modern sans motion (NMM), pour référence.
+personnage = "AKI"
+
+[[combo]]
+nom = "cr. lp, cr. lp, cr. lp xx qcb+hp"
+categorie = "Sans jauge"
+inputs = "cr. lp, cr. lp, cr. lp xx qcb+hp"
+degats = 1201
+drive = 0
+super = 0
+notes = "Mash option. Applies poison. Safe on block (-4 at range)"
+
+[[combo]]
+nom = "cr. lp, cr. lp, cr. lp xx qcf+hp"
+categorie = "Sans jauge"
+inputs = "cr. lp, cr. lp, cr. lp xx qcf+hp"
+degats = 1266
+drive = 0
+super = 0
+notes = "Mash option. Applies poison."
+
+[[combo]]
+nom = "cr. lk, cr. lp, cr. lp xx qcf+hp"
+categorie = "Sans jauge"
+inputs = "cr. lk, cr. lp, cr. lp xx qcf+hp"
+degats = 1166
+drive = 0
+super = 0
+notes = "Low light confirm. Applies poison. Too far for qcb+hp."
+
+[[combo]]
+nom = "cr. lp, cr. lk, cr. lp xx qcf+hp"
+categorie = "Sans jauge"
+inputs = "cr. lp, cr. lk, cr. lp xx qcf+hp"
+degats = 1186
+drive = 0
+super = 0
+notes = "Low light confirm. Applies poison. Crouching only."
+
+[[combo]]
+nom = "cr. lp, cr. lp, cr. lp, st. lk xx qcf+lp"
+categorie = "Sans jauge"
+inputs = "cr. lp, cr. lp, cr. lp, st. lk xx qcf+lp"
+degats = 1216
+drive = 0
+super = 0
+notes = "New light confirm from 5/21/2024 patch. AKI's ability to do a 4 piece light string can push enemies beyond their cr. mk range."
+
+[[combo]]
+nom = "st. mk, st. mp xx qcb+hp"
+categorie = "Sans jauge"
+inputs = "st. mk, st. mp xx qcb+hp"
+degats = 1911
+drive = 0
+super = 0
+notes = "Medium Confirm. Applies poison. Safe on block (-4 at range)"
+
+[[combo]]
+nom = "st. mk, st. mp xx qcf+hp"
+categorie = "Sans jauge"
+inputs = "st. mk, st. mp xx qcf+hp"
+degats = 1956
+drive = 0
+super = 0
+notes = "Medium Confirm. Applies poison."
+
+[[combo]]
+nom = "st. mk, st. mp xx qcb+lp xx f+p"
+categorie = "Sans jauge"
+inputs = "st. mk, st. mp xx qcb+lp xx f+p"
+degats = 2286
+drive = 0
+super = 0
+notes = "Medium Confirm."
+
+[[combo]]
+nom = "st. hk xx d+pp xx k, cr. lp, cr. lp xx qcf+hp"
+categorie = "Sans jauge"
+inputs = "st. hk xx d+pp xx k, cr. lp, cr. lp xx qcf+hp"
+degats = 2366
+drive = 0
+super = 0
+notes = "Heavy Confirm. Applies poison. st. hk xx d+pp xx k is a frametrap that beats 4f"
+
+[[combo]]
+nom = "hp xx hp"
+categorie = "Sans jauge"
+inputs = "hp xx hp"
+degats = 1274
+drive = 0
+super = 0
+notes = "Long range whiff punish option. Applies poison. If this is hitconfirmable, I can't do it."
+
+[[combo]]
+nom = "hp xx hp, cr. hp"
+categorie = "Sans jauge"
+inputs = "hp xx hp, cr. hp"
+degats = 2000
+drive = 0
+super = 0
+notes = "Only really works at close-ish range (8/3/2026)"
+
+[[combo]]
+nom = "hp xx hp, SA1"
+categorie = "Sans jauge"
+inputs = "hp xx hp, SA1"
+degats = 2800
+drive = 0
+super = 1
+notes = "hp xx hp now juggles into SA1 and SA3 (8/3/2026)"
+
+[[combo]]
+nom = "hp xx hp, qcf+hp (bloom), qcf+lp"
+categorie = "Sans jauge"
+inputs = "hp xx hp, qcf+hp (bloom), qcf+lp"
+degats = 2000
+drive = 0
+super = 0
+notes = "Corner only. (8/3/2026)"
+
+[[combo]]
+nom = "f+hk, cr. lp, cr. lp xx qcf+hp"
+categorie = "Sans jauge"
+inputs = "f+hk, cr. lp, cr. lp xx qcf+hp"
+degats = 1766
+drive = 0
+super = 0
+notes = "Strong combo starter and neutral tool."
+
+[[combo]]
+nom = "cr. lp, cr. lp xx qcf+hp (bloom), qcf+lp"
+categorie = "Meterless (Bloom)"
+inputs = "cr. lp, cr. lp xx qcf+hp (bloom), qcf+lp"
+degats = 1511
+drive = 0
+super = 0
+notes = "Midscreen option, does not work after 3 buttons."
+
+[[combo]]
+nom = "cr. lp, cr. lp, cr. lp xx qcf+hp (bloom), qcb+hp, qcf+lp (bloom)"
+categorie = "Meterless (Bloom)"
+inputs = "cr. lp, cr. lp, cr. lp xx qcf+hp (bloom), qcb+hp, qcf+lp (bloom)"
+degats = 1840
+drive = 0
+super = 0
+notes = "Corner only."
+
+[[combo]]
+nom = "cr. lp, cr. lp, cr. lp xx qcf+hp (bloom), qcf+mp"
+categorie = "Meterless (Bloom)"
+inputs = "cr. lp, cr. lp, cr. lp xx qcf+hp (bloom), qcf+mp"
+degats = 1675
+drive = 0
+super = 0
+notes = "Corner only. Applies poison."
+
+[[combo]]
+nom = "cr. lp, cr. lp, cr. lp xx qcf+hp (bloom), qcb+lp xx f+p (bloom)"
+categorie = "Meterless (Bloom)"
+inputs = "cr. lp, cr. lp, cr. lp xx qcf+hp (bloom), qcb+lp xx f+p (bloom)"
+degats = 1883
+drive = 0
+super = 0
+notes = "Corner only."
+
+[[combo]]
+nom = "cr. lk, cr. lp xx qcf+hp (bloom), qcf+lp"
+categorie = "Meterless (Bloom)"
+inputs = "cr. lk, cr. lp xx qcf+hp (bloom), qcf+lp"
+degats = 1413
+drive = 0
+super = 0
+notes = "Midscreen option, does not work after 3 buttons."
+
+[[combo]]
+nom = "cr. lk, cr. lp, cr. lp xx qcf+hp (bloom), qcf+mp"
+categorie = "Meterless (Bloom)"
+inputs = "cr. lk, cr. lp, cr. lp xx qcf+hp (bloom), qcf+mp"
+degats = 1576
+drive = 0
+super = 0
+notes = "Corner only. Applies poison."
+
+[[combo]]
+nom = "cr. lk, cr. lp, cr. lp xx qcf+hp (bloom), qcb+hp, qcf+lp (bloom)"
+categorie = "Meterless (Bloom)"
+inputs = "cr. lk, cr. lp, cr. lp xx qcf+hp (bloom), qcb+hp, qcf+lp (bloom)"
+degats = 1739
+drive = 0
+super = 0
+notes = "Corner only."
+
+[[combo]]
+nom = "st. mk, st. mp xx qcf+hp (bloom), qcf+lp"
+categorie = "Meterless (Bloom)"
+inputs = "st. mk, st. mp xx qcf+hp (bloom), qcf+lp"
+degats = 2421
+drive = 0
+super = 0
+notes = "Midscreen option."
+
+[[combo]]
+nom = "st. mk, st. mp xx qcf+mp (bloom), cr. hp"
+categorie = "Meterless (Bloom)"
+inputs = "st. mk, st. mp xx qcf+mp (bloom), cr. hp"
+degats = 2688
+drive = 0
+super = 0
+notes = "Midscreen option. Standing only."
+
+[[combo]]
+nom = "st. mk, st. mp xx qcf+mp (bloom), st. hk xx d+pp xx k, qcf+lp"
+categorie = "Meterless (Bloom)"
+inputs = "st. mk, st. mp xx qcf+mp (bloom), st. hk xx d+pp xx k, qcf+lp"
+degats = 3166
+drive = 0
+super = 0
+notes = "Corner only. Standing only. Applies poison."
+
+[[combo]]
+nom = "st. mk, st. mp xx qcf+mp (bloom), st. hk xx qcb+hp, qcf+lp (bloom)"
+categorie = "Meterless (Bloom)"
+inputs = "st. mk, st. mp xx qcf+mp (bloom), st. hk xx qcb+hp, qcf+lp (bloom)"
+degats = 3197
+drive = 0
+super = 0
+notes = "Corner only. Standing only."
+
+[[combo]]
+nom = "hp xx hp (bloom), qcf+mp"
+categorie = "Meterless (Bloom)"
+inputs = "hp xx hp (bloom), qcf+mp"
+degats = 1795
+drive = 0
+super = 0
+notes = "Midscreen option."
+
+[[combo]]
+nom = "hp xx hp (bloom), cr. hp"
+categorie = "Meterless (Bloom)"
+inputs = "hp xx hp (bloom), cr. hp"
+degats = 1948
+drive = 0
+super = 0
+notes = "Corner option."
+
+[[combo]]
+nom = "hp xx hp (bloom), qcb+hp, qcf+lp"
+categorie = "Meterless (Bloom)"
+inputs = "hp xx hp (bloom), qcb+hp, qcf+lp"
+degats = 2260
+drive = 0
+super = 0
+notes = "Corner option."
+
+[[combo]]
+nom = "f+hk, cr. lp, cr. lp xx qcf+hp (bloom), qcf+lp"
+categorie = "Meterless (Bloom)"
+inputs = "f+hk, cr. lp, cr. lp xx qcf+hp (bloom), qcf+lp"
+degats = 2137
+drive = 0
+super = 0
+notes = "Midscreen option."
+
+[[combo]]
+nom = "f+hk, cr. lp, cr. lp xx qcf+hp (bloom), qcb+lp xx f+p (bloom)"
+categorie = "Meterless (Bloom)"
+inputs = "f+hk, cr. lp, cr. lp xx qcf+hp (bloom), qcb+lp xx f+p (bloom)"
+degats = 2411
+drive = 0
+super = 0
+notes = "Corner only."
+
+[[combo]]
+nom = "st. mk, st. mp xx qcb+pp, cr. hp"
+categorie = "OD"
+inputs = "st. mk, st. mp xx qcb+pp, cr. hp"
+degats = 2603
+drive = 2
+super = 0
+notes = "Midscreen option"
+
+[[combo]]
+nom = "st. mk, st. mp xx qcb+pp, qcf+hp"
+categorie = "OD"
+inputs = "st. mk, st. mp xx qcb+pp, qcf+hp"
+degats = 2523
+drive = 2
+super = 0
+notes = "Corner option. Sets up an orchid puddle into +6."
+
+[[combo]]
+nom = "cr. mp xx qcf+pp, cr. lp, cr. lp xx qcf+hp (bloom), qcf+lp"
+categorie = "OD"
+inputs = "cr. mp xx qcf+pp, cr. lp, cr. lp xx qcf+hp (bloom), qcf+lp"
+degats = 2329
+drive = 2
+super = 0
+notes = "Midscreen option off a poke or drive rush conversion. Applies poison."
+
+[[combo]]
+nom = "cr. mp xx qcf+pp, cr. lp, cr. lp xx qcf+hp (bloom), qcb+hp, qcf+lp"
+categorie = "OD"
+inputs = "cr. mp xx qcf+pp, cr. lp, cr. lp xx qcf+hp (bloom), qcb+hp, qcf+lp"
+degats = 2447
+drive = 2
+super = 0
+notes = "Corner option."
+
+[[combo]]
+nom = "cr. mp xx qcf+pp (bloom), st. hk xx qcf+hp"
+categorie = "OD"
+inputs = "cr. mp xx qcf+pp (bloom), st. hk xx qcf+hp"
+degats = 2709
+drive = 2
+super = 0
+notes = "Midscreen option. Applies poison."
+
+[[combo]]
+nom = "cr. mp xx qcf+pp (bloom), st. hk xx d+pp xx k, qcf+lp"
+categorie = "OD"
+inputs = "cr. mp xx qcf+pp (bloom), st. hk xx d+pp xx k, qcf+lp"
+degats = 2912
+drive = 2
+super = 0
+notes = "Corner. Applies poison."
+
+[[combo]]
+nom = "cr. mp xx qcf+pp (bloom), st. hk xx qcb+hp, qcf+lp"
+categorie = "OD"
+inputs = "cr. mp xx qcf+pp (bloom), st. hk xx qcb+hp, qcf+lp"
+degats = 2994
+drive = 2
+super = 0
+notes = "Corner."
+
+[[combo]]
+nom = "cr. lp xx dr xx st. lp"
+categorie = "Extensions Drive Rush"
+inputs = "cr. lp xx dr xx st. lp"
+drive = 3
+super = 0
+notes = "4f to a 5f."
+
+[[combo]]
+nom = "st. lp xx st. lp xx dr xx st. lp"
+categorie = "Extensions Drive Rush"
+inputs = "st. lp xx st. lp xx dr xx st. lp"
+drive = 3
+super = 0
+notes = "5f to a 5f."
+
+[[combo]]
+nom = "st. lk xx dr xx st. lk"
+categorie = "Extensions Drive Rush"
+inputs = "st. lk xx dr xx st. lk"
+drive = 3
+super = 0
+notes = "5f to a 5f."
+
+[[combo]]
+nom = "st. mp xx dr xx qcf+hp"
+categorie = "Extensions Drive Rush"
+inputs = "st. mp xx dr xx qcf+hp"
+drive = 3
+super = 0
+notes = "6f to an 11f."
+
+[[combo]]
+nom = "cr. mp xx dr xx st. hp"
+categorie = "Extensions Drive Rush"
+inputs = "cr. mp xx dr xx st. hp"
+drive = 3
+super = 0
+notes = "8f to a 12f."
+
+[[combo]]
+nom = "st. hk xx dr xx f+hp"
+categorie = "Extensions Drive Rush"
+inputs = "st. hk xx dr xx f+hp"
+drive = 3
+super = 0
+notes = "9f to a 16f."
+
+[[combo]]
+nom = "dr xx cr. mk, st. hk xx d+pp xx k, cr. lp xx qcf+hp"
+categorie = "Drive Rush"
+inputs = "dr xx cr. mk, st. hk xx d+pp xx k, cr. lp xx qcf+hp"
+degats = 2526
+drive = 1
+super = 0
+notes = "Good option for catching opponents low."
+
+[[combo]]
+nom = "dr xx f+hk, cr. mp xx qcf+hp"
+categorie = "Drive Rush"
+inputs = "dr xx f+hk, cr. mp xx qcf+hp"
+degats = 1866
+drive = 1
+super = 0
+notes = "Hops lows, forces stand."
+
+[[combo]]
+nom = "dr xx d/f+mp, st. mp xx qcf+hp"
+categorie = "Drive Rush"
+inputs = "dr xx d/f+mp, st. mp xx qcf+hp"
+degats = 1856
+drive = 1
+super = 0
+notes = "Overhead."
+
+[[combo]]
+nom = "dr xx st. mp, cr. mk, st. lp xx st. lp xx qcf+hp"
+categorie = "Drive Rush"
+inputs = "dr xx st. mp, cr. mk, st. lp xx st. lp xx qcf+hp"
+degats = 2166
+drive = 1
+super = 0
+notes = "Advancing normal, dr xx st. mp is also +1, letting AKI start frametraps. Travels about 50% screen"
+
+[[combo]]
+nom = "cr. lp, cr. lp xx qcf+hp (bloom), dr xx st. mp xx d+pp xx k, qcf+lp"
+categorie = "Drive Rush"
+inputs = "cr. lp, cr. lp xx qcf+hp (bloom), dr xx st. mp xx d+pp xx k, qcf+lp"
+degats = 1938
+drive = 1
+super = 0
+notes = "Midscreen drive rush extension. qcf+hp bloom can be extended with dr xx st. mp. Coward crouch into kicks only functions after two buttons, not three."
+
+[[combo]]
+nom = "cr. lp, cr. lp, cr. lp xx qcf+hp (bloom), dr xx st. hk xx d+pp xx k, qcf+lp"
+categorie = "Drive Rush"
+inputs = "cr. lp, cr. lp, cr. lp xx qcf+hp (bloom), dr xx st. hk xx d+pp xx k, qcf+lp"
+degats = 2024
+drive = 1
+super = 0
+notes = "Corner. Getting qcf+hp (bloom) in the corner gives you a drive rush into st. hk for more damage and conversion possibilities."
+
+[[combo]]
+nom = "cr. lp, cr. lp, cr. lp xx qcf+hp (bloom), dr xx st. hk xx d+pp xx k, qcb+mp"
+categorie = "Drive Rush"
+inputs = "cr. lp, cr. lp, cr. lp xx qcf+hp (bloom), dr xx st. hk xx d+pp xx k, qcb+mp"
+degats = 1828
+drive = 1
+super = 0
+notes = "Corner. Sets up a puddle with +7 advantage."
+
+[[combo]]
+nom = "st. mk, st. mp xx dr xx st. mk, st. hk xx d+pp xx k, cr. lp, cr. lp xx qcf+hp"
+categorie = "Drive Rush"
+inputs = "st. mk, st. mp xx dr xx st. mk, st. hk xx d+pp xx k, cr. lp, cr. lp xx qcf+hp"
+degats = 3053
+drive = 3
+super = 0
+notes = "Getting dr xx st. mk is really strong for combo possibilities"
+
+[[combo]]
+nom = "st. mk, st. mp xx dr xx st. mk, st. hk xx qcf+mp (bloom), st. hk xx qcb+hp, dr xx st. hk xx d+pp xx p, dr xx cr. hk xx qcfx2+k"
+categorie = "Drive Rush"
+inputs = "st. mk, st. mp xx dr xx st. mk, st. hk xx qcf+mp (bloom), st. hk xx qcb+hp, dr xx st. hk xx d+pp xx p, dr xx cr. hk xx qcfx2+k"
+degats = 4230
+drive = 5
+super = 1
+notes = "Corner only. Leverages st. hk force stand to get the qcf+mp (bloom) crumple"
+
+[[combo]]
+nom = "st. mk, st. mp xx dr xx st. mk, st. hk xx qcf+mp (bloom), dash, cr. lp xx qcf+hp"
+categorie = "Drive Rush"
+inputs = "st. mk, st. mp xx dr xx st. mk, st. hk xx qcf+mp (bloom), dash, cr. lp xx qcf+hp"
+degats = 3198
+drive = 3
+super = 0
+notes = "Midscreen. Only appears to do more damage because of poison making the math wonky."
+
+[[combo]]
+nom = "cr. lp, cr. lp, cr. lp xx qcf+hp (bloom), qcb+hp, qcf+lp (bloom), qcfx2+k"
+categorie = "Drive Rush"
+inputs = "cr. lp, cr. lp, cr. lp xx qcf+hp (bloom), qcb+hp, qcf+lp (bloom), qcfx2+k"
+degats = 2456
+drive = 0
+super = 1
+notes = "qcf+lp (bloom) gives SA1 in the corner."
+
+[[combo]]
+nom = "cr. lp, cr. lp xx qcf+hp (bloom), qcbx2+p"
+categorie = "Drive Rush"
+inputs = "cr. lp, cr. lp xx qcf+hp (bloom), qcbx2+p"
+degats = 2807
+drive = 0
+super = 2
+notes = "Example juggle with SA2. The startup is fast enough to combo off of jabs or when you juggle with qcf+hp (bloom)"
+
+[[combo]]
+nom = "cr. lp, cr. lp xx qcf+hp (bloom), dr xx st. mp xx d+pp xx k, qcf+lp xx qcfx2+p"
+categorie = "Drive Rush"
+inputs = "cr. lp, cr. lp xx qcf+hp (bloom), dr xx st. mp xx d+pp xx k, qcf+lp xx qcfx2+p"
+degats = 3890
+drive = 1
+super = 3
+notes = "There are simpler routes into SA3, but this is an example of a dr extension payoff."
+
+[[combo]]
+nom = "cr. lp, cr. lp xx qcf+hp (bloom), dr xx st. hk xx qcb+hp, dr xx st. hk xx d+pp xx p, dr xx cr. hk xx qcfx2+p"
+categorie = "Drive Rush"
+inputs = "cr. lp, cr. lp xx qcf+hp (bloom), dr xx st. hk xx qcb+hp, dr xx st. hk xx d+pp xx p, dr xx cr. hk xx qcfx2+p"
+degats = 4264
+drive = 3
+super = 3
+notes = "Another SA3 route."
+
+[[combo]]
+nom = "cr. lp (pc), cr. mp xx qcf+hp"
+categorie = "Punish Counter"
+inputs = "cr. lp (pc), cr. mp xx qcf+hp"
+degats = 1426
+drive = 0
+super = 0
+notes = "4f punish counter. Reaches at the range that cr. lp can hit."
+
+[[combo]]
+nom = "cr. lk (pc), st. mp xx qcf+hp"
+categorie = "Punish Counter"
+inputs = "cr. lk (pc), st. mp xx qcf+hp"
+degats = 1306
+drive = 0
+super = 0
+notes = "5f punish counter. Reaches at the range that cr. lk can hit."
+
+[[combo]]
+nom = "st. mp (pc), st. mp xx qcf+hp"
+categorie = "Punish Counter"
+inputs = "st. mp (pc), st. mp xx qcf+hp"
+degats = 1976
+drive = 0
+super = 0
+notes = "6f punish counter. Forward advancing, good as a whiff punish."
+
+[[combo]]
+nom = "st. mp (pc), cr. mk, st. lk xx qcf+hp"
+categorie = "Punish Counter"
+inputs = "st. mp (pc), cr. mk, st. lk xx qcf+hp"
+degats = 2146
+drive = 0
+super = 0
+notes = "6f punish counter. Point blank."
+
+[[combo]]
+nom = "st. mp (pc) xx d+pp xx k, cr. lp xx qcf+hp"
+categorie = "Punish Counter"
+inputs = "st. mp (pc) xx d+pp xx k, cr. lp xx qcf+hp"
+degats = 2146
+drive = 0
+super = 0
+notes = "6f punish counter as a cancel."
+
+[[combo]]
+nom = "cr. mk (pc), st. hk xx d+pp xx k, cr. lp xx qcf+hp"
+categorie = "Punish Counter"
+inputs = "cr. mk (pc), st. hk xx d+pp xx k, cr. lp xx qcf+hp"
+degats = 2646
+drive = 0
+super = 0
+notes = "7f punish counter. Need to be point blank to get the crawl"
+
+[[combo]]
+nom = "cr. mk (pc), st. hk xx qcf+hp xx qcf+mp"
+categorie = "Punish Counter"
+inputs = "cr. mk (pc), st. hk xx qcf+hp xx qcf+mp"
+degats = 2006
+drive = 0
+super = 0
+notes = "7f punish counter. Works at tip cr. mk range."
+
+[[combo]]
+nom = "cr. mk (pc), st. hk xx qcf+pp, cr. lp xx qcf+hp, dr xx st. mp xx d+pp xx k, qcf+lp"
+categorie = "Punish Counter"
+inputs = "cr. mk (pc), st. hk xx qcf+pp, cr. lp xx qcf+hp, dr xx st. mp xx d+pp xx k, qcf+lp"
+degats = 3059
+drive = 3
+super = 1
+notes = "7f punish counter. Example cash out with qcf+pp"
+
+[[combo]]
+nom = "st. mk (pc), st. hk xx d+pp xx k, cr. lp, cr. lp xx qcf+hp"
+categorie = "Punish Counter"
+inputs = "st. mk (pc), st. hk xx d+pp xx k, cr. lp, cr. lp xx qcf+hp"
+degats = 2956
+drive = 0
+super = 0
+notes = "9f punish counter. Point blank."
+
+[[combo]]
+nom = "st. mk (pc), cr. hp"
+categorie = "Punish Counter"
+inputs = "st. mk (pc), cr. hp"
+degats = 1740
+drive = 0
+super = 0
+notes = "9f punish counter. Tip range."
+
+[[combo]]
+nom = "st. hk (pc) xx qcb+hk, cr. lp, cr. lp xx qcf+hp"
+categorie = "Punish Counter"
+inputs = "st. hk (pc) xx qcb+hk, cr. lp, cr. lp xx qcf+hp"
+degats = 2926
+drive = 0
+super = 0
+notes = "9f punish counter."
+
+[[combo]]
+nom = "st. hk (pc) xx d+pp xx p (bloom), st. hk xx qcb+hp, dr xx st. hk xx dr xx st. hk xx qcb+lk, qcfx2+p"
+categorie = "Punish Counter"
+inputs = "st. hk (pc) xx d+pp xx p (bloom), st. hk xx qcb+hp, dr xx st. hk xx dr xx st. hk xx qcb+lk, qcfx2+p"
+degats = 6301
+drive = 6
+super = 3
+notes = "9f punish counter with poison, carries from midscreen to corner."
+
+[[combo]]
+nom = "st. hp (pc), st. lp xx st. lp xx qcf+hp"
+categorie = "Punish Counter"
+inputs = "st. hp (pc), st. lp xx st. lp xx qcf+hp"
+degats = 2086
+drive = 0
+super = 0
+notes = "12f punish counter."
+
+[[combo]]
+nom = "qcf+lp (pc), dr xx cr. lp xx qcf+mp, dr xx cr. mp xx qcf+hp"
+categorie = "Punish Counter"
+inputs = "qcf+lp (pc), dr xx cr. lp xx qcf+mp, dr xx cr. mp xx qcf+hp"
+degats = 2217
+drive = 2
+super = 0
+notes = "12f punish counter from just outside of st. mk range. Used as a whiff punish/spacing trap."
+
+[[combo]]
+nom = "f+hk (pc), st. mk, cr. mp xx qcf+hp"
+categorie = "Punish Counter"
+inputs = "f+hk (pc), st. mk, cr. mp xx qcf+hp"
+degats = 2456
+drive = 0
+super = 0
+notes = "14f punish counter."
+
+[[combo]]
+nom = "f+hp (pc), st. mp xx qcf+hp"
+categorie = "Punish Counter"
+inputs = "f+hp (pc), st. mp xx qcf+hp"
+degats = 2336
+drive = 0
+super = 0
+notes = "16f punish counter."
+
+[[combo]]
+nom = "qcf+pp (pc), cr. mp xx qcf+hp"
+categorie = "Punish Counter"
+inputs = "qcf+pp (pc), cr. mp xx qcf+hp"
+degats = 2187
+drive = 2
+super = 0
+notes = "21f punish counter, reaches a significant portion of the screen."
+
+[[combo]]
+nom = "qcf+pp (pc), cr. mp xx qcf+pp, st. hk xx qcb+hp, dr xx st. hk xx dr xx st. hk xx qcb+lk, qcfx2+p"
+categorie = "Punish Counter"
+inputs = "qcf+pp (pc), cr. mp xx qcf+pp, st. hk xx qcb+hp, dr xx st. hk xx dr xx st. hk xx qcb+lk, qcfx2+p"
+degats = 5267
+drive = 8
+super = 3
+notes = "21f punish counter cash-out with OD Needle example conversion."
+
+[[combo]]
+nom = "DI, st. hk xx d+pp xx k, cr. lp, cr. lp xx qcf+hp"
+categorie = "Après DI (crumple)"
+inputs = "DI, st. hk xx d+pp xx k, cr. lp, cr. lp xx qcf+hp"
+degats = 2726
+drive = 1
+super = 0
+notes = "Applies poison."
+
+[[combo]]
+nom = "DI, j. hk, dr xx st. hk xx d+pp xx p"
+categorie = "Après DI (crumple)"
+inputs = "DI, j. hk, dr xx st. hk xx d+pp xx p"
+degats = 2712
+drive = 2
+super = 0
+notes = "Monstrous corner carry. Applies poison"
+
+[[combo]]
+nom = "DI, j. hk, dr xx st. hk xx d+pp xx p (bloom), dr xx st. hk xx qcf+hp"
+categorie = "Après DI (crumple)"
+inputs = "DI, j. hk, dr xx st. hk xx d+pp xx p (bloom), dr xx st. hk xx qcf+hp"
+degats = 3512
+drive = 2
+super = 0
+notes = "Monstrous corner carry. Applies poison. Example bloom route."
+
+[[combo]]
+nom = "DI, st. hk xx d+pp xx k, qcf+lp"
+categorie = "Après DI (wallsplat)"
+inputs = "DI, st. hk xx d+pp xx k, qcf+lp"
+degats = 1510
+drive = 1
+super = 0
+notes = "Applies poison"
+
+[[combo]]
+nom = "DI, st. hk xx qcb+hp, dr xx st. hk xx d+pp xx p, dr xx cr. hk xx qcfx2+k"
+categorie = "Après DI (wallsplat)"
+inputs = "DI, st. hk xx qcb+hp, dr xx st. hk xx d+pp xx p, dr xx cr. hk xx qcfx2+k"
+degats = 2946
+drive = 3
+super = 0
+notes = "Example route using lunge."
+
+[[combo]]
+nom = "DI, qcb+mp, j. hp, st. hk xx qcf+mp, st. hk xx qcf+mp, qcf+hp"
+categorie = "Après DI (stun)"
+inputs = "DI, qcb+mp, j. hp, st. hk xx qcf+mp, st. hk xx qcf+mp, qcf+hp"
+degats = 2949
+drive = 1
+super = 0
+notes = "Applies poison."
+
+[[combo]]
+nom = "DI, qcb+mp, j. hp, st. hk xx qcf+mp, st. hk xx qcf+mp, dr xx st. hk xx qcb+kk, qcf+lp xx qcfx2+p"
+categorie = "Après DI (stun)"
+inputs = "DI, qcb+mp, j. hp, st. hk xx qcf+mp, st. hk xx qcf+mp, dr xx st. hk xx qcb+kk, qcf+lp xx qcfx2+p"
+degats = 5115
+drive = 4
+super = 3
+notes = "Post-stun SA3 combo."
+
+[[modern]]
+categorie = "Anti-airs"
+inputs = "H+[AUTO]"
+notes = "Hits opponents above your head. Special cancellable, you can cancel into B+SP"
+
+[[modern]]
+categorie = "Anti-airs"
+inputs = "D+H"
+notes = "Hits further out jump-ins"
+
+[[modern]]
+categorie = "Anti-airs"
+inputs = "F+SP"
+notes = "Air invincible from frame 6, poisons opponent."
+
+[[modern]]
+categorie = "Pokes"
+inputs = "M"
+notes = "Noncommittal option, good disjoint. Good for challenging drive rushes, but weak to drive impact. On punish counter, can link into D+H"
+
+[[modern]]
+categorie = "Pokes"
+inputs = "M+[AUTO]"
+notes = "Forward advancing, special cancellable. Can be used to interrupt drive rushes and punish certain annoying moves in neutral. Best to buffer a drive rush behind this."
+
+[[modern]]
+categorie = "Pokes"
+inputs = "L+[AUTO]"
+notes = "Incredible range for a light, good for pushing opponents out if they overextend."
+
+[[modern]]
+categorie = "Pokes"
+inputs = "H"
+notes = "Can be cancelled into itself to poison the opponent with a followup. Long range poke, good for spacing traps. Theoretically hitconfirmable."
+
+[[modern]]
+categorie = "Punitions"
+inputs = "D+L > D+L > F+SP"
+notes = "4f punish. No poison"
+
+[[modern]]
+categorie = "Punitions"
+inputs = "M+[AUTO] > F+SP"
+notes = "6f punish. No poison"
+
+[[modern]]
+categorie = "Punitions"
+inputs = "H+[AUTO] > D+SP, D+L > F+SP"
+notes = "9f punish. No poison"
+
+[[modern]]
+categorie = "Punitions"
+inputs = "L > L > F+SP (bloom), DR > M+[AUTO] > F+SP"
+notes = "4f punish. Poisoned."
+
+[[modern]]
+categorie = "Punitions"
+inputs = "M+[AUTO] > F+SP (bloom), DR > M+[AUTO] > F+SP"
+notes = "6f punish. Poisoned."
+
+[[modern]]
+categorie = "Punitions"
+inputs = "H+[AUTO] > D+SP, D+L > F+SP (bloom), DR > M+[AUTO] > F+SP"
+notes = "9f punish. Poisoned."
+
+[[modern]]
+categorie = "Combos de base"
+inputs = "L > L > F+SP"
+notes = "Light BnB"
+
+[[modern]]
+categorie = "Combos de base"
+inputs = "M > M+[AUTO] > F+SP"
+notes = "Medium BnB"
+
+[[modern]]
+categorie = "Combos de base"
+inputs = "H+[AUTO] > D+M+H > D+M > D+L > F+SP"
+notes = "Heavy BnB"
+
+[[modern]]
+categorie = "Combos de base"
+inputs = "DR > D+M > M+[AUTO] > F+SP"
+notes = "Drive rush starter."
+
+[[modern]]
+categorie = "Combos de base"
+inputs = "DR > M+[AUTO] > M+[AUTO] > F+SP"
+notes = "Drive rush starter."
+
+[[modern]]
+categorie = "Combos de base"
+inputs = "M+[AUTO] > DR > M > H+[AUTO] > D+M+H > D+M > D+L > F+SP"
+notes = "Drive rush extension off of mediums."
+
+[[modern]]
+categorie = "Combos de base"
+inputs = "M+[AUTO] > DR > M > H+[AUTO] > D+M+H > D+M > D+L > F+SP (bloom), DR > M+[AUTO] > F+SP"
+notes = "Drive rush extension off of mediums. Poisoned."

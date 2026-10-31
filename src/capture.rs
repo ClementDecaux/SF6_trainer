@@ -181,7 +181,7 @@ pub enum Ordre {
 /// Si la capture est coupée (ou hors Windows), les ordres ne vont nulle part.
 pub struct Capture {
     envoi: Option<Sender<Ordre>>,
-    personnage: String,
+    pub personnage: String,
     combo: String,
     inputs: String,
     debut: u64,

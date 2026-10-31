@@ -1,0 +1,688 @@
+# Elena : combos de la feuille communautaire SF6 (Google Sheets), importés tels quels.
+# degats = dégâts du combo complet, drive = barres de Drive, super = barres de super.
+# [[modern]] : les mêmes infos en contrôles Modern sans motion (NMM), pour référence.
+personnage = "Elena"
+
+[[combo]]
+nom = "cr. lp, cr. lp, cr. lp xx qcb+lk"
+categorie = "Sans jauge"
+inputs = "cr. lp, cr. lp, cr. lp xx qcb+lk"
+degats = 1290
+drive = 0
+super = 0
+notes = "Either of the first two lights of this string can be replaced by cr. lk."
+
+[[combo]]
+nom = "cr. lp, cr. lp, cr. lp xx qcf+lk"
+categorie = "Sans jauge"
+inputs = "cr. lp, cr. lp, cr. lp xx qcf+lk"
+degats = 1410
+drive = 0
+super = 0
+notes = "Either of the first two lights of this string can be replaced by cr. lk. Standing only."
+
+[[combo]]
+nom = "cr. lp, cr. lp, cr. lp xx srk+hk"
+categorie = "Sans jauge"
+inputs = "cr. lp, cr. lp, cr. lp xx srk+hk"
+degats = 1590
+drive = 0
+super = 0
+notes = "Either of the first two lights of this string can be replaced by cr. lk"
+
+[[combo]]
+nom = "st. mk, cr. lk, cr. lp xx srk+hk"
+categorie = "Sans jauge"
+inputs = "st. mk, cr. lk, cr. lp xx srk+hk"
+degats = 1920
+drive = 0
+super = 0
+notes = "Crouching only"
+
+[[combo]]
+nom = "st. mk, st. lp xx srk+hk"
+categorie = "Sans jauge"
+inputs = "st. mk, st. lp xx srk+hk"
+degats = 1920
+drive = 0
+super = 0
+
+[[combo]]
+nom = "st. mk, st. lp xx qcf+lk"
+categorie = "Sans jauge"
+inputs = "st. mk, st. lp xx qcf+lk"
+degats = 1680
+drive = 0
+super = 0
+notes = "Standing only."
+
+[[combo]]
+nom = "st. mk xx st. hk xx qcb+mk"
+categorie = "Sans jauge"
+inputs = "st. mk xx st. hk xx qcb+mk"
+degats = 1700
+drive = 0
+super = 0
+notes = "Whiffs at st. mk tip range."
+
+[[combo]]
+nom = "st. mk xx st. hk xx qcf+lk, srk+hk"
+categorie = "Sans jauge"
+inputs = "st. mk xx st. hk xx qcf+lk, srk+hk"
+degats = 2620
+drive = 0
+super = 0
+notes = "Corner only."
+
+[[combo]]
+nom = "st. mp xx st. mp xx srk+hk"
+categorie = "Sans jauge"
+inputs = "st. mp xx st. mp xx srk+hk"
+degats = 2120
+drive = 0
+super = 0
+notes = "Hitconfirmable at midrange. Standing only."
+
+[[combo]]
+nom = "cr. mp xx qcf+lp xx f+lk"
+categorie = "Sans jauge"
+inputs = "cr. mp xx qcf+lp xx f+lk"
+degats = 1600
+drive = 0
+super = 0
+notes = "Decent poke, frametraps into the f+lk finisher on block. Spaced correctly, leaves you outside of 5f punish range. On ch/pc, can convert into f+mk for a juggle"
+
+[[combo]]
+nom = "cr. mk xx hk, cr. lp xx srk+hk"
+categorie = "Sans jauge"
+inputs = "cr. mk xx hk, cr. lp xx srk+hk"
+degats = 1970
+drive = 0
+super = 0
+notes = "Standing Only"
+
+[[combo]]
+nom = "cr. mk xx hk, cr. lp xx qcb+lk"
+categorie = "Sans jauge"
+inputs = "cr. mk xx hk, cr. lp xx qcb+lk"
+degats = 1670
+drive = 0
+super = 0
+notes = "Standing Only"
+
+[[combo]]
+nom = "cr. hp xx qcb+hk, qcf+mk xx qcbx2+k"
+categorie = "Sans jauge"
+inputs = "cr. hp xx qcb+hk, qcf+mk xx qcbx2+k"
+degats = 4480
+drive = 0
+super = 3
+notes = "Example conversion into SA3."
+
+[[combo]]
+nom = "cr. hp xx qcb+hk, qcf+lk, srk+hk"
+categorie = "Sans jauge"
+inputs = "cr. hp xx qcb+hk, qcf+lk, srk+hk"
+degats = 2980
+drive = 0
+super = 0
+notes = "Mostly reserved for jump-ins or punishes. Corner only."
+
+[[combo]]
+nom = "cr. hp xx qcf+lp xx f+mk, srk+hk"
+categorie = "Sans jauge"
+inputs = "cr. hp xx qcf+lp xx f+mk, srk+hk"
+degats = 2500
+drive = 0
+super = 0
+notes = "Mostly reserved for jump-ins or punishes."
+
+[[combo]]
+nom = "st. hp xx hp, srk+hk"
+categorie = "Sans jauge"
+inputs = "st. hp xx hp, srk+hk"
+degats = 2720
+drive = 0
+super = 0
+notes = "Heavy combo starter from a safejump."
+
+[[combo]]
+nom = "f+hp xx hp xx hp"
+categorie = "Sans jauge"
+inputs = "f+hp xx hp xx hp"
+degats = 2000
+drive = 0
+super = 0
+notes = "Hitconfirmable target combo."
+
+[[combo]]
+nom = "qcf+lp > f+p > f+hk, cr. lp, cr. lp xx srk+hk"
+categorie = "Sans jauge"
+inputs = "qcf+lp > f+p > f+hk, cr. lp, cr. lp xx srk+hk"
+degats = 2290
+drive = 0
+super = 0
+notes = "Example combo out of enhanced mallet smash."
+
+[[combo]]
+nom = "cr. lp, cr. lp, cr. lp xx srk+pp"
+categorie = "OD"
+inputs = "cr. lp, cr. lp, cr. lp xx srk+pp"
+degats = 1710
+drive = 2
+super = 0
+notes = "Small damage increase for 2 bars. Not worth it without killing."
+
+[[combo]]
+nom = "st. mk xx hk xx qcb+kk xx f+p xx f+mk, srk+hk"
+categorie = "OD"
+inputs = "st. mk xx hk xx qcb+kk xx f+p xx f+mk, srk+hk"
+degats = 2860
+drive = 2
+super = 0
+
+[[combo]]
+nom = "st. mk xx hk xx qcf+kk, srk+hk"
+categorie = "OD"
+inputs = "st. mk xx hk xx qcf+kk, srk+hk"
+degats = 2380
+drive = 2
+super = 0
+notes = "Sideswitch combo."
+
+[[combo]]
+nom = "cr. mk xx hk xx qcb+kk, qcf+lk"
+categorie = "OD"
+inputs = "cr. mk xx hk xx qcb+kk, qcf+lk"
+degats = 2170
+drive = 2
+super = 0
+
+[[combo]]
+nom = "st. hp xx hp, qcf+kk"
+categorie = "OD"
+inputs = "st. hp xx hp, qcf+kk"
+degats = 2560
+drive = 2
+super = 0
+notes = "Safejump. Standing only."
+
+[[combo]]
+nom = "st. hp xx hp, qcf+kk, srk+lk"
+categorie = "OD"
+inputs = "st. hp xx hp, qcf+kk, srk+lk"
+degats = 3160
+drive = 2
+super = 0
+notes = "Corner only. Standing only."
+
+[[combo]]
+nom = "cr. lp xx dr xx cr. lp"
+categorie = "Extensions Drive Rush"
+inputs = "cr. lp xx dr xx cr. lp"
+drive = 3
+notes = "4f or less"
+
+[[combo]]
+nom = "st. lp xx dr xx cr. lp"
+categorie = "Extensions Drive Rush"
+inputs = "st. lp xx dr xx cr. lp"
+drive = 3
+notes = "4f or less"
+
+[[combo]]
+nom = "st. lk xx dr xx cr. lp"
+categorie = "Extensions Drive Rush"
+inputs = "st. lk xx dr xx cr. lp"
+drive = 3
+notes = "4f or less"
+
+[[combo]]
+nom = "cr. mp xx dr xx st. hp"
+categorie = "Extensions Drive Rush"
+inputs = "cr. mp xx dr xx st. hp"
+drive = 3
+notes = "12f or less"
+
+[[combo]]
+nom = "cr. hp xx dr xx f+hp"
+categorie = "Extensions Drive Rush"
+inputs = "cr. hp xx dr xx f+hp"
+drive = 3
+notes = "19f or less"
+
+[[combo]]
+nom = "st. mp xx st. mp xx dr xx cr. hk"
+categorie = "Extensions Drive Rush"
+inputs = "st. mp xx st. mp xx dr xx cr. hk"
+drive = 3
+notes = "11f or less"
+
+[[combo]]
+nom = "cr. mk xx hk xx dr xx d/f+hk"
+categorie = "Extensions Drive Rush"
+inputs = "cr. mk xx hk xx dr xx d/f+hk"
+drive = 3
+notes = "14f or less"
+
+[[combo]]
+nom = "st. mk xx hk xx dr xx st. mk"
+categorie = "Extensions Drive Rush"
+inputs = "st. mk xx hk xx dr xx st. mk"
+drive = 3
+notes = "6f or less truestrings on block. KD on hit."
+
+[[combo]]
+nom = "st. mk xx dr xx cr. lp, cr. hp xx qcb+hk, qcf+lk"
+categorie = "Drive Rush"
+inputs = "st. mk xx dr xx cr. lp, cr. hp xx qcb+hk, qcf+lk"
+degats = 2469
+drive = 3
+super = 0
+notes = "Simple conversion from a cancellable normal routing into jabs."
+
+[[combo]]
+nom = "st. mk xx st. hk xx dr xx cr. hp xx qcb+hk xx f+p, srk+hk"
+categorie = "Drive Rush"
+inputs = "st. mk xx st. hk xx dr xx cr. hp xx qcb+hk xx f+p, srk+hk"
+degats = 2420
+drive = 3
+super = 0
+notes = "Sideswitch."
+
+[[combo]]
+nom = "cr. mp xx dr xx st. mk, cr. hp xx qcb+hk, qcf+lk"
+categorie = "Drive Rush"
+inputs = "cr. mp xx dr xx st. mk, cr. hp xx qcb+hk, qcf+lk"
+degats = 2739
+drive = 3
+super = 0
+
+[[combo]]
+nom = "cr. mp xx dr xx cr. hp xx qcf+lp xx f+mk, srk+hk"
+categorie = "Drive Rush"
+inputs = "cr. mp xx dr xx cr. hp xx qcf+lp xx f+mk, srk+hk"
+degats = 2718
+drive = 3
+super = 0
+
+[[combo]]
+nom = "cr. mp xx dr xx cr. hp xx qcf+lp xx f+mk, qcfx2+k, srk+hk"
+categorie = "Drive Rush"
+inputs = "cr. mp xx dr xx cr. hp xx qcf+lp xx f+mk, qcfx2+k, srk+hk"
+degats = 3285
+drive = 3
+super = 1
+notes = "Incorporates SA1."
+
+[[combo]]
+nom = "cr. mk xx hk xx dr xx cr. hp xx qcf+p xx f+mk, srk+hk"
+categorie = "Drive Rush"
+inputs = "cr. mk xx hk xx dr xx cr. hp xx qcf+p xx f+mk, srk+hk"
+degats = 2439
+drive = 3
+super = 0
+
+[[combo]]
+nom = "cr. mk xx hk xx qcb+kk, dr xx cr. mp xx qcf+lp xx f+mk, srk+hk"
+categorie = "Drive Rush"
+inputs = "cr. mk xx hk xx qcb+kk, dr xx cr. mp xx qcf+lp xx f+mk, srk+hk"
+degats = 2528
+drive = 3
+super = 0
+notes = "Midscreen conversion from OD spin scythe."
+
+[[combo]]
+nom = "cr. hp xx qcb+hk, dr xx cr. mp xx qcf+lp xx f+mk"
+categorie = "Drive Rush"
+inputs = "cr. hp xx qcb+hk, dr xx cr. mp xx qcf+lp xx f+mk"
+degats = 2444
+drive = 1
+super = 0
+notes = "Dropping the srk+mk gives a +41 knockdown (safejump)."
+
+[[combo]]
+nom = "cr. hp xx qcb+hk, dr xx cr. mp xx qcf+lp xx f+mk, srk+mk"
+categorie = "Drive Rush"
+inputs = "cr. hp xx qcb+hk, dr xx cr. mp xx qcf+lp xx f+mk, srk+mk"
+degats = 2852
+drive = 1
+super = 0
+notes = "Extension from qcb+hk juggle. Corner only"
+
+[[combo]]
+nom = "cr. hp xx qcb+hk, dr xx cr. mp xx qcf+pp xx f+mk, qcfx2+k, srk+hk"
+categorie = "Drive Rush"
+inputs = "cr. hp xx qcb+hk, dr xx cr. mp xx qcf+pp xx f+mk, qcfx2+k, srk+hk"
+degats = 3264
+drive = 3
+super = 1
+notes = "Using the extra speed and knock-up frames from OD lynx whirl to incorporate SA1. Works midscreen."
+
+[[combo]]
+nom = "cr. hp xx dr xx st. hk, st. mk xx dr xx st. hk, st. mk xx qcb+mk xx SA3"
+categorie = "Drive Rush"
+inputs = "cr. hp xx dr xx st. hk, st. mk xx dr xx st. hk, st. mk xx qcb+mk xx SA3"
+degats = 4716
+drive = 6
+super = 3
+notes = "Example drive rush loop."
+
+[[combo]]
+nom = "dr xx f+mk, st. mk xx st. hk xx srk+hk"
+categorie = "Drive Rush"
+inputs = "dr xx f+mk, st. mk xx st. hk xx srk+hk"
+degats = 2400
+drive = 1
+super = 0
+notes = "Drive rush into overhead"
+
+[[combo]]
+nom = "dr xx st. hk, st. mk xx st. hk xx srk+hk"
+categorie = "Drive Rush"
+inputs = "dr xx st. hk, st. mk xx st. hk xx srk+hk"
+degats = 2700
+drive = 1
+super = 0
+notes = "Avoids lows, travels a surprising distance."
+
+[[combo]]
+nom = "dr xx cr. mk, st. mk xx st. hk xx srk+hk"
+categorie = "Drive Rush"
+inputs = "dr xx cr. mk, st. mk xx st. hk xx srk+hk"
+degats = 2120
+drive = 1
+super = 0
+notes = "Drive rush into a low. +0 on block, however."
+
+[[combo]]
+nom = "dr xx cr. lk, st. mk xx st. hk xx srk+hk"
+categorie = "Drive Rush"
+inputs = "dr xx cr. lk, st. mk xx st. hk xx srk+hk"
+degats = 1720
+drive = 1
+super = 0
+notes = "Drive rush into crouching light kick conversion."
+
+[[combo]]
+nom = "cr. lp, cr. hp xx qcb+hk, qcf+lk"
+categorie = "Punish Counter"
+inputs = "cr. lp, cr. hp xx qcb+hk, qcf+lk"
+degats = 2390
+drive = 0
+super = 0
+notes = "4f punish counter, point blank."
+
+[[combo]]
+nom = "cr. lp, cr. hp xx qcb+hk, qcf+lk, srk+hk"
+categorie = "Punish Counter"
+inputs = "cr. lp, cr. hp xx qcb+hk, qcf+lk, srk+hk"
+degats = 2810
+drive = 0
+super = 0
+notes = "4f punish counter, point blank. Corner."
+
+[[combo]]
+nom = "cr. lp, cr. mk xx cr. hk xx srk+hk"
+categorie = "Punish Counter"
+inputs = "cr. lp, cr. mk xx cr. hk xx srk+hk"
+degats = 1960
+drive = 0
+super = 0
+notes = "4f punish counter, long range."
+
+[[combo]]
+nom = "st. mk, cr. hp xx qcb+hk, qcf+lk"
+categorie = "Punish Counter"
+inputs = "st. mk, cr. hp xx qcb+hk, qcf+lk"
+degats = 3020
+drive = 0
+super = 0
+notes = "6f punish counter, point blank"
+
+[[combo]]
+nom = "st. mk, cr. hp xx qcb+hk, qcf+lk, srk+hk"
+categorie = "Punish Counter"
+inputs = "st. mk, cr. hp xx qcb+hk, qcf+lk, srk+hk"
+degats = 3580
+drive = 0
+super = 0
+notes = "6f punish counter. point blank. Corner."
+
+[[combo]]
+nom = "st. mk, cr. mk xx cr. hk xx srk+hk"
+categorie = "Punish Counter"
+inputs = "st. mk, cr. mk xx cr. hk xx srk+hk"
+degats = 2500
+drive = 0
+super = 0
+notes = "6f punish counter, long range."
+
+[[combo]]
+nom = "cr. mp xx qcf+lp xx f+mk, srk+hk"
+categorie = "Punish Counter"
+inputs = "cr. mp xx qcf+lp xx f+mk, srk+hk"
+degats = 2740
+drive = 0
+super = 0
+notes = "8f punish counter."
+
+[[combo]]
+nom = "cr. mp xx qcf+lp xx f+mk, qcfx2+k, srk+hk"
+categorie = "Punish Counter"
+inputs = "cr. mp xx qcf+lp xx f+mk, qcfx2+k, srk+hk"
+degats = 3580
+drive = 0
+super = 1
+notes = "8f punish counter"
+
+[[combo]]
+nom = "st. hk, srk+hk"
+categorie = "Punish Counter"
+inputs = "st. hk, srk+hk"
+degats = 2480
+drive = 0
+super = 0
+notes = "12f punish counter. Point blank."
+
+[[combo]]
+nom = "st. hk, cr. hk"
+categorie = "Punish Counter"
+inputs = "st. hk, cr. hk"
+degats = 1980
+drive = 0
+super = 0
+notes = "12f punish counter. Long range."
+
+[[combo]]
+nom = "st. hp xx hp, srk+hk (2)"
+categorie = "Punish Counter"
+inputs = "st. hp xx hp, srk+hk"
+degats = 2880
+drive = 0
+super = 0
+notes = "12f punish counter. Point blank."
+
+[[combo]]
+nom = "st. hp xx hp, qcf+hk"
+categorie = "Punish Counter"
+inputs = "st. hp xx hp, qcf+hk"
+degats = 2800
+drive = 0
+super = 0
+notes = "12f punish counter. Good corner carry."
+
+[[combo]]
+nom = "st. hp xx hp, dr xx cr. hp xx qcb+hk, qcf+hk"
+categorie = "Punish Counter"
+inputs = "st. hp xx hp, dr xx cr. hp xx qcb+hk, qcf+hk"
+degats = 3558
+drive = 1
+super = 0
+notes = "12f punish counter."
+
+[[combo]]
+nom = "st. hp xx hp, dr xx cr. hp xx qcf+lp xx f+mk, srk+hk"
+categorie = "Punish Counter"
+inputs = "st. hp xx hp, dr xx cr. hp xx qcf+lp xx f+mk, srk+hk"
+degats = 3549
+drive = 1
+super = 0
+notes = "12f punish counter."
+
+[[combo]]
+nom = "qcb+hk xx f+p xx f+mk, srk+hk"
+categorie = "Punish Counter"
+inputs = "qcb+hk xx f+p xx f+mk, srk+hk"
+degats = 3380
+drive = 0
+super = 0
+notes = "24f punish counter."
+
+[[combo]]
+nom = "qcb+hk xx f+p xx f+mk, qcf+lk, srk+lk"
+categorie = "Punish Counter"
+inputs = "qcb+hk xx f+p xx f+mk, qcf+lk, srk+lk"
+degats = 3740
+drive = 0
+super = 0
+notes = "24f punish counter. Corner only."
+
+[[combo]]
+nom = "qcb+hk xx f+p xx f+lk, dr xx cr. lp xx qcb+mk xx f+p xx f+mk, qcf+lk, srk+mk"
+categorie = "Punish Counter"
+inputs = "qcb+hk xx f+p xx f+lk, dr xx cr. lp xx qcb+mk xx f+p xx f+mk, qcf+lk, srk+mk"
+degats = 4143
+drive = 1
+super = 0
+notes = "24f punish counter. Corner only."
+
+[[combo]]
+nom = "DI, dash, cr. mp xx qcf+lp xx f+mk, srk+hk"
+categorie = "Après DI (crumple)"
+inputs = "DI, dash, cr. mp xx qcf+lp xx f+mk, srk+hk"
+degats = 2910
+drive = 1
+super = 0
+
+[[combo]]
+nom = "DI, dash, cr. mp xx qcb+hk, qcf+mk, srk+mk"
+categorie = "Après DI (crumple)"
+inputs = "DI, dash, cr. mp xx qcb+hk, qcf+mk, srk+mk"
+degats = 3240
+drive = 1
+super = 0
+notes = "Uppercut only connects in the corner, but this can carry to corner and get the uppercut from mid-screen."
+
+[[combo]]
+nom = "DI, dash, st. hp xx hp, dr xx cr. hp xx qcb+hk, qcf+mk, srk+mk"
+categorie = "Après DI (crumple)"
+inputs = "DI, dash, st. hp xx hp, dr xx cr. hp xx qcb+hk, qcf+mk, srk+mk"
+degats = 3484
+drive = 2
+super = 0
+notes = "Uppercut only connects in the corner, but this can carry to corner."
+
+[[combo]]
+nom = "DI, dash, st. hp xx hp, dr xx cr. hp xx qcb+hk xx f+p xx f+mk, qcf+lk, srk+hk"
+categorie = "Après DI (crumple)"
+inputs = "DI, dash, st. hp xx hp, dr xx cr. hp xx qcb+hk xx f+p xx f+mk, qcf+lk, srk+hk"
+degats = 3528
+drive = 2
+super = 0
+notes = "Uppercut only connects in the corner, but this can carry to corner."
+
+[[combo]]
+nom = "DI, cr. mp xx qcb+hk, qcf+mk, srk+hk"
+categorie = "Après DI (wallsplat)"
+inputs = "DI, cr. mp xx qcb+hk, qcf+mk, srk+hk"
+degats = 2672
+drive = 1
+super = 0
+
+[[combo]]
+nom = "DI, st. hp xx hp, dr xx cr. hp xx qcb+hk, qcf+mk, srk+hk"
+categorie = "Après DI (wallsplat)"
+inputs = "DI, st. hp xx hp, dr xx cr. hp xx qcb+hk, qcf+mk, srk+hk"
+degats = 2964
+drive = 2
+super = 0
+
+[[combo]]
+nom = "DI, st. hp xx hp, dr xx cr. hp xx qcb+hk xx f+p xx f+mk, qcf+lk, srk+hk"
+categorie = "Après DI (wallsplat)"
+inputs = "DI, st. hp xx hp, dr xx cr. hp xx qcb+hk xx f+p xx f+mk, qcf+lk, srk+hk"
+degats = 3009
+drive = 2
+super = 0
+
+[[combo]]
+nom = "DI, j. hp, cr. hp xx qcb+hk, qcf+lk, srk+hk"
+categorie = "Après DI (stun)"
+inputs = "DI, j. hp, cr. hp xx qcb+hk, qcf+lk, srk+hk"
+degats = 2840
+drive = 1
+super = 0
+
+[[modern]]
+categorie = "Anti-airs"
+inputs = "D+H"
+notes = "Elena's cr. hp, hits twice above her."
+
+[[modern]]
+categorie = "Anti-airs"
+inputs = "F+SP"
+notes = "Anti-air invincible uppercut"
+
+[[modern]]
+categorie = "Anti-airs"
+inputs = "J+[AUTO]+L"
+notes = "jump back j. lk is a good air-to-air to try to thwart crossups"
+
+[[modern]]
+categorie = "Pokes"
+inputs = "[AUTO]+M"
+notes = "Elena's cr. mp. Long range, special cancellable."
+
+[[modern]]
+categorie = "Pokes"
+inputs = "D+M"
+notes = "Elena's cr. mk. Target combo cancellable (D+M > D+M) that can cancel into a special."
+
+[[modern]]
+categorie = "Pokes"
+inputs = "F+H"
+notes = "Elena's confirmable target combo starter. Good long-ish range poke, can confirm into a knockdown."
+
+[[modern]]
+categorie = "Pokes"
+inputs = "M"
+notes = "This is a hitconfirmable standing-only normal into a special cancellable target combo."
+
+[[modern]]
+categorie = "Punitions"
+inputs = "D+L, D+H > SP"
+
+[[modern]]
+categorie = "Punitions"
+inputs = "M+[AUTO] > D+SP > F+M, F+SP"
+
+[[modern]]
+categorie = "Punitions"
+inputs = "H > H, SP"
+
+[[modern]]
+categorie = "Combos de base"
+inputs = "D+L > D+L > D+L > F+SP"
+
+[[modern]]
+categorie = "Combos de base"
+inputs = "D+M > D+M > F+SP"
+
+[[modern]]
+categorie = "Combos de base"
+inputs = "[AUTO]+M > DR > D+H > QCB+H, SP, F+SP"
+
+[[modern]]
+categorie = "Combos de base"
+inputs = "D+M > D+M > DR > D+H > QCB+H, SP, F+SP"

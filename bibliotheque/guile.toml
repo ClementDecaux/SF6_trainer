@@ -1,0 +1,593 @@
+# Guile : combos de la feuille communautaire SF6 (Google Sheets), importés tels quels.
+# degats = dégâts du combo complet, drive = barres de Drive, super = barres de super.
+# [[modern]] : les mêmes infos en contrôles Modern sans motion (NMM), pour référence.
+personnage = "Guile"
+
+[[combo]]
+nom = "cr. lk, cr. lp, st. lk, d~u+hk"
+categorie = ""
+inputs = "cr. lk, cr. lp, st. lk, d~u+hk"
+degats = 1370
+drive = 0
+super = 0
+notes = "Somewhat complicated to perform, though the 3 piece cr. lk, cr. lp, st. lk is still somewhat useful"
+
+[[combo]]
+nom = "cr. lk, cr. lp xx b~f+hp"
+categorie = ""
+inputs = "cr. lk, cr. lp xx b~f+hp"
+degats = 860
+drive = 0
+super = 0
+notes = "Safe ender"
+
+[[combo]]
+nom = "cr. lk, cr. lp xx d~u+hk"
+categorie = ""
+inputs = "cr. lk, cr. lp xx d~u+hk"
+degats = 1420
+drive = 0
+super = 0
+notes = "All combos listed here assume perfect input flash-kick for damage"
+
+[[combo]]
+nom = "cr. lp, cr. lp, st. lk, d~u+hk"
+categorie = ""
+inputs = "cr. lp, cr. lp, st. lk, d~u+hk"
+degats = 1470
+drive = 0
+super = 0
+notes = "Again, complicated, but the 3-piece is still useful."
+
+[[combo]]
+nom = "cr. lp, cr. lp xx b~f+hp"
+categorie = ""
+inputs = "cr. lp, cr. lp xx b~f+hp"
+degats = 925
+drive = 0
+super = 0
+notes = "Safe ender"
+
+[[combo]]
+nom = "cr. lp, cr. lp xx d~u+hk"
+categorie = ""
+inputs = "cr. lp, cr. lp xx d~u+hk"
+degats = 1520
+drive = 0
+super = 0
+
+[[combo]]
+nom = "cr. mp, cr. lp xx d~u+hk"
+categorie = ""
+inputs = "cr. mp, cr. lp xx d~u+hk"
+degats = 2020
+drive = 0
+super = 0
+
+[[combo]]
+nom = "st. mp, cr. mp xx b~f+hp"
+categorie = ""
+inputs = "st. mp, cr. mp xx b~f+hp"
+degats = 1640
+drive = 0
+super = 0
+
+[[combo]]
+nom = "st. mp, cr. mp xx cr. mp xx d~u+hk"
+categorie = ""
+inputs = "st. mp, cr. mp xx cr. mp xx d~u+hk"
+degats = 2320
+drive = 0
+super = 0
+
+[[combo]]
+nom = "st. mp, cr. mp xx b~f~b~f+hp, b~f~b~f+lp"
+categorie = ""
+inputs = "st. mp, cr. mp xx b~f~b~f+hp, b~f~b~f+lp"
+degats = 3900
+drive = 0
+super = 2
+notes = "Example double level 1 super now available to Guile. Does not work off of cr. mp xx cr. mp (8/3/2026)"
+
+[[combo]]
+nom = "f+hp, cr. lk, cr. lp xx d~u+hk"
+categorie = ""
+inputs = "f+hp, cr. lk, cr. lp xx d~u+hk"
+degats = 2220
+drive = 0
+super = 0
+notes = "Standing only"
+
+[[combo]]
+nom = "b+mp xx hp xx b~f+hp"
+categorie = ""
+inputs = "b+mp xx hp xx b~f+hp"
+degats = 1680
+drive = 0
+super = 0
+notes = "Vulnerable to DI after the b+mp (identical to st. mp), but safe on block."
+
+[[combo]]
+nom = "b+mp xx hp xx d~u+hk"
+categorie = ""
+inputs = "b+mp xx hp xx d~u+hk"
+degats = 2320
+drive = 0
+super = 0
+notes = "Have to charge down right after hitting st. mp."
+
+[[combo]]
+nom = "b+hp xx b~f+hp"
+categorie = ""
+inputs = "b+hp xx b~f+hp"
+degats = 1350
+drive = 0
+super = 0
+notes = "Decent chunk of damage for a common walk-back poke"
+
+[[combo]]
+nom = "cr. lk, cr. lp xx b~f+pp"
+categorie = "OD"
+inputs = "cr. lk, cr. lp xx b~f+pp"
+degats = 1140
+drive = 2
+super = 0
+notes = "Solid knockdown off of lights that's safe on block."
+
+[[combo]]
+nom = "cr. lk, cr. lp xx d~u+kk"
+categorie = "OD"
+inputs = "cr. lk, cr. lp xx d~u+kk"
+degats = 1560
+drive = 2
+super = 0
+notes = "Small amount of additional damage for a bar, worse oki."
+
+[[combo]]
+nom = "st. mp, cr. mp xx cr. mp xx b~f+pp, d~u+hk"
+categorie = "OD"
+inputs = "st. mp, cr. mp xx cr. mp xx b~f+pp, d~u+hk"
+degats = 2780
+drive = 2
+super = 0
+notes = "Corner only"
+
+[[combo]]
+nom = "cr. lp xx DR xx cr. lp"
+categorie = "Extensions Drive Rush"
+inputs = "cr. lp xx DR xx cr. lp"
+drive = 3
+notes = "4f or less"
+
+[[combo]]
+nom = "st. lk xx DR xx st. lk"
+categorie = "Extensions Drive Rush"
+inputs = "st. lk xx DR xx st. lk"
+drive = 3
+notes = "5f or less"
+
+[[combo]]
+nom = "cr. mp xx DR xx cr. hk"
+categorie = "Extensions Drive Rush"
+inputs = "cr. mp xx DR xx cr. hk"
+drive = 3
+notes = "9f or less"
+
+[[combo]]
+nom = "st. mp xx DR xx st. hk"
+categorie = "Extensions Drive Rush"
+inputs = "st. mp xx DR xx st. hk"
+drive = 3
+notes = "13f or less"
+
+[[combo]]
+nom = "st. hp xx DR xx st. hk"
+categorie = "Extensions Drive Rush"
+inputs = "st. hp xx DR xx st. hk"
+drive = 3
+notes = "13f or less"
+
+[[combo]]
+nom = "b+hp xx DR xx st. hk"
+categorie = "Extensions Drive Rush"
+inputs = "b+hp xx DR xx st. hk"
+drive = 3
+notes = "13f or less"
+
+[[combo]]
+nom = "cr. mp xx cr. mp xx DR"
+categorie = "Extensions Drive Rush"
+inputs = "cr. mp xx cr. mp xx DR"
+notes = "Lets you combo into a launched opponent, handy for cr. hk xx d/f+hk"
+
+[[combo]]
+nom = "st. lk xx DR xx st. lp, st. mp, cr. mp xx cr. mp xx d~u+hk"
+categorie = "Drive Rush"
+inputs = "st. lk xx DR xx st. lp, st. mp, cr. mp xx cr. mp xx d~u+hk"
+degats = 1650
+drive = 3
+super = 0
+notes = "Light DR cancel in neutral"
+
+[[combo]]
+nom = "st. hp xx DR xx st. hk, b+mp xx hp xx d~u+hk"
+categorie = "Drive Rush"
+inputs = "st. hp xx DR xx st. hk, b+mp xx hp xx d~u+hk"
+degats = 2692
+drive = 3
+super = 0
+notes = "st. hp is a powerful neutral option from Guile"
+
+[[combo]]
+nom = "st. mp, cr. mp xx DR xx cr. hk xx d/f+hk xx d~u+hk"
+categorie = "Drive Rush"
+inputs = "st. mp, cr. mp xx DR xx cr. hk xx d/f+hk xx d~u+hk"
+degats = 2370
+drive = 3
+super = 0
+
+[[combo]]
+nom = "st. mp, cr. mp xx cr. mp xx DR xx cr. hk xx d/f+hk xx d~u+hk"
+categorie = "Drive Rush"
+inputs = "st. mp, cr. mp xx cr. mp xx DR xx cr. hk xx d/f+hk xx d~u+hk"
+degats = 2301
+drive = 3
+super = 0
+
+[[combo]]
+nom = "dr xx cr. lk, cr. lp, cr. lp xx d~u+hk"
+categorie = "Drive Rush"
+inputs = "dr xx cr. lk, cr. lp, cr. lp xx d~u+hk"
+degats = 1490
+drive = 1
+super = 0
+notes = "DR moves Guile close enough to get 3 crouching lights. Easy combo."
+
+[[combo]]
+nom = "dr xx f+mp, cr. mp xx cr. mp xx d~u+hk"
+categorie = "Drive Rush"
+inputs = "dr xx f+mp, cr. mp xx cr. mp xx d~u+hk"
+degats = 2520
+drive = 1
+super = 0
+notes = "Combo off of a drive rush overhead."
+
+[[combo]]
+nom = "dr xx f+mk, cr. mp xx cr. mp xx d~u+hk"
+categorie = "Drive Rush"
+inputs = "dr xx f+mk, cr. mp xx cr. mp xx d~u+hk"
+degats = 2420
+drive = 1
+super = 0
+notes = "Can go into b+mp xx hp instead. Sobat (f+mk) moves a surprising distance and hops lows."
+
+[[combo]]
+nom = "dr xx b+lk, cr. lp, cr. lp xx d~u+hk"
+categorie = "Drive Rush"
+inputs = "dr xx b+lk, cr. lp, cr. lp xx d~u+hk"
+degats = 2020
+drive = 1
+super = 0
+notes = "Often a followup to a fireball in neutral."
+
+[[combo]]
+nom = "cr. lp, b+hp xx b~f+hp"
+categorie = "Punish Counter"
+inputs = "cr. lp, b+hp xx b~f+hp"
+degats = 1385
+drive = 0
+super = 0
+notes = "4f Punish Counter. Back charge."
+
+[[combo]]
+nom = "cr. lp, b+hp xx b~f~b~f+p"
+categorie = "Punish Counter"
+inputs = "cr. lp, b+hp xx b~f~b~f+p"
+degats = 2400
+drive = 0
+super = 1
+notes = "4f Punish Counter. Back charge."
+
+[[combo]]
+nom = "cr. lp, cr. hk"
+categorie = "Punish Counter"
+inputs = "cr. lp, cr. hk"
+degats = 1080
+drive = 0
+super = 0
+notes = "4f Punish Counter. Sans charge."
+
+[[combo]]
+nom = "cr. lp, cr. mp xx cr. mp xx d~u+hk"
+categorie = "Punish Counter"
+inputs = "cr. lp, cr. mp xx cr. mp xx d~u+hk"
+degats = 1780
+drive = 0
+super = 0
+notes = "4f Punish Counter. Point blank."
+
+[[combo]]
+nom = "cr. lp, st. mp, cr. mp xx d~u+hk"
+categorie = "Punish Counter"
+inputs = "cr. lp, st. mp, cr. mp xx d~u+hk"
+degats = 2100
+drive = 0
+super = 0
+notes = "4f Punish Counter. Point blank."
+
+[[combo]]
+nom = "cr. mp, b+mp xx b+hp"
+categorie = "Punish Counter"
+inputs = "cr. mp, b+mp xx b+hp"
+degats = 1800
+drive = 0
+super = 0
+notes = "6f Punish Counter. Can cancel into SA1."
+
+[[combo]]
+nom = "cr. mp, cr. mp xx d~u+hk"
+categorie = "Punish Counter"
+inputs = "cr. mp, cr. mp xx d~u+hk"
+degats = 2440
+drive = 0
+super = 0
+notes = "6f Punish Counter"
+
+[[combo]]
+nom = "cr. mp xx dr xx st. hk, cr. mp xx mp xx d~u+hk"
+categorie = "Punish Counter"
+inputs = "cr. mp xx dr xx st. hk, cr. mp xx mp xx d~u+hk"
+degats = 2600
+drive = 3
+super = 0
+notes = "6f Punish Counter. New route from cr. mp ch/pc into st. hk (8/3/2026)"
+
+[[combo]]
+nom = "st. hp, d/f+hk xx d~u+hk"
+categorie = "Punish Counter"
+inputs = "st. hp, d/f+hk xx d~u+hk"
+degats = 2860
+drive = 0
+super = 0
+notes = "7f Punish Counter. Point blank."
+
+[[combo]]
+nom = "st. hp, st. hk xx SA1 (HK), d~u+kk"
+categorie = "Punish Counter"
+inputs = "st. hp, st. hk xx SA1 (HK), d~u+kk"
+degats = 3760
+drive = 2
+super = 1
+notes = "7f Punish Counter."
+
+[[combo]]
+nom = "st. hp, st. hk xx SA3"
+categorie = "Punish Counter"
+inputs = "st. hp, st. hk xx SA3"
+degats = 4520
+drive = 0
+super = 3
+notes = "7f Punish Counter."
+
+[[combo]]
+nom = "cr. mk, d~u+hk"
+categorie = "Punish Counter"
+inputs = "cr. mk, d~u+hk"
+degats = 1720
+drive = 0
+super = 0
+notes = "8f Punish Counter. Good if you have down charge and net a whiff punish"
+
+[[combo]]
+nom = "cr. mk xx d/f+mp, d~u+mk"
+categorie = "Punish Counter"
+inputs = "cr. mk xx d/f+mp, d~u+mk"
+degats = 2278
+drive = 0
+super = 0
+notes = "8f Punish Counter. Only works at close to point blank range."
+
+[[combo]]
+nom = "b+lk, cr. lp, cr. lp xx d~u+hk"
+categorie = "Punish Counter"
+inputs = "b+lk, cr. lp, cr. lp xx d~u+hk"
+degats = 2120
+drive = 0
+super = 0
+notes = "8f Punish Counter. Lunges forward, can be more plus and convert into juicier options, but this is always at least +4 on Punish Counter."
+
+[[combo]]
+nom = "cr. hk xx d/f+hk xx d~u+hk"
+categorie = "Punish Counter"
+inputs = "cr. hk xx d/f+hk xx d~u+hk"
+degats = 1720
+drive = 0
+super = 0
+notes = "9f Punish Counter. Can be used as a whiff punish."
+
+[[combo]]
+nom = "d/f+hk, d~u+hk"
+categorie = "Punish Counter"
+inputs = "d/f+hk, d~u+hk"
+degats = 2600
+drive = 0
+super = 0
+notes = "10f Punish Counter. Standing only."
+
+[[combo]]
+nom = "st. hk, cr. mp xx d~u+hk"
+categorie = "Punish Counter"
+inputs = "st. hk, cr. mp xx d~u+hk"
+degats = 2680
+drive = 0
+super = 0
+notes = "13f Punish Counter."
+
+[[combo]]
+nom = "f+hp, st. mp, cr. mp xx d~u+hk"
+categorie = "Punish Counter"
+inputs = "f+hp, st. mp, cr. mp xx d~u+hk"
+degats = 3020
+drive = 0
+super = 0
+notes = "16f Punish Counter."
+
+[[combo]]
+nom = "f+hp, b+mp xx hp xx d~u+hk"
+categorie = "Punish Counter"
+inputs = "f+hp, b+mp xx hp xx d~u+hk"
+degats = 3020
+drive = 0
+super = 0
+notes = "16f Punish Counter."
+
+[[combo]]
+nom = "f+hp, b+hp xx b~f~b~f+mp"
+categorie = "Punish Counter"
+inputs = "f+hp, b+hp xx b~f~b~f+mp"
+degats = 3360
+drive = 0
+super = 1
+notes = "16f Punish Counter. Works at tip range."
+
+[[combo]]
+nom = "f+hp, st. mp xx b+hp xx b~f~b~f+mp"
+categorie = "Punish Counter"
+inputs = "f+hp, st. mp xx b+hp xx b~f~b~f+mp"
+degats = 3440
+drive = 0
+super = 1
+notes = "16f Punish Counter. Point blank."
+
+[[combo]]
+nom = "f+hk, d~u+hk"
+categorie = "Punish Counter"
+inputs = "f+hk, d~u+hk"
+degats = 2200
+drive = 0
+super = 0
+notes = "17f Punish Counter. Crushes lows."
+
+[[combo]]
+nom = "f+hk, cr. mp xx d~u+hk"
+categorie = "Punish Counter"
+inputs = "f+hk, cr. mp xx d~u+hk"
+degats = 2920
+drive = 0
+super = 0
+notes = "17f Punish Counter. Corner only."
+
+[[combo]]
+nom = "DI, f+hp, cr. lp xx d~u+hk"
+categorie = "Après DI (crumple)"
+inputs = "DI, f+hp, cr. lp xx d~u+hk"
+degats = 2650
+drive = 1
+super = 0
+
+[[combo]]
+nom = "DI, cr. mp xx cr. mp xx d~u+hk"
+categorie = "Après DI (wallsplat)"
+inputs = "DI, cr. mp xx cr. mp xx d~u+hk"
+degats = 1328
+drive = 1
+super = 0
+
+[[combo]]
+nom = "DI, b+mp xx hp xx d~u+hk"
+categorie = "Après DI (wallsplat)"
+inputs = "DI, b+mp xx hp xx d~u+hk"
+degats = 1856
+drive = 1
+super = 0
+
+[[combo]]
+nom = "DI, b+mp xx hp xx b~f~b~f+hp, d~u+kk"
+categorie = "Après DI (wallsplat)"
+inputs = "DI, b+mp xx hp xx b~f~b~f+hp, d~u+kk"
+degats = 2840
+drive = 1
+super = 0
+
+[[combo]]
+nom = "DI, j. hk, d/f+hk xx d~u+hk"
+categorie = "Après DI (stun)"
+inputs = "DI, j. hk, d/f+hk xx d~u+hk"
+degats = 2180
+drive = 1
+super = 0
+
+[[modern]]
+categorie = "Anti-airs"
+inputs = "D+H"
+notes = "Hits over Guile's head."
+
+[[modern]]
+categorie = "Anti-airs"
+inputs = "M"
+notes = "Good lateral anti-air."
+
+[[modern]]
+categorie = "Anti-airs"
+inputs = "D+SP"
+notes = "With down charge, has air invincibility."
+
+[[modern]]
+categorie = "Pokes"
+inputs = "D+M"
+notes = "Moves guile slightly forward. Noncomittal option."
+
+[[modern]]
+categorie = "Pokes"
+inputs = "B+SP"
+notes = "Slow moving projectile, controls a large amount of space."
+
+[[modern]]
+categorie = "Pokes"
+inputs = "B+H"
+notes = "Special cancellable, hits at an appreciable range."
+
+[[modern]]
+categorie = "Pokes"
+inputs = "L+[AUTO]"
+notes = "Long range light attack. Good for checking movement forward."
+
+[[modern]]
+categorie = "Punitions"
+inputs = "D+L > M+[AUTO] > M+[AUTO] > D+SP"
+notes = "4f punish."
+
+[[modern]]
+categorie = "Punitions"
+inputs = "D+M > D+SP"
+notes = "8f punish. Also good as a whiff punish if you can get the down charge in time. Not a cancel, a link."
+
+[[modern]]
+categorie = "Punitions"
+inputs = "D/F+H > D/F+H > D+SP > D+SP+[AUTO]"
+notes = "9f punish. Works at most ranges, goes into OD flash kick in the corner for more damage."
+
+[[modern]]
+categorie = "Punitions"
+inputs = "H > H+[AUTO] > DR > H > H+[AUTO] > H+[AUTO] > D+SP"
+notes = "13f punish. H > H+[AUTO] > DR is loopable."
+
+[[modern]]
+categorie = "Combos de base"
+inputs = "D+L > D+L > D+SP"
+notes = "4f light combo. Best used off a jump-in to get charge."
+
+[[modern]]
+categorie = "Combos de base"
+inputs = "H+[AUTO] > M+[AUTO] > M+[AUTO] > D+SP"
+notes = "7f combo."
+
+[[modern]]
+categorie = "Combos de base"
+inputs = "DR > B+L > D+L > D+L > D+SP"
+notes = "Good forward advancing drive rush combo."
+
+[[modern]]
+categorie = "Combos de base"
+inputs = "B+H > DR > H > H+[AUTO] > H+[AUTO] > D+SP"
+notes = "Drive rush conversion off of B+H in neutral."

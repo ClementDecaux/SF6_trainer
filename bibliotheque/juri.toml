@@ -1,0 +1,833 @@
+# Juri : combos de la feuille communautaire SF6 (Google Sheets), importés tels quels.
+# degats = dégâts du combo complet, drive = barres de Drive, super = barres de super.
+# [[modern]] : les mêmes infos en contrôles Modern sans motion (NMM), pour référence.
+personnage = "Juri"
+
+[[combo]]
+nom = "cr. lk, st. lp xx qcb+lk"
+categorie = "Sans jauge"
+inputs = "cr. lk, st. lp xx qcb+lk"
+degats = 860
+drive = 0
+super = 0
+notes = "Basic stocking combo. You only get two light attacks into a store."
+
+[[combo]]
+nom = "cr. lk, cr. lp, cr. lp xx qcb+mk"
+categorie = "Sans jauge"
+inputs = "cr. lk, cr. lp, cr. lp xx qcb+mk"
+degats = 1010
+drive = 0
+super = 0
+notes = "3-hit light confirm into stock"
+
+[[combo]]
+nom = "cr. lk, st. lp, st. lk xx srk+lp"
+categorie = "Sans jauge"
+inputs = "cr. lk, st. lp, st. lk xx srk+lp"
+degats = 1130
+drive = 0
+super = 0
+
+[[combo]]
+nom = "cr. lk, st. lp, st. lk xx srk+hp"
+categorie = "Sans jauge"
+inputs = "cr. lk, st. lp, st. lk xx srk+hp"
+degats = 1370
+drive = 0
+super = 0
+
+[[combo]]
+nom = "st. lp, st. lp xx qcb+lk"
+categorie = "Sans jauge"
+inputs = "st. lp, st. lp xx qcb+lk"
+degats = 960
+drive = 0
+super = 0
+notes = "Basic stocking combo. You only get two light attacks into a store."
+
+[[combo]]
+nom = "st. lp, st. lp, st. lk xx srk+lp"
+categorie = "Sans jauge"
+inputs = "st. lp, st. lp, st. lk xx srk+lp"
+degats = 1230
+drive = 0
+super = 0
+
+[[combo]]
+nom = "st. lp, st. lp, st. lk xx srk+hp"
+categorie = "Sans jauge"
+inputs = "st. lp, st. lp, st. lk xx srk+hp"
+degats = 1470
+drive = 0
+super = 0
+
+[[combo]]
+nom = "st. lp, st. mk xx qcb+hk, srk+hp"
+categorie = "Sans jauge"
+inputs = "st. lp, st. mk xx qcb+hk, srk+hp"
+degats = 1510
+drive = 0
+super = 0
+notes = "Basic stocking combo"
+
+[[combo]]
+nom = "st. lp, st. mk xx qcf+mk (stock), f+mp xx qcb+mk"
+categorie = "Sans jauge"
+inputs = "st. lp, st. mk xx qcf+mk (stock), f+mp xx qcb+mk"
+degats = 1580
+drive = 0
+super = 0
+notes = "Restock combo"
+
+[[combo]]
+nom = "st. lp, st. mk xx qcf+mk (stock), f+mp xx qcf+hk (non-stock/stock)"
+categorie = "Sans jauge"
+inputs = "st. lp, st. mk xx qcf+mk (stock), f+mp xx qcf+hk (non-stock/stock)"
+degats = 1740
+drive = 0
+super = 0
+notes = "Provides better oki for backrise relative to srk+hp ender. If using qcf+hk (stock) damage is equal to srk+hp ender"
+
+[[combo]]
+nom = "st. lp, st. mk xx qcf+mk (stock), f+mp xx srk+hp"
+categorie = "Sans jauge"
+inputs = "st. lp, st. mk xx qcf+mk (stock), f+mp xx srk+hp"
+degats = 1820
+drive = 0
+super = 0
+
+[[combo]]
+nom = "st. mp, cr. mp xx qcb+mk"
+categorie = "Sans jauge"
+inputs = "st. mp, cr. mp xx qcb+mk"
+degats = 1680
+drive = 0
+super = 0
+notes = "Basic stocking combo"
+
+[[combo]]
+nom = "st. mp, st. lk xx srk+hp"
+categorie = "Sans jauge"
+inputs = "st. mp, st. lk xx srk+hp"
+degats = 1620
+drive = 0
+super = 0
+notes = "st. lk can be used as an alternative link from st. mp if you are too far for cr. MP to connect"
+
+[[combo]]
+nom = "st. mp, cr. mp xx srk+hp"
+categorie = "Sans jauge"
+inputs = "st. mp, cr. mp xx srk+hp"
+degats = 1920
+drive = 0
+super = 0
+
+[[combo]]
+nom = "st. mp, cr. mp xx qcf+hk"
+categorie = "Sans jauge"
+inputs = "st. mp, cr. mp xx qcf+hk"
+degats = 2000
+drive = 0
+super = 0
+
+[[combo]]
+nom = "st. mp, cr. mp xx qcf+hk (stock)"
+categorie = "Sans jauge"
+inputs = "st. mp, cr. mp xx qcf+hk (stock)"
+degats = 2160
+drive = 0
+super = 0
+
+[[combo]]
+nom = "cr. mp, st. lp, st. lk xx srk+hp"
+categorie = "Sans jauge"
+inputs = "cr. mp, st. lp, st. lk xx srk+hp"
+degats = 1980
+drive = 0
+super = 0
+notes = "Basic link combo if starting with cr. mp"
+
+[[combo]]
+nom = "cr. mk xx qcb+mk"
+categorie = "Sans jauge"
+inputs = "cr. mk xx qcb+mk"
+degats = 980
+drive = 0
+super = 0
+notes = "At tip range of cr. mk, Juri isn't punishable on block except in very rare cases."
+
+[[combo]]
+nom = "st. hp xx qcb+hk, srk+hp"
+categorie = "Sans jauge"
+inputs = "st. hp xx qcb+hk, srk+hp"
+degats = 2020
+drive = 0
+super = 0
+
+[[combo]]
+nom = "st. hp xx qcf+mk (stock), cr. mp xx srk+hp"
+categorie = "Sans jauge"
+inputs = "st. hp xx qcf+mk (stock), cr. mp xx srk+hp"
+degats = 2540
+drive = 0
+super = 0
+
+[[combo]]
+nom = "cr. hp xx qcb+hk, srk+hp"
+categorie = "Sans jauge"
+inputs = "cr. hp xx qcb+hk, srk+hp"
+degats = 2120
+drive = 0
+super = 0
+
+[[combo]]
+nom = "cr. hp xx qcf+mk (stock), cr. mp xx srk+hp"
+categorie = "Sans jauge"
+inputs = "cr. hp xx qcf+mk (stock), cr. mp xx srk+hp"
+degats = 2640
+drive = 0
+super = 0
+
+[[combo]]
+nom = "b+hk (2) xx qcb+mk"
+categorie = "Sans jauge"
+inputs = "b+hk (2) xx qcb+mk"
+degats = 1400
+drive = 0
+super = 0
+notes = "2-hit normal makes this hitconfirm relatively easy."
+
+[[combo]]
+nom = "b+hk (2) xx srk+hp"
+categorie = "Sans jauge"
+inputs = "b+hk (2) xx srk+hp"
+degats = 2000
+drive = 0
+super = 0
+notes = "2-hit normal makes this hitconfirm relatively easy."
+
+[[combo]]
+nom = "b+hk (2) xx qcf+mk, st. lk xx srk+hp"
+categorie = "Sans jauge"
+inputs = "b+hk (2) xx qcf+mk, st. lk xx srk+hp"
+degats = 2330
+drive = 0
+super = 0
+notes = "2-hit normal makes this hitconfirm relatively easy."
+
+[[combo]]
+nom = "b+hk (2) xx qcf+mk (stock), f+mp xx qcf+hk (stock)"
+categorie = "Sans jauge"
+inputs = "b+hk (2) xx qcf+mk (stock), f+mp xx qcf+hk (stock)"
+degats = 2540
+drive = 0
+super = 0
+notes = "2-hit normal makes this hitconfirm relatively easy."
+
+[[combo]]
+nom = "f+hp (2) xx qcb+mk"
+categorie = "Sans jauge"
+inputs = "f+hp (2) xx qcb+mk"
+degats = 1600
+drive = 0
+super = 0
+notes = "2-hit normal makes this hitconfirm relatively easy. Hard to contest normal"
+
+[[combo]]
+nom = "f+hp (2) xx srk+hp"
+categorie = "Sans jauge"
+inputs = "f+hp (2) xx srk+hp"
+degats = 2200
+drive = 0
+super = 0
+notes = "2-hit normal makes this hitconfirm relatively easy. Hard to contest normal"
+
+[[combo]]
+nom = "f+hp (2) xx qcf+mk (stock), f+mp xx srk+hp"
+categorie = "Sans jauge"
+inputs = "f+hp (2) xx qcf+mk (stock), f+mp xx srk+hp"
+degats = 2740
+drive = 0
+super = 0
+notes = "2-hit normal makes this hitconfirm relatively easy. Hard to contest normal"
+
+[[combo]]
+nom = "st. hp xx qcb+mk"
+categorie = "Sans jauge"
+inputs = "st. hp xx qcb+mk"
+degats = 1400
+drive = 0
+super = 0
+notes = "At tip range, juri is out of range of most 6f punishes"
+
+[[combo]]
+nom = "st. hp xx qcb+hp, srk+hp"
+categorie = "Sans jauge"
+inputs = "st. hp xx qcb+hp, srk+hp"
+degats = 2020
+drive = 0
+super = 0
+notes = "st. hp is a dominating button in neutral, often spacing traps into itself."
+
+[[combo]]
+nom = "st. hp xx qcf+mk (stock), f+mp xx srk+hp"
+categorie = "Sans jauge"
+inputs = "st. hp xx qcf+mk (stock), f+mp xx srk+hp"
+degats = 2540
+drive = 0
+super = 0
+notes = "st. hp is a dominating button in neutral, often spacing traps into itself."
+
+[[combo]]
+nom = "cr. hp xx qcb+hk, srk+hp (2)"
+categorie = "Sans jauge"
+inputs = "cr. hp xx qcb+hk, srk+hp"
+degats = 2120
+drive = 0
+super = 0
+notes = "Used in combos, or off a raw jump-in"
+
+[[combo]]
+nom = "cr. hp xx qcf+mk (stock), f+mp xx srk+hp"
+categorie = "Sans jauge"
+inputs = "cr. hp xx qcf+mk (stock), f+mp xx srk+hp"
+degats = 2640
+drive = 0
+super = 0
+notes = "Used in combos with a stock, or off a raw jump-in"
+
+[[combo]]
+nom = "st. lp, st. mk xx qcf+lk+hk, f+mp xx srk+hp"
+categorie = "OD"
+inputs = "st. lp, st. mk xx qcf+lk+hk, f+mp xx srk+hp"
+degats = 1960
+drive = 2
+super = 0
+notes = "If you don't have any fuha stocks, Juri can instead spend drive to get a similar outcome."
+
+[[combo]]
+nom = "st. mp, cr. mp xx qcb+kk, srk+hp"
+categorie = "OD"
+inputs = "st. mp, cr. mp xx qcb+kk, srk+hp"
+degats = 2310
+drive = 2
+super = 0
+notes = "Nets the same juggle as hk stock into uppercut off of mediums."
+
+[[combo]]
+nom = "b+hk xx qcb+kk, b+hk xx srk+hp"
+categorie = "OD"
+inputs = "b+hk xx qcb+kk, b+hk xx srk+hp"
+degats = 2680
+drive = 2
+super = 0
+notes = "Example of free juggle follow up from qcb+kk and groundbounce from b+hk in a combo."
+
+[[combo]]
+nom = "st. mp, cr. mp xx qcf+mk+hk (stock) xx qcf+mk, srk+hp"
+categorie = "OD"
+inputs = "st. mp, cr. mp xx qcf+mk+hk (stock) xx qcf+mk, srk+hp"
+degats = 2850
+drive = 3
+super = 0
+notes = "Juri can cancel qcf+mk+hk with a stock into another qcf+k move at the cost of one drive, in this case giving a ground bounce she can combo off of."
+
+[[combo]]
+nom = "st. lp xx DR xx st. lp"
+categorie = "Extensions Drive Rush"
+inputs = "st. lp xx DR xx st. lp"
+drive = 3
+notes = "4f or less"
+
+[[combo]]
+nom = "st. lk xx DR xx st. lp"
+categorie = "Extensions Drive Rush"
+inputs = "st. lk xx DR xx st. lp"
+drive = 3
+notes = "4f or less"
+
+[[combo]]
+nom = "st. mk xx DR xx st. hp"
+categorie = "Extensions Drive Rush"
+inputs = "st. mk xx DR xx st. hp"
+drive = 3
+notes = "10f or less"
+
+[[combo]]
+nom = "cr. mp xx DR xx st. hp"
+categorie = "Extensions Drive Rush"
+inputs = "cr. mp xx DR xx st. hp"
+drive = 3
+notes = "10f or less"
+
+[[combo]]
+nom = "cr. mk xx DR xx st. hp"
+categorie = "Extensions Drive Rush"
+inputs = "cr. mk xx DR xx st. hp"
+drive = 3
+notes = "10f or less"
+
+[[combo]]
+nom = "f+mp xx DR xx st. hp"
+categorie = "Extensions Drive Rush"
+inputs = "f+mp xx DR xx st. hp"
+drive = 3
+notes = "10f or less"
+
+[[combo]]
+nom = "b+hk xx DR xx st. hp"
+categorie = "Extensions Drive Rush"
+inputs = "b+hk xx DR xx st. hp"
+drive = 3
+notes = "10f or less"
+
+[[combo]]
+nom = "st. lp, st. lp, st. lk xx DR xx st. lp, cr. hp xx qcb+hk, srk+hp"
+categorie = "Drive Rush"
+inputs = "st. lp, st. lp, st. lk xx DR xx st. lp, cr. hp xx qcb+hk, srk+hp"
+degats = 1676
+drive = 3
+super = 0
+
+[[combo]]
+nom = "st. mp, cr. mp xx DR xx f+mp, cr. hp xx qcb+hk, srk+hp"
+categorie = "Drive Rush"
+inputs = "st. mp, cr. mp xx DR xx f+mp, cr. hp xx qcb+hk, srk+hp"
+degats = 2772
+drive = 3
+super = 0
+
+[[combo]]
+nom = "st. mp, cr. mp xx DR xx cr. hp, st. mp, cr. mp xx qcb+mk"
+categorie = "Drive Rush"
+inputs = "st. mp, cr. mp xx DR xx cr. hp, st. mp, cr. mp xx qcb+mk"
+degats = 2433
+drive = 3
+super = 0
+
+[[combo]]
+nom = "st. lk xx DR xx st. lp, cr. hp xx qcb+hk, srk+hp"
+categorie = "Drive Rush"
+inputs = "st. lk xx DR xx st. lp, cr. hp xx qcb+hk, srk+hp"
+degats = 1668
+drive = 3
+super = 0
+notes = "Common DR combo out of neutral"
+
+[[combo]]
+nom = "cr. mk xx DR xx st. mp, cr. hp xx qcb+hk, srk+hp"
+categorie = "Drive Rush"
+inputs = "cr. mk xx DR xx st. mp, cr. hp xx qcb+hk, srk+hp"
+degats = 2072
+drive = 3
+super = 0
+notes = "Common DR combo out of neutral"
+
+[[combo]]
+nom = "st. mp, cr. mp xx DR xx f+mp, cr. hp xx qcb+hk xx qcfx2+k"
+categorie = "Drive Rush"
+inputs = "st. mp, cr. mp xx DR xx f+mp, cr. hp xx qcb+hk xx qcfx2+k"
+degats = 3150
+drive = 3
+super = 1
+notes = "Example SA1 conversion"
+
+[[combo]]
+nom = "st. mp, cr. mp xx DR xx f+mp, cr. hp xx qcf+mk+hk (2 hits) xx qcbx2+p (first hit) (held), st. mp xx st. hp xx st. hk xx qcf+hk"
+categorie = "Drive Rush"
+inputs = "st. mp, cr. mp xx DR xx f+mp, cr. hp xx qcf+mk+hk (2 hits) xx qcbx2+p (first hit) (held), st. mp xx st. hp xx st. hk xx qcf+hk"
+degats = 2954
+drive = 5
+super = 2
+notes = "Example SA2 conversion"
+
+[[combo]]
+nom = "st. mp, cr. mp xx DR xx f+mp, cr. hp xx qcf+hk xx qcbx2+k"
+categorie = "Drive Rush"
+inputs = "st. mp, cr. mp xx DR xx f+mp, cr. hp xx qcf+hk xx qcbx2+k"
+degats = 4649
+drive = 3
+super = 3
+notes = "Example SA3 conversion"
+
+[[combo]]
+nom = "st. lp, cr. hp xx qcb+hp, srk+hp"
+categorie = "Punish Counter"
+inputs = "st. lp, cr. hp xx qcb+hp, srk+hp"
+degats = 1970
+drive = 0
+super = 0
+notes = "4f Punish Counter. Point blank"
+
+[[combo]]
+nom = "st. lp, cr. mk xx qcb+mk"
+categorie = "Punish Counter"
+inputs = "st. lp, cr. mk xx qcb+mk"
+degats = 1180
+drive = 0
+super = 0
+notes = "4f Punish Counter. Works at any range."
+
+[[combo]]
+nom = "st. lp xx DR xx st. mp, cr. hp xx qcb+hk, srk+hp"
+categorie = "Punish Counter"
+inputs = "st. lp xx DR xx st. mp, cr. hp xx qcb+hk, srk+hp"
+degats = 1932
+drive = 3
+super = 0
+notes = "4f Punish Counter. Works at any range."
+
+[[combo]]
+nom = "st. lk xx DR xx st. mp, cr. hp xx qcb+hk, srk+hp"
+categorie = "Punish Counter"
+inputs = "st. lk xx DR xx st. mp, cr. hp xx qcb+hk, srk+hp"
+degats = 1932
+drive = 3
+super = 0
+notes = "5f Punish Counter. Works at any range."
+
+[[combo]]
+nom = "st. mp, st. hp xx qcb+hp, srk+hp"
+categorie = "Punish Counter"
+inputs = "st. mp, st. hp xx qcb+hp, srk+hp"
+degats = 2550
+drive = 0
+super = 0
+notes = "6f Punish Counter. Any range the st. mp hits, the st. hp hits."
+
+[[combo]]
+nom = "cr. mp, cr. hp xx qcb+hk, srk+hp"
+categorie = "Punish Counter"
+inputs = "cr. mp, cr. hp xx qcb+hk, srk+hp"
+degats = 2650
+drive = 0
+super = 0
+notes = "6f Punish Counter. Point blank."
+
+[[combo]]
+nom = "cr. mp, f+mp xx srk+hp"
+categorie = "Punish Counter"
+inputs = "cr. mp, f+mp xx srk+hp"
+degats = 2280
+drive = 0
+super = 0
+notes = "6f Punish Counter. Works at ranges where f+mp will hit."
+
+[[combo]]
+nom = "st. mp, st. hp xx qcf+mk, cr. mp xx srk+hp"
+categorie = "Punish Counter"
+inputs = "st. mp, st. hp xx qcf+mk, cr. mp xx srk+hp"
+degats = 2960
+drive = 0
+super = 0
+notes = "6f Punish Counter. Example with 1 stock"
+
+[[combo]]
+nom = "cr. mk xx qcb+hk, srk+hp"
+categorie = "Punish Counter"
+inputs = "cr. mk xx qcb+hk, srk+hp"
+degats = 1630
+drive = 0
+super = 0
+notes = "8f Punish Counter. Useful for whiff punishing."
+
+[[combo]]
+nom = "cr. hp, qcb+mk, srk+hp"
+categorie = "Punish Counter"
+inputs = "cr. hp, qcb+mk, srk+hp"
+degats = 2640
+drive = 0
+super = 0
+notes = "8f airborne punish counter. Hitconfirmable."
+
+[[combo]]
+nom = "st. hk, srk+hp"
+categorie = "Punish Counter"
+inputs = "st. hk, srk+hp"
+degats = 2040
+drive = 0
+super = 0
+notes = "17f Punish Counter. Forward lunging attack. Good for spacing traps."
+
+[[combo]]
+nom = "st. hk, qcb+mk"
+categorie = "Punish Counter"
+inputs = "st. hk, qcb+mk"
+degats = 1560
+drive = 0
+super = 0
+notes = "17f Punish Counter."
+
+[[combo]]
+nom = "st. hk, dr xx cr. lp xx qcb+hk"
+categorie = "Punish Counter"
+inputs = "st. hk, dr xx cr. lp xx qcb+hk"
+degats = 1579
+drive = 1
+super = 0
+notes = "17f Punish Counter. Gives a +42 knockdown"
+
+[[combo]]
+nom = "st. hk, dr xx cr. lp xx qcb+hk, srk+hp"
+categorie = "Punish Counter"
+inputs = "st. hk, dr xx cr. lp xx qcb+hk, srk+hp"
+degats = 2038
+drive = 1
+super = 0
+notes = "17f Punish Counter."
+
+[[combo]]
+nom = "dr xx f+hp, cr. hp xx qcb+hk, srk+hp"
+categorie = "Punish Counter"
+inputs = "dr xx f+hp, cr. hp xx qcb+hk, srk+hp"
+degats = 3130
+drive = 1
+super = 0
+notes = "26f Punish Counter. Heavy punish for supers."
+
+[[combo]]
+nom = "dr xx f+hp, cr. hp xx dr xx cr. hp, st. mp, cr. mp xx dr xx cr. hp, st. mp, cr. mp xx qcf+hk xx qcbx2+k"
+categorie = "Punish Counter"
+inputs = "dr xx f+hp, cr. hp xx dr xx cr. hp, st. mp, cr. mp xx dr xx cr. hp, st. mp, cr. mp xx qcf+hk xx qcbx2+k"
+degats = 6274
+drive = 7
+super = 3
+notes = "26f Punish Counter. Example drive dump loop."
+
+[[combo]]
+nom = "DI, cr. hp xx qcb+hk, srk+hp"
+categorie = "Après DI (crumple)"
+inputs = "DI, cr. hp xx qcb+hk, srk+hp"
+degats = 2570
+drive = 1
+super = 0
+
+[[combo]]
+nom = "DI, j. hk, dr xx cr. hp xx qcb+hk, srk+hp"
+categorie = "Après DI (crumple)"
+inputs = "DI, j. hk, dr xx cr. hp xx qcb+hk, srk+hp"
+degats = 2764
+drive = 2
+super = 0
+
+[[combo]]
+nom = "DI, j. hk, dr xx cr. hp xx qcf+lk+mk, qcf+hk"
+categorie = "Après DI (crumple)"
+inputs = "DI, j. hk, dr xx cr. hp xx qcf+lk+mk, qcf+hk"
+degats = 2959
+drive = 4
+super = 0
+
+[[combo]]
+nom = "DI, cr. hp xx qcb+hk, srk+hp (2)"
+categorie = "Après DI (wallsplat)"
+inputs = "DI, cr. hp xx qcb+hk, srk+hp"
+degats = 1888
+drive = 1
+super = 0
+
+[[combo]]
+nom = "DI, cr. hp xx qcf+hk, srk+pp"
+categorie = "Après DI (wallsplat)"
+inputs = "DI, cr. hp xx qcf+hk, srk+pp"
+degats = 2544
+drive = 3
+super = 0
+
+[[combo]]
+nom = "DI, cr. hp xx qcf+hk (stock), qcfx2+k"
+categorie = "Après DI (wallsplat)"
+inputs = "DI, cr. hp xx qcf+hk (stock), qcfx2+k"
+degats = 2832
+drive = 1
+super = 1
+notes = "Requires 1 stock."
+
+[[combo]]
+nom = "DI, bdash, qcb+lk, qcb+lk, st. hp xx qcb+hk, srk+hp"
+categorie = "Après DI (stun)"
+inputs = "DI, bdash, qcb+lk, qcb+lk, st. hp xx qcb+hk, srk+hp"
+degats = 1530
+drive = 1
+super = 0
+notes = "Full stock combo post stun."
+
+[[combo]]
+nom = "DI, bdash, qcb+lk, qcb+lk, st. hp xx qcf+mk (stock), f+mp xx qcf+hk (stock)"
+categorie = "Après DI (stun)"
+inputs = "DI, bdash, qcb+lk, qcb+lk, st. hp xx qcf+mk (stock), f+mp xx qcf+hk (stock)"
+degats = 1840
+drive = 1
+super = 0
+notes = "Double stock stun combo that omits the jump in attack"
+
+[[combo]]
+nom = "DI, j. hk, cr. hp xx qcb+hk, srk+hp"
+categorie = "Après DI (stun)"
+inputs = "DI, j. hk, cr. hp xx qcb+hk, srk+hp"
+degats = 2020
+drive = 1
+super = 0
+notes = "Forward jump can't cross up into the corner, making this an easy conversion."
+
+[[combo]]
+nom = "DI, bdash, qcb+lk, j. hk, cr. hp xx qcf+mk (stock), cr. mp xx srk+hp"
+categorie = "Après DI (stun)"
+inputs = "DI, bdash, qcb+lk, j. hk, cr. hp xx qcf+mk (stock), cr. mp xx srk+hp"
+degats = 2230
+drive = 1
+super = 0
+notes = "You have enough time to build a stock"
+
+[[combo]]
+nom = "st. mp, cr. mp xx qcbx2+p (held), st. mp xx cr. hp xx qcb+hk"
+categorie = "Feng Shui Engine Combos"
+inputs = "st. mp, cr. mp xx qcbx2+p (held), st. mp xx cr. hp xx qcb+hk"
+degats = 2390
+drive = 0
+super = 2
+notes = "Simple quick conversion resulting in a stock and a safejump"
+
+[[combo]]
+nom = "st. mp, cr. mp xx dr xx st. hp xx qcbx2+p, f+mp xx mk xx cr. hp xx qcb+hk"
+categorie = "Feng Shui Engine Combos"
+inputs = "st. mp, cr. mp xx dr xx st. hp xx qcbx2+p, f+mp xx mk xx cr. hp xx qcb+hk"
+degats = 2817
+drive = 3
+super = 2
+notes = "Another quick conversion resulting in a stock and a safejump."
+
+[[combo]]
+nom = "st. mp, cr. mp xx dr xx st. hp xx qcbx2+p, f+mp xx mk xx st. hk xx cr. hp xx j. lk xx j. mk xx j. hp xx j. hk"
+categorie = "Feng Shui Engine Combos"
+inputs = "st. mp, cr. mp xx dr xx st. hp xx qcbx2+p, f+mp xx mk xx st. hk xx cr. hp xx j. lk xx j. mk xx j. hp xx j. hk"
+degats = 3065
+drive = 3
+super = 2
+notes = "GoatGloat's setup from CEO in the corner. Sets up a mixup in the corner."
+
+[[combo]]
+nom = "st. hp xx qcb+hp xx qcbx2+p (held), cr. hp, j. mp xx j. mk xx qcb+k xx k"
+categorie = "Feng Shui Engine Combos"
+inputs = "st. hp xx qcb+hp xx qcbx2+p (held), cr. hp, j. mp xx j. mk xx qcb+k xx k"
+degats = 3150
+drive = 0
+super = 2
+notes = "Entry point into SA2 that corners the opponent."
+
+[[combo]]
+nom = "st. lp, st. lp, st. lk xx f+mp xx cr. hp xx qcb+hk"
+categorie = "Feng Shui Engine Combos"
+inputs = "st. lp, st. lp, st. lk xx f+mp xx cr. hp xx qcb+hk"
+degats = 1400
+drive = 0
+super = 0
+notes = "Post FSE. Sets up a safejump (+42). Gains a stock."
+
+[[combo]]
+nom = "st. lp, st. lp, st. lk xx f+mp xx f+hp xx qcf+hk"
+categorie = "Feng Shui Engine Combos"
+inputs = "st. lp, st. lp, st. lk xx f+mp xx f+hp xx qcf+hk"
+degats = 2070
+drive = 0
+super = 0
+notes = "Post FSE. No stocks, sets up a safejump (+42). With stock, +41 KD."
+
+[[combo]]
+nom = "st. mp, cr. mp xx cr. mk xx f+hp xx qcf+hk"
+categorie = "Feng Shui Engine Combos"
+inputs = "st. mp, cr. mp xx cr. mk xx f+hp xx qcf+hk"
+degats = 2600
+drive = 0
+super = 0
+notes = "Post FSE. No stocks, sets up a safejump (+42). With stock, +41 KD."
+
+[[combo]]
+nom = "st. lp, st. lp xx st. mp xx cr. hp xx DI"
+categorie = "Feng Shui Engine Combos"
+inputs = "st. lp, st. lp xx st. mp xx cr. hp xx DI"
+degats = 1640
+drive = 1
+super = 0
+notes = "Post FSE. +32 KD. Drains one bar of drive from the opponent."
+
+[[modern]]
+categorie = "Anti-airs"
+inputs = "D+H"
+notes = "Shrinks Juri's hitbox significantly"
+
+[[modern]]
+categorie = "Anti-airs"
+inputs = "F+SP"
+notes = "Juri's uppercut. Though she has a big pinwheel effect, it does not strike behind her."
+
+[[modern]]
+categorie = "Anti-airs"
+inputs = "L+M (air)"
+notes = "Preemptive airthrow. Swaps sides with the opponent."
+
+[[modern]]
+categorie = "Pokes"
+inputs = "D+M"
+notes = "One of Juri's most dominating pokes. Cancellable, almost impossible to walk away from."
+
+[[modern]]
+categorie = "Pokes"
+inputs = "M+[AUTO]"
+notes = "Lunges Juri forward. Good hitbox, can be used to interrupt drive rush."
+
+[[modern]]
+categorie = "Pokes"
+inputs = "L"
+notes = "Long range light attack, good for checking movement at close range."
+
+[[modern]]
+categorie = "Pokes"
+inputs = "H+[AUTO]"
+notes = "Long range heavy attack. Cancellable. Excellent as a spacing trap, hard to whiff punish."
+
+[[modern]]
+categorie = "Punitions"
+inputs = "D+L > D+H > B+SP"
+notes = "4f punish. Point blank"
+
+[[modern]]
+categorie = "Punitions"
+inputs = "D+L > M+[AUTO] > B+SP"
+notes = "4f punish. Operates at tip range for D+L"
+
+[[modern]]
+categorie = "Punitions"
+inputs = "M > H+[AUTO] > B+SP"
+notes = "6f punish."
+
+[[modern]]
+categorie = "Punitions"
+inputs = "M > H+[AUTO] > D+SP > M+[AUTO] > B+SP"
+notes = "6f punish. Uses a stock, refunds a stock."
+
+[[modern]]
+categorie = "Combos de base"
+inputs = "D+L > D+L > D+L > F+SP"
+
+[[modern]]
+categorie = "Combos de base"
+inputs = "M > L > F+SP"
+
+[[modern]]
+categorie = "Combos de base"
+inputs = "H+[AUTO] > D+SP > M+[AUTO] > B+SP"
+notes = "Uses a stock, refunds a stock. Best used as a midscreen whiff punish or after a jump-in."
+
+[[modern]]
+categorie = "Combos de base"
+inputs = "DR > D+L > D+H > B+SP"
+
+[[modern]]
+categorie = "Combos de base"
+inputs = "DR > M > M+[AUTO] > B+SP"
+
+[[modern]]
+categorie = "Combos de base"
+inputs = "D+M > DR > M > D+H > B+SP"

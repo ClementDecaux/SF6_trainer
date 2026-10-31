@@ -1,0 +1,768 @@
+# Jamie : combos de la feuille communautaire SF6 (Google Sheets), importés tels quels.
+# degats = dégâts du combo complet, drive = barres de Drive, super = barres de super.
+# [[modern]] : les mêmes infos en contrôles Modern sans motion (NMM), pour référence.
+personnage = "Jamie"
+
+[[combo]]
+nom = "cr. lk, cr. lp xx qcf+lp > f+p > f+p"
+categorie = "Sans jauge — 0 drinks"
+inputs = "cr. lk, cr. lp xx qcf+lp > f+p > f+p"
+degats = 1016
+drive = 0
+super = 0
+
+[[combo]]
+nom = "cr. lk, cr. lp xx qcf+lp > f+k > f+k"
+categorie = "Sans jauge — 0 drinks"
+inputs = "cr. lk, cr. lp xx qcf+lp > f+k > f+k"
+degats = 917
+drive = 0
+super = 0
+
+[[combo]]
+nom = "cr. lk, cr. lp, st. lk xx srk+lk"
+categorie = "Sans jauge — 0 drinks"
+inputs = "cr. lk, cr. lp, st. lk xx srk+lk"
+degats = 1089
+drive = 0
+super = 0
+
+[[combo]]
+nom = "cr. lp, cr. lp, cr. lp xx qcf+lp > f+p > f+p"
+categorie = "Sans jauge — 0 drinks"
+inputs = "cr. lp, cr. lp, cr. lp xx qcf+lp > f+p > f+p"
+degats = 1106
+drive = 0
+super = 0
+
+[[combo]]
+nom = "cr. lp, cr. lp, cr. lp xx qcf+lp > f+k > f+k"
+categorie = "Sans jauge — 0 drinks"
+inputs = "cr. lp, cr. lp, cr. lp xx qcf+lp > f+k > f+k"
+degats = 1025
+drive = 0
+super = 0
+
+[[combo]]
+nom = "cr. lp, cr. lp, cr. lp xx srk+hk"
+categorie = "Sans jauge — 0 drinks"
+inputs = "cr. lp, cr. lp, cr. lp xx srk+hk"
+degats = 1318
+drive = 0
+super = 0
+
+[[combo]]
+nom = "st. lp, st. lp, st. lk xx qcf+lp > f+p > f+p"
+categorie = "Sans jauge — 0 drinks"
+inputs = "st. lp, st. lp, st. lk xx qcf+lp > f+p > f+p"
+degats = 1219
+drive = 0
+super = 0
+
+[[combo]]
+nom = "st. lp, st. lp, st. lk xx qcf+lp > f+k > f+k"
+categorie = "Sans jauge — 0 drinks"
+inputs = "st. lp, st. lp, st. lk xx qcf+lp > f+k > f+k"
+degats = 1138
+drive = 0
+super = 0
+
+[[combo]]
+nom = "st. mp, st. lk xx qcf+lp > f+p > f+p"
+categorie = "Sans jauge — 0 drinks"
+inputs = "st. mp, st. lk xx qcf+lp > f+p > f+p"
+degats = 1579
+drive = 0
+super = 0
+
+[[combo]]
+nom = "st. mp, st. lk xx qcf+lp > f+k > f+k"
+categorie = "Sans jauge — 0 drinks"
+inputs = "st. mp, st. lk xx qcf+lp > f+k > f+k"
+degats = 1462
+drive = 0
+super = 0
+
+[[combo]]
+nom = "st. mp, st. lk xx srk+hk"
+categorie = "Sans jauge — 0 drinks"
+inputs = "st. mp, st. lk xx srk+hk"
+degats = 1818
+drive = 0
+super = 0
+notes = "use srk+lk for safe jumps in the corner"
+
+[[combo]]
+nom = "st. mp, cr. mp xx qcb+mp"
+categorie = "Sans jauge — 0 drinks"
+inputs = "st. mp, cr. mp xx qcb+mp"
+degats = 1800
+drive = 0
+super = 0
+notes = "Making use of better on-hit property (6/3/2025)"
+
+[[combo]]
+nom = "st. mp, cr. mp xx srk+hk"
+categorie = "Sans jauge — 0 drinks"
+inputs = "st. mp, cr. mp xx srk+hk"
+degats = 2088
+drive = 0
+super = 0
+notes = "Making use of better on-hit property (6/3/2025)"
+
+[[combo]]
+nom = "cr. mp xx qcb+mp"
+categorie = "Sans jauge — 0 drinks"
+inputs = "cr. mp xx qcb+mp"
+degats = 1440
+drive = 0
+super = 0
+notes = "Disjointed normal, good buffer at midrange to catch forward movement"
+
+[[combo]]
+nom = "st. hk xx qcf+hp > f+p > f+p"
+categorie = "Sans jauge — 0 drinks"
+inputs = "st. hk xx qcf+hp > f+p > f+p"
+degats = 1858
+drive = 0
+super = 0
+notes = "Hits at a surprisingly long range, and the first rekka hit can be spaced"
+
+[[combo]]
+nom = "cr. lk, cr. lp, st. lp > st. lk > st. mp xx srk+lk"
+categorie = "Sans jauge — 1 drink"
+inputs = "cr. lk, cr. lp, st. lp > st. lk > st. mp xx srk+lk"
+degats = 1307
+drive = 0
+super = 0
+notes = "Pulls you close enough for a +42 safejump"
+
+[[combo]]
+nom = "st. mp, st. lp > st. lk > st. mp xx qcb+lp"
+categorie = "Sans jauge — 1 drink"
+inputs = "st. mp, st. lp > st. lk > st. mp xx qcb+lp"
+degats = 1850
+drive = 0
+super = 0
+
+[[combo]]
+nom = "st. mp, st. lp > st. lk > st. mp xx qcf+mp > f+p > f+p"
+categorie = "Sans jauge — 1 drink"
+inputs = "st. mp, st. lp > st. lk > st. mp xx qcf+mp > f+p > f+p"
+degats = 1981
+drive = 0
+super = 0
+
+[[combo]]
+nom = "st. mp, st. lp > st. lk > st. mp xx qcf+mp > f+k > f+k"
+categorie = "Sans jauge — 1 drink"
+inputs = "st. mp, st. lp > st. lk > st. mp xx qcf+mp > f+k > f+k"
+degats = 1896
+drive = 0
+super = 0
+
+[[combo]]
+nom = "st. mp, st. lp > st. lk > st. mp xx qcf+lk"
+categorie = "Sans jauge — 2 drinks"
+inputs = "st. mp, st. lp > st. lk > st. mp xx qcf+lk"
+degats = 2250
+drive = 0
+super = 0
+notes = "Sets up a safejump"
+
+[[combo]]
+nom = "f+mk xx k"
+categorie = "Sans jauge — 2 drinks"
+inputs = "f+mk xx k"
+degats = 1000
+drive = 0
+super = 0
+notes = "Worth noting this target combo is single hit hit confirmable"
+
+[[combo]]
+nom = "hcb+k, cr. mp xx qcf+mp > f+p > f+p"
+categorie = "Sans jauge — 3 drinks"
+inputs = "hcb+k, cr. mp xx qcf+mp > f+p > f+p"
+degats = 1342
+drive = 0
+super = 0
+notes = "Example command grab starter."
+
+[[combo]]
+nom = "hcb+k, st. mp, st. lp > st. lk > st. mp xx qcf+lk"
+categorie = "Sans jauge — 3 drinks"
+inputs = "hcb+k, st. mp, st. lp > st. lk > st. mp xx qcf+lk"
+degats = 1565
+drive = 0
+super = 0
+notes = "Sets up a safejump"
+
+[[combo]]
+nom = "st. mp, st. lp > st. lk > st. mp xx qcb+lp xx f+p"
+categorie = "Sans jauge — 4 drinks"
+inputs = "st. mp, st. lp > st. lk > st. mp xx qcb+lp xx f+p"
+degats = 2640
+drive = 0
+super = 0
+
+[[combo]]
+nom = "cr. lk, cr. lp xx qcf+pp > f+p > f+p"
+categorie = "OD — 0 drinks"
+inputs = "cr. lk, cr. lp xx qcf+pp > f+p > f+p"
+degats = 1398
+drive = 2
+super = 0
+
+[[combo]]
+nom = "st. lp, st. lp, st. lk xx srk+kk"
+categorie = "OD — 0 drinks"
+inputs = "st. lp, st. lp, st. lk xx srk+kk"
+degats = 1485
+drive = 2
+super = 0
+
+[[combo]]
+nom = "cr. lk, cr. lp xx qcf+pp xx qcbx2+p, cr. hp xx qcb+hp xx f+p"
+categorie = "OD — 0 drinks"
+inputs = "cr. lk, cr. lp xx qcf+pp xx qcbx2+p, cr. hp xx qcb+hp xx f+p"
+degats = 2212
+drive = 2
+super = 2
+notes = "Example entry point into SA2"
+
+[[combo]]
+nom = "cr. hp xx qcb+pp, srk+hk"
+categorie = "OD — 0 drinks"
+inputs = "cr. hp xx qcb+pp, srk+hk"
+degats = 2808
+drive = 2
+super = 0
+notes = "Corner only."
+
+[[combo]]
+nom = "qcb+kk (air), srk+hk"
+categorie = "OD — 1 drink"
+inputs = "qcb+kk (air), srk+hk"
+degats = 1824
+drive = 2
+super = 0
+
+[[combo]]
+nom = "st. lp xx DR xx cr. lp"
+categorie = "Extensions Drive Rush — 0 drinks"
+inputs = "st. lp xx DR xx cr. lp"
+drive = 3
+notes = "4f or slower"
+
+[[combo]]
+nom = "cr. lp xx DR xx st. lp"
+categorie = "Extensions Drive Rush — 0 drinks"
+inputs = "cr. lp xx DR xx st. lp"
+drive = 3
+notes = "5f or slower"
+
+[[combo]]
+nom = "st. lk xx DR xx st. lk"
+categorie = "Extensions Drive Rush — 0 drinks"
+inputs = "st. lk xx DR xx st. lk"
+drive = 3
+notes = "5f or slower"
+
+[[combo]]
+nom = "st. hp xx DR xx st. mp"
+categorie = "Extensions Drive Rush — 0 drinks"
+inputs = "st. hp xx DR xx st. mp"
+drive = 3
+notes = "8f or slower"
+
+[[combo]]
+nom = "cr. mp xx DR xx st. mp, cr. hp"
+categorie = "Extensions Drive Rush — 0 drinks"
+inputs = "cr. mp xx DR xx st. mp, cr. hp"
+drive = 3
+notes = "9f or slower"
+
+[[combo]]
+nom = "cr. mk xx DR xx cr. hp"
+categorie = "Extensions Drive Rush — 0 drinks"
+inputs = "cr. mk xx DR xx cr. hp"
+drive = 3
+notes = "9f or slower"
+
+[[combo]]
+nom = "st. mk xx DR xx st. mk"
+categorie = "Extensions Drive Rush — 0 drinks"
+inputs = "st. mk xx DR xx st. mk"
+drive = 3
+notes = "10f or slower"
+
+[[combo]]
+nom = "st. hk xx DR xx st. mk"
+categorie = "Extensions Drive Rush — 0 drinks"
+inputs = "st. hk xx DR xx st. mk"
+drive = 3
+notes = "10f or slower"
+
+[[combo]]
+nom = "cr. hp xx DR xx f+hk"
+categorie = "Extensions Drive Rush — 0 drinks"
+inputs = "cr. hp xx DR xx f+hk"
+drive = 3
+notes = "16f or slower"
+
+[[combo]]
+nom = "st. lp xx st. lk xx st. mp xx DR xx cr. hp"
+categorie = "Extensions Drive Rush — 1 drink"
+inputs = "st. lp xx st. lk xx st. mp xx DR xx cr. hp"
+drive = 3
+notes = "9f or slower"
+
+[[combo]]
+nom = "cr. lk, cr. lp xx DR xx cr. lp, d+kk, cr. hk xx hk xx p"
+categorie = "Drive Rush — 0 drinks"
+inputs = "cr. lk, cr. lp xx DR xx cr. lp, d+kk, cr. hk xx hk xx p"
+degats = 1216
+drive = 3
+super = 0
+
+[[combo]]
+nom = "cr. lk, cr. lp xx DR xx cr. lp, d+kk, srk+hk"
+categorie = "Drive Rush — 0 drinks"
+inputs = "cr. lk, cr. lp xx DR xx cr. lp, d+kk, srk+hk"
+degats = 1294
+drive = 3
+super = 0
+
+[[combo]]
+nom = "cr. lk, cr. lp xx DR xx cr. lp, cr. hp xx qcb+hp"
+categorie = "Drive Rush — 0 drinks"
+inputs = "cr. lk, cr. lp xx DR xx cr. lp, cr. hp xx qcb+hp"
+degats = 1353
+drive = 3
+super = 0
+notes = "Enough KDA to give a safejump (+42)"
+
+[[combo]]
+nom = "st. mp, st. lk xx DR xx cr. lp, cr. hp xx srk+hk"
+categorie = "Drive Rush — 0 drinks"
+inputs = "st. mp, st. lk xx DR xx cr. lp, cr. hp xx srk+hk"
+degats = 2069
+drive = 3
+super = 0
+
+[[combo]]
+nom = "cr. mk xx DR xx d+kk, j. hk, cr. hk xx hk xx p"
+categorie = "Drive Rush — 0 drinks"
+inputs = "cr. mk xx DR xx d+kk, j. hk, cr. hk xx hk xx p"
+degats = 1790
+drive = 3
+super = 0
+notes = "Nets you a drink"
+
+[[combo]]
+nom = "cr. mk xx DR xx d+kk, j. hk, st. hp, cr. hk xx hk xx p"
+categorie = "Drive Rush — 0 drinks"
+inputs = "cr. mk xx DR xx d+kk, j. hk, st. hp, cr. hk xx hk xx p"
+degats = 2054
+drive = 3
+super = 0
+notes = "Far more finnicky than the previous but a decent 250 damage increase."
+
+[[combo]]
+nom = "cr. mk xx DR xx st. mp, cr. hp xx qcb+hp"
+categorie = "Drive Rush — 0 drinks"
+inputs = "cr. mk xx DR xx st. mp, cr. hp xx qcb+hp"
+degats = 1833
+drive = 3
+super = 0
+notes = "Safejump (+42)"
+
+[[combo]]
+nom = "cr. mk xx DR xx st. mp, cr. hp xx srk+hk"
+categorie = "Drive Rush — 0 drinks"
+inputs = "cr. mk xx DR xx st. mp, cr. hp xx srk+hk"
+degats = 1923
+drive = 3
+super = 0
+
+[[combo]]
+nom = "cr. mk xx DR xx d+kk, j. hk, qcfx2+k"
+categorie = "Drive Rush — 0 drinks"
+inputs = "cr. mk xx DR xx d+kk, j. hk, qcfx2+k"
+degats = 2190
+drive = 3
+super = 1
+
+[[combo]]
+nom = "cr. hp xx qcb+pp, DR xx cr. lp xx qcb+hp"
+categorie = "Drive Rush — 0 drinks"
+inputs = "cr. hp xx qcb+pp, DR xx cr. lp xx qcb+hp"
+degats = 2588
+drive = 3
+super = 0
+notes = "Corner only."
+
+[[combo]]
+nom = "DR xx cr. mp, cr. mp, st. lk xx srk+lk"
+categorie = "Drive Rush — 0 drinks"
+inputs = "DR xx cr. mp, cr. mp, st. lk xx srk+lk"
+degats = 1926
+drive = 1
+super = 0
+notes = "Combo and frametrap."
+
+[[combo]]
+nom = "DR xx cr. mp, cr. hp xx qcb+hp"
+categorie = "Drive Rush — 0 drinks"
+inputs = "DR xx cr. mp, cr. hp xx qcb+hp"
+degats = 2214
+drive = 1
+super = 0
+
+[[combo]]
+nom = "DR xx f+mk, cr. lp, st. lk xx srk+lk"
+categorie = "Drive Rush — 0 drinks"
+inputs = "DR xx f+mk, cr. lp, st. lk xx srk+lk"
+degats = 1611
+drive = 1
+super = 0
+notes = "Conversion off of overhead"
+
+[[combo]]
+nom = "DR xx st. hp, cr. lp, st. lk xx srk+lk"
+categorie = "Drive Rush — 0 drinks"
+inputs = "DR xx st. hp, cr. lp, st. lk xx srk+lk"
+degats = 1881
+drive = 1
+super = 0
+notes = "Jamie's DR xx st. hp is one of the best forward moving drive rushes in the game."
+
+[[combo]]
+nom = "st. mp, st. lp xx st. lk xx st. mp xx DR xx st. mp, cr. hp xx qcb+hp xx qcfx2+p"
+categorie = "Drive Rush — 1 drink"
+inputs = "st. mp, st. lp xx st. lk xx st. mp xx DR xx st. mp, cr. hp xx qcb+hp xx qcfx2+p"
+degats = 3669
+drive = 3
+super = 3
+notes = "Example conversion into SA3"
+
+[[combo]]
+nom = "cr. lp, cr. hp xx qcb+hp"
+categorie = "Punish Counter"
+inputs = "cr. lp, cr. hp xx qcb+hp"
+degats = 1674
+drive = 0
+super = 0
+notes = "4f Punish Counter. Point Blank"
+
+[[combo]]
+nom = "cr. lp, cr. mk xx qcf+mp xx f+p xx f+p"
+categorie = "Punish Counter"
+inputs = "cr. lp, cr. mk xx qcf+mp xx f+p xx f+p"
+degats = 1368
+drive = 0
+super = 0
+notes = "4f Punish Counter. Works at cr. lp tip range."
+
+[[combo]]
+nom = "cr. lp, cr. hk xx hk"
+categorie = "Punish Counter"
+inputs = "cr. lp, cr. hk xx hk"
+degats = 1161
+drive = 0
+super = 0
+notes = "4f Punish Counter. Works at cr. lp tip range. Can grab a drink afterwards."
+
+[[combo]]
+nom = "st. lp, cr. hp xx qcb+hp"
+categorie = "Punish Counter"
+inputs = "st. lp, cr. hp xx qcb+hp"
+degats = 1728
+drive = 0
+super = 0
+notes = "5f Punish Counter. Point Blank"
+
+[[combo]]
+nom = "st. lp, cr. mk xx qcf+mp xx f+p xx f+p"
+categorie = "Punish Counter"
+inputs = "st. lp, cr. mk xx qcf+mp xx f+p xx f+p"
+degats = 1422
+drive = 0
+super = 0
+notes = "5f Punish Counter. Works at st. lp tip range"
+
+[[combo]]
+nom = "cr. mp, cr. mk xx qcf+mp xx f+p xx f+p"
+categorie = "Punish Counter"
+inputs = "cr. mp, cr. mk xx qcf+mp xx f+p xx f+p"
+degats = 1962
+drive = 0
+super = 0
+notes = "6f Punish Counter. Works at tip cr. mp range."
+
+[[combo]]
+nom = "cr. mp, cr. hp xx qcb+hp"
+categorie = "Punish Counter"
+inputs = "cr. mp, cr. hp xx qcb+hp"
+degats = 2322
+drive = 0
+super = 0
+notes = "6f Punish Counter."
+
+[[combo]]
+nom = "cr. mp, cr. hk xx hk"
+categorie = "Punish Counter"
+inputs = "cr. mp, cr. hk xx hk"
+degats = 1728
+drive = 0
+super = 0
+notes = "6f Punish Counter. Tip range of cr. mp"
+
+[[combo]]
+nom = "st. mp, cr. hp xx qcb+hp"
+categorie = "Punish Counter"
+inputs = "st. mp, cr. hp xx qcb+hp"
+degats = 2322
+drive = 0
+super = 0
+notes = "8f Punish Counter. Point blank"
+
+[[combo]]
+nom = "st. mp, cr. hk xx hk"
+categorie = "Punish Counter"
+inputs = "st. mp, cr. hk xx hk"
+degats = 1728
+drive = 0
+super = 0
+notes = "8f Punish Counter. Can grab alcohol afterwards."
+
+[[combo]]
+nom = "st. mp, cr. mk xx qcf+mp xx f+p xx f+p"
+categorie = "Punish Counter"
+inputs = "st. mp, cr. mk xx qcf+mp xx f+p xx f+p"
+degats = 1962
+drive = 0
+super = 0
+notes = "8f Punish Counter. Works at tip st. mp range."
+
+[[combo]]
+nom = "st. hp, st. lk xx srk+hk"
+categorie = "Punish Counter"
+inputs = "st. hp, st. lk xx srk+hk"
+degats = 2250
+drive = 0
+super = 0
+notes = "5f Punish Counter. Point blank"
+
+[[combo]]
+nom = "st. hp, st. lk xx srk+hk (2)"
+categorie = "Punish Counter"
+inputs = "st. hp, st. lk xx srk+hk"
+degats = 2034
+drive = 0
+super = 0
+notes = "Lunging punish counter. Used for whiff punishing attacks."
+
+[[combo]]
+nom = "st. hk, cr. mk xx qcf+mp xx f+p xx f+p"
+categorie = "Punish Counter"
+inputs = "st. hk, cr. mk xx qcf+mp xx f+p xx f+p"
+degats = 2178
+drive = 0
+super = 0
+notes = "15f Punish Counter."
+
+[[combo]]
+nom = "st. hk, dash, cr. hp xx qcb+hp"
+categorie = "Punish Counter"
+inputs = "st. hk, dash, cr. hp xx qcb+hp"
+degats = 2538
+drive = 0
+super = 0
+notes = "15f Punish Counter."
+
+[[combo]]
+nom = "f+hk, cr. mk xx qcf+mp xx f+p xx f+p"
+categorie = "Punish Counter"
+inputs = "f+hk, cr. mk xx qcf+mp xx f+p xx f+p"
+degats = 2286
+drive = 0
+super = 0
+notes = "16f Punish Counter. Lunging attack. Drink level 1"
+
+[[combo]]
+nom = "b+hp, st. hp xx qcf+mp xx f+p xx f+p"
+categorie = "Punish Counter"
+inputs = "b+hp, st. hp xx qcf+mp xx f+p xx f+p"
+degats = 1908
+drive = 0
+super = 0
+notes = "18f Punish Counter. Lunging attack. Drink level 1"
+
+[[combo]]
+nom = "b+hp, st. lk xx srk+hk"
+categorie = "Punish Counter"
+inputs = "b+hp, st. lk xx srk+hk"
+degats = 2142
+drive = 0
+super = 0
+notes = "18f Punish Counter. Lunging attack. Drink level 1."
+
+[[combo]]
+nom = "DI, cr. hp xx qcf+hp xx f+p xx f+p"
+categorie = "Après DI (crumple)"
+inputs = "DI, cr. hp xx qcf+hp xx f+p xx f+p"
+degats = 2330
+drive = 1
+super = 0
+
+[[combo]]
+nom = "DI, cr. hp xx srk+hk"
+categorie = "Après DI (crumple)"
+inputs = "DI, cr. hp xx srk+hk"
+degats = 2394
+drive = 1
+super = 0
+
+[[combo]]
+nom = "DI, fdash, cr. hp xx qcb+hp"
+categorie = "Après DI (crumple)"
+inputs = "DI, fdash, cr. hp xx qcb+hp"
+degats = 2268
+drive = 1
+super = 0
+notes = "More corner carry."
+
+[[combo]]
+nom = "DI, nj j. hk, dr xx cr. hp xx qcb+hp"
+categorie = "Après DI (crumple)"
+inputs = "DI, nj j. hk, dr xx cr. hp xx qcb+hp"
+degats = 2169
+drive = 2
+super = 0
+notes = "More corner carry."
+
+[[combo]]
+nom = "DI, cr. hp xx srk+hk (2)"
+categorie = "Après DI (wallsplat)"
+inputs = "DI, cr. hp xx srk+hk"
+degats = 1656
+drive = 1
+super = 0
+
+[[combo]]
+nom = "DI, dd+p, j. hp, cr. hp xx srk+hk"
+categorie = "Après DI (stun)"
+inputs = "DI, dd+p, j. hp, cr. hp xx srk+hk"
+degats = 2180
+drive = 1
+super = 0
+
+[[combo]]
+nom = "DI, dd+p (held), cr. hp xx srk+hk"
+categorie = "Après DI (stun)"
+inputs = "DI, dd+p (held), cr. hp xx srk+hk"
+degats = 1880
+drive = 1
+super = 0
+notes = "Can get two drink levels off of a stun."
+
+[[modern]]
+categorie = "Anti-airs"
+inputs = "D+H"
+notes = "Pretty good disjointed hitbox for anti-airing"
+
+[[modern]]
+categorie = "Anti-airs"
+inputs = "F+SP"
+notes = "Air invincible. Good knockdown property."
+
+[[modern]]
+categorie = "Anti-airs"
+inputs = "D+M+H"
+notes = "Interesting anti-air, juggles the opponent and is jump cancellable."
+
+[[modern]]
+categorie = "Pokes"
+inputs = "M+[AUTO]"
+notes = "Really good range on a medium kick, reaches very far. Special cancellable."
+
+[[modern]]
+categorie = "Pokes"
+inputs = "D+M"
+notes = "Fast low attack, good range. Special cancellable."
+
+[[modern]]
+categorie = "Pokes"
+inputs = "H"
+notes = "Long range lunge attack, breaks DI. Good for whiff punishing or as a drive rush option."
+
+[[modern]]
+categorie = "Pokes"
+inputs = "H+[AUTO]"
+notes = "Incredibly good whiff punish option. Crumples the opponent. Special cancellable."
+
+[[modern]]
+categorie = "Pokes"
+inputs = "M"
+notes = "Not special cancellable. Good disjoint against drive rush."
+
+[[modern]]
+categorie = "Punitions"
+inputs = "D+L > D/F+H > H > H"
+notes = "4f punish to set up a drink."
+
+[[modern]]
+categorie = "Punitions"
+inputs = "D+L > D+H > D+SP"
+notes = "4f punish. If in drink 2+, you get breakdance. If in drink <2 you get rekka, which you complete as normal."
+
+[[modern]]
+categorie = "Punitions"
+inputs = "M > D+H > D+SP"
+notes = "8f punish."
+
+[[modern]]
+categorie = "Punitions"
+inputs = "H+[AUTO] > DD+L (hold)"
+notes = "15f punish. Good as a whiff punish, nets you two levels of drinks."
+
+[[modern]]
+categorie = "Combos de base"
+inputs = "M > D+L > F+SP"
+notes = "M is a good combo starter, plus frame. You can drink after this to amp to level 1."
+
+[[modern]]
+categorie = "Combos de base"
+inputs = "M > L > L > L > D+SP"
+notes = "In level 1 drink, this is rekka, you finish as normal. In level 2, this is breakdance as a finisher."
+
+[[modern]]
+categorie = "Combos de base"
+inputs = "L+[AUTO] > L+[AUTO] > F+SP"
+notes = "Similar to the M combo above, but starting off a crouching light kick."
+
+[[modern]]
+categorie = "Combos de base"
+inputs = "L+[AUTO] > L+[AUTO] > L > L > L > D+SP"
+notes = "Similar to the M combo above, but starting off a crouching light kick."
+
+[[modern]]
+categorie = "Combos de base"
+inputs = "DR > H > D+L > F+SP"
+notes = "Drive rush into H is very hard to stop. Combos into L or D+L on hit."
+
+[[modern]]
+categorie = "Combos de base"
+inputs = "DR > H > L > L > L > D+SP"
+notes = "Similar to the M combo above but off of drive rush H."
+
+[[modern]]
+categorie = "Combos de base"
+inputs = "D+M > DR > M > D+H > F+SP"
+notes = "Drive rush combo off of cr. mk. At level 0, you can opt for an uppercut to get distance and get a drink level."
+
+[[modern]]
+categorie = "Combos de base"
+inputs = "D+M > DR > M > D+H > D+SP"
+notes = "Drive rush combo off of cr. mk. Sets up rekkas at level 0/1, breakdance at level 2+."

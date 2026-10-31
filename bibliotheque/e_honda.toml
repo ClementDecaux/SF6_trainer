@@ -1,0 +1,765 @@
+# E. Honda : combos de la feuille communautaire SF6 (Google Sheets), importés tels quels.
+# degats = dégâts du combo complet, drive = barres de Drive, super = barres de super.
+# [[modern]] : les mêmes infos en contrôles Modern sans motion (NMM), pour référence.
+personnage = "E. Honda"
+
+[[combo]]
+nom = "cr. lk, cr. lp xx qcb+lp"
+categorie = ""
+inputs = "cr. lk, cr. lp xx qcb+lp"
+degats = 1000
+drive = 0
+super = 0
+
+[[combo]]
+nom = "cr. lk, cr. lp xx qcb+lp (dd+k), cr. lp xx b~f+mp"
+categorie = ""
+inputs = "cr. lk, cr. lp xx qcb+lp (dd+k), cr. lp xx b~f+mp"
+degats = 1745
+drive = 0
+super = 0
+notes = "Requires sumo spirit (d+kk) active."
+
+[[combo]]
+nom = "cr. lk, cr. lp xx b~f+mp"
+categorie = ""
+inputs = "cr. lk, cr. lp xx b~f+mp"
+degats = 1420
+drive = 0
+super = 0
+
+[[combo]]
+nom = "cr. lk, cr. lp xx d~u+k"
+categorie = ""
+inputs = "cr. lk, cr. lp xx d~u+k"
+degats = 1420
+drive = 0
+super = 0
+notes = "Standing only. Delivers a hard knockdown."
+
+[[combo]]
+nom = "cr. lk, cr. lp, cr. lp xx qcb+lp"
+categorie = ""
+inputs = "cr. lk, cr. lp, cr. lp xx qcb+lp"
+degats = 1130
+drive = 0
+super = 0
+notes = "Can add another jab if you chain cancel the jabs."
+
+[[combo]]
+nom = "cr. lp, cr. lp, cr. lp xx qcb+lp"
+categorie = ""
+inputs = "cr. lp, cr. lp, cr. lp xx qcb+lp"
+degats = 1230
+drive = 0
+super = 0
+notes = "Light mash combo"
+
+[[combo]]
+nom = "cr. lp, cr. lp, cr. lp xx b~f+mp"
+categorie = ""
+inputs = "cr. lp, cr. lp, cr. lp xx b~f+mp"
+degats = 1410
+drive = 0
+super = 0
+
+[[combo]]
+nom = "cr. lp, cr. lp, cr. lp xx d~u+k"
+categorie = ""
+inputs = "cr. lp, cr. lp, cr. lp xx d~u+k"
+degats = 1590
+drive = 0
+super = 0
+notes = "Standing only"
+
+[[combo]]
+nom = "st. lk, cr. lp xx qcb+lp"
+categorie = ""
+inputs = "st. lk, cr. lp xx qcb+lp"
+degats = 1100
+drive = 0
+super = 0
+
+[[combo]]
+nom = "st. lk, cr. lp xx b~f+mp"
+categorie = ""
+inputs = "st. lk, cr. lp xx b~f+mp"
+degats = 1520
+drive = 0
+super = 0
+
+[[combo]]
+nom = "st. lk, st. lp xx st. mp xx qcf+k xx p"
+categorie = ""
+inputs = "st. lk, st. lp xx st. mp xx qcf+k xx p"
+degats = 1440
+drive = 0
+super = 0
+notes = "Results in KD (+41)"
+
+[[combo]]
+nom = "st. lk, st. lp xx st. mp xx qcb+hp"
+categorie = ""
+inputs = "st. lk, st. lp xx st. mp xx qcb+hp"
+degats = 1680
+drive = 0
+super = 0
+notes = "Results in KD (+45)"
+
+[[combo]]
+nom = "st. lk, st. lp xx st. mp xx b~f+hp"
+categorie = ""
+inputs = "st. lk, st. lp xx st. mp xx b~f+hp"
+degats = 1740
+drive = 0
+super = 0
+notes = "Results in KD (+41)"
+
+[[combo]]
+nom = "cr. mp xx qcf+k xx p xx p"
+categorie = ""
+inputs = "cr. mp xx qcf+k xx p xx p"
+degats = 1880
+drive = 0
+super = 0
+notes = "cr. mp's comboability into sumo run was improved, giving a buffer from neutral as well as better ch confirms from st. mp (8/3/2026)"
+
+[[combo]]
+nom = "st. mp, st. lp xx st. mp xx qcf+k xx p"
+categorie = ""
+inputs = "st. mp, st. lp xx st. mp xx qcf+k xx p"
+degats = 2040
+drive = 0
+super = 0
+
+[[combo]]
+nom = "st. mp, st. lp xx st. mp xx qcb+hp"
+categorie = ""
+inputs = "st. mp, st. lp xx st. mp xx qcb+hp"
+degats = 2320
+drive = 0
+super = 0
+
+[[combo]]
+nom = "st. mp, st. lp xx st. mp xx b~f+hp"
+categorie = ""
+inputs = "st. mp, st. lp xx st. mp xx b~f+hp"
+degats = 2390
+drive = 0
+super = 0
+
+[[combo]]
+nom = "st. mp, st. lp xx st. mp xx qcb+hp (dd+k), b~f+mp"
+categorie = ""
+inputs = "st. mp, st. lp xx st. mp xx qcb+hp (dd+k), b~f+mp"
+degats = 2905
+drive = 0
+super = 0
+notes = "Requires a sumo spirit install"
+
+[[combo]]
+nom = "cr. mk, st. lp xx st. mp xx qcf+k xx p"
+categorie = ""
+inputs = "cr. mk, st. lp xx st. mp xx qcf+k xx p"
+degats = 1840
+drive = 0
+super = 0
+notes = "Results in KD (+41)"
+
+[[combo]]
+nom = "cr. mk, st. lp xx st. mp xx qcb+hp"
+categorie = ""
+inputs = "cr. mk, st. lp xx st. mp xx qcb+hp"
+degats = 2120
+drive = 0
+super = 0
+notes = "Results in KD (+45)"
+
+[[combo]]
+nom = "cr. mk, st. lp xx st. mp xx b~f+hp"
+categorie = ""
+inputs = "cr. mk, st. lp xx st. mp xx b~f+hp"
+degats = 2190
+drive = 0
+super = 0
+notes = "Results in KD (+41)"
+
+[[combo]]
+nom = "st. mp xx qcb+mp"
+categorie = ""
+inputs = "st. mp xx qcb+mp"
+degats = 1700
+drive = 0
+super = 0
+
+[[combo]]
+nom = "st. mp xx b~f+hp"
+categorie = ""
+inputs = "st. mp xx b~f+hp"
+degats = 2100
+drive = 0
+super = 0
+
+[[combo]]
+nom = "cr. mp xx qcb+hp"
+categorie = ""
+inputs = "cr. mp xx qcb+hp"
+degats = 1800
+drive = 0
+super = 0
+
+[[combo]]
+nom = "cr. mp xx b~f+hp"
+categorie = ""
+inputs = "cr. mp xx b~f+hp"
+degats = 2100
+drive = 0
+super = 0
+notes = "Depends on distance. 1900 at further cr. mp distances."
+
+[[combo]]
+nom = "st. hp xx qcf+k xx p"
+categorie = ""
+inputs = "st. hp xx qcf+k xx p"
+degats = 1700
+drive = 0
+super = 0
+notes = "Safe buffer"
+
+[[combo]]
+nom = "st. hp xx qcb+hp"
+categorie = ""
+inputs = "st. hp xx qcb+hp"
+degats = 2100
+drive = 0
+super = 0
+
+[[combo]]
+nom = "st. hp xx b~f+hp"
+categorie = ""
+inputs = "st. hp xx b~f+hp"
+degats = 2400
+drive = 0
+super = 0
+notes = "Depends on distance. 2200 at further distances."
+
+[[combo]]
+nom = "st. hk xx qcf+k xx p"
+categorie = ""
+inputs = "st. hk xx qcf+k xx p"
+degats = 1600
+drive = 0
+super = 0
+notes = "Assumes first hit connects."
+
+[[combo]]
+nom = "st. hk xx qcb+hp"
+categorie = ""
+inputs = "st. hk xx qcb+hp"
+degats = 2000
+drive = 0
+super = 0
+notes = "Assumes first hit connects."
+
+[[combo]]
+nom = "st. hk xx b~f+hp"
+categorie = ""
+inputs = "st. hk xx b~f+hp"
+degats = 2300
+drive = 0
+super = 0
+notes = "Assumes first hit connects."
+
+[[combo]]
+nom = "st. hk (1st) xx qcf+k xx p"
+categorie = ""
+inputs = "st. hk (1st) xx qcf+k xx p"
+degats = 1200
+drive = 0
+super = 0
+notes = "Frametraps into the slaps after st. hk (1). (8/3/2026)"
+
+[[combo]]
+nom = "st. hk (1st) xx qcf+k xx d+p, b~f+hp"
+categorie = ""
+inputs = "st. hk (1st) xx qcf+k xx d+p, b~f+hp"
+degats = 2400
+drive = 0
+super = 0
+notes = "Cancel on first hit."
+
+[[combo]]
+nom = "st. hk (1st) xx qcf+k xx d+p, d~u+k"
+categorie = ""
+inputs = "st. hk (1st) xx qcf+k xx d+p, d~u+k"
+degats = 2320
+drive = 0
+super = 0
+notes = "Cancel on first hit. Leaves you +22 with a hard knockdown."
+
+[[combo]]
+nom = "st. mk xx qcb+hp (dd+k), cr. lp xx b~f+mp"
+categorie = ""
+inputs = "st. mk xx qcb+hp (dd+k), cr. lp xx b~f+mp"
+degats = 3000
+drive = 0
+super = 0
+notes = "When sumo spirit is active, certain normals such as st. mk and cr. hp can now cancel into hundred hand slap, giving Honda more options in neutral."
+
+[[combo]]
+nom = "cr. hp xx qcb+hp (dd+k), cr. lp xx b~f+mp"
+categorie = ""
+inputs = "cr. hp xx qcb+hp (dd+k), cr. lp xx b~f+mp"
+degats = 3100
+drive = 0
+super = 0
+notes = "cr. hp can cancel into hands when sumo spirit is active"
+
+[[combo]]
+nom = "cr. lk, cr. lp xx b~f+pp"
+categorie = "OD"
+inputs = "cr. lk, cr. lp xx b~f+pp"
+degats = 1750
+drive = 2
+super = 0
+notes = "In any combo in the meterless section, you can replace headbutt with ex headbutt for a bit of extra damage."
+
+[[combo]]
+nom = "st. lk, st. lp xx st. mp xx qcb+lp, d~u+kk"
+categorie = "OD"
+inputs = "st. lk, st. lp xx st. mp xx qcb+lp, d~u+kk"
+degats = 2140
+drive = 2
+super = 0
+notes = "Corner only. Hard knockdown"
+
+[[combo]]
+nom = "cr. mk, st. lp xx st. mp xx qcb+lp, d~u+kk"
+categorie = "OD"
+inputs = "cr. mk, st. lp xx st. mp xx qcb+lp, d~u+kk"
+degats = 2680
+drive = 2
+super = 0
+notes = "Corner only. Hard knockdown"
+
+[[combo]]
+nom = "cr. mp xx qcf+kk xx p xx p"
+categorie = "OD"
+inputs = "cr. mp xx qcf+kk xx p xx p"
+degats = 2040
+drive = 2
+super = 0
+notes = "If you do not finish this into the final slap, Honda is +2."
+
+[[combo]]
+nom = "st. hp xx qcb+pp, cr. lp xx b~f+mp"
+categorie = "OD"
+inputs = "st. hp xx qcb+pp, cr. lp xx b~f+mp"
+degats = 2920
+drive = 2
+super = 0
+
+[[combo]]
+nom = "st. hp xx qcb+pp (d+kk), st. lp xx st. mp xx b~f+hp"
+categorie = "OD"
+inputs = "st. hp xx qcb+pp (d+kk), st. lp xx st. mp xx b~f+hp"
+degats = 3190
+drive = 2
+super = 0
+notes = "Requires sumo spirit."
+
+[[combo]]
+nom = "st. hp xx qcf+kk xx d+p, b~f+hp"
+categorie = "OD"
+inputs = "st. hp xx qcf+kk xx d+p, b~f+hp"
+degats = 3100
+drive = 2
+super = 0
+notes = "OD Sumo Dash into Lift is fast enough to combo off of st. hp"
+
+[[combo]]
+nom = "st. hk xx qcf+kk xx d+p, b~f+hp"
+categorie = "OD"
+inputs = "st. hk xx qcf+kk xx d+p, b~f+hp"
+degats = 3000
+drive = 2
+super = 0
+notes = "OD Sumo Dash into Lift is fast enough to combo off of 2nd hit st. hk"
+
+[[combo]]
+nom = "st. hp xx qcf+kk xx d+p, d/f+hk, d~u+hk"
+categorie = "OD"
+inputs = "st. hp xx qcf+kk xx d+p, d/f+hk, d~u+hk"
+degats = 3380
+drive = 2
+super = 0
+notes = "OD Sumo Dash into Lift now gives d/f+hk groundbounce (6/3/2025)"
+
+[[combo]]
+nom = "cr. lp xx DR xx st. lp"
+categorie = "Extensions Drive Rush"
+inputs = "cr. lp xx DR xx st. lp"
+drive = 3
+notes = "5f or less"
+
+[[combo]]
+nom = "st. lk xx DR xx st. lp"
+categorie = "Extensions Drive Rush"
+inputs = "st. lk xx DR xx st. lp"
+drive = 3
+notes = "5f or less"
+
+[[combo]]
+nom = "st. lp xx DR xx st. lp"
+categorie = "Extensions Drive Rush"
+inputs = "st. lp xx DR xx st. lp"
+drive = 3
+notes = "5f or less"
+
+[[combo]]
+nom = "st. mp xx DR xx cr. hp"
+categorie = "Extensions Drive Rush"
+inputs = "st. mp xx DR xx cr. hp"
+drive = 3
+notes = "11f or less"
+
+[[combo]]
+nom = "cr. mp xx DR xx cr. hp"
+categorie = "Extensions Drive Rush"
+inputs = "cr. mp xx DR xx cr. hp"
+drive = 3
+notes = "11f or less"
+
+[[combo]]
+nom = "st. hp xx DR xx f+hk"
+categorie = "Extensions Drive Rush"
+inputs = "st. hp xx DR xx f+hk"
+drive = 3
+notes = "14f or less"
+
+[[combo]]
+nom = "st. hk xx DR xx f+hk"
+categorie = "Extensions Drive Rush"
+inputs = "st. hk xx DR xx f+hk"
+drive = 3
+notes = "14f or less"
+
+[[combo]]
+nom = "lp xx mp xx DR"
+categorie = "Extensions Drive Rush"
+inputs = "lp xx mp xx DR"
+drive = 3
+notes = "Special mention, as you can juggle with the button you DR into"
+
+[[combo]]
+nom = "st. hk (1st) xx qcf+k xx d+p, dr xx st. hp xx qcf+k xx p xx p"
+categorie = "Drive Rush"
+inputs = "st. hk (1st) xx qcf+k xx d+p, dr xx st. hp xx qcf+k xx p xx p"
+degats = 2590
+drive = 1
+super = 0
+notes = "Example sumo lift into dr st. hp combo"
+
+[[combo]]
+nom = "st. hk (1st) xx qcf+k xx d+p, dr xx st. hp xx qcb+hp (charged), b~f+hp"
+categorie = "Drive Rush"
+inputs = "st. hk (1st) xx qcf+k xx d+p, dr xx st. hp xx qcb+hp (charged), b~f+hp"
+degats = 3130
+drive = 1
+super = 0
+
+[[combo]]
+nom = "st. hk (1st) xx qcf+k xx d+p, dr xx st. hp xx qcb+hp (charged), qcb+lp xx qcfx2+p"
+categorie = "Drive Rush"
+inputs = "st. hk (1st) xx qcf+k xx d+p, dr xx st. hp xx qcb+hp (charged), qcb+lp xx qcfx2+p"
+degats = 4833
+drive = 1
+super = 3
+
+[[combo]]
+nom = "st. lp xx DR xx st. lp, st. hk (1st) xx qcf+k xx d+p, b~f+hp"
+categorie = "Drive Rush"
+inputs = "st. lp xx DR xx st. lp, st. hk (1st) xx qcf+k xx d+p, b~f+hp"
+degats = 1778
+drive = 3
+super = 0
+
+[[combo]]
+nom = "cr. mk, st. lp xx DR xx st. lp, st. hk xx qcb+pp, cr. lp xx b~f+mp"
+categorie = "Drive Rush"
+inputs = "cr. mk, st. lp xx DR xx st. lp, st. hk xx qcb+pp, cr. lp xx b~f+mp"
+degats = 2479
+drive = 5
+super = 0
+
+[[combo]]
+nom = "cr. mp xx DR xx st. mp, st. hk xx qcf+k xx d+p, b~f+hp"
+categorie = "Drive Rush"
+inputs = "cr. mp xx DR xx st. mp, st. hk xx qcf+k xx d+p, b~f+hp"
+degats = 2704
+drive = 3
+super = 0
+
+[[combo]]
+nom = "dr xx st. lp, st. lp xx st. mp xx b~f+hp"
+categorie = "Drive Rush"
+inputs = "dr xx st. lp, st. lp xx st. mp xx b~f+hp"
+degats = 1740
+drive = 1
+super = 0
+notes = "Works at tip range of the st. lp, where st. hk may whiff."
+
+[[combo]]
+nom = "dr xx st. mp, st. hk (1) xx qcf+k xx d+p, d~u+k"
+categorie = "Drive Rush"
+inputs = "dr xx st. mp, st. hk (1) xx qcf+k xx d+p, d~u+k"
+degats = 2720
+drive = 1
+super = 0
+notes = "One of your more common drive rush options due to the lunge distance on st. mp and incredible knockdown that buttslam gives"
+
+[[combo]]
+nom = "dr xx cr. mk, st. hk (1) xx qcf+k xx d+p, d~u+k"
+categorie = "Drive Rush"
+inputs = "dr xx cr. mk, st. hk (1) xx qcf+k xx d+p, d~u+k"
+degats = 2590
+drive = 1
+super = 0
+notes = "Similar to above, but starting off a low."
+
+[[combo]]
+nom = "dr xx d/f+hk, st. lp xx st. mp xx b~f+hp"
+categorie = "Drive Rush"
+inputs = "dr xx d/f+hk, st. lp xx st. mp xx b~f+hp"
+degats = 2490
+drive = 1
+super = 0
+notes = "Combo starting from an overhead. 33f startup"
+
+[[combo]]
+nom = "cr. lp, st. hk (1st hit) xx qcf+k xx d+p, b~f+hp"
+categorie = "Punish Counter"
+inputs = "cr. lp, st. hk (1st hit) xx qcf+k xx d+p, b~f+hp"
+degats = 2140
+drive = 0
+super = 0
+notes = "4f Punish Counter"
+
+[[combo]]
+nom = "cr. lp, st. lp xx st. mp xx b~f+hp"
+categorie = "Punish Counter"
+inputs = "cr. lp, st. lp xx st. mp xx b~f+hp"
+degats = 1800
+drive = 0
+super = 0
+notes = "4f Punish Counter. Reaches from pretty significant range."
+
+[[combo]]
+nom = "cr. mp xx qcf+k xx d+p, d~u+k"
+categorie = "Punish Counter"
+inputs = "cr. mp xx qcf+k xx d+p, d~u+k"
+degats = 2640
+drive = 0
+super = 0
+notes = "8f punish counter"
+
+[[combo]]
+nom = "st. hp, st. hk xx b~f+hp"
+categorie = "Punish Counter"
+inputs = "st. hp, st. hk xx b~f+hp"
+degats = 2920
+drive = 0
+super = 0
+notes = "9f+ Punish Counter (point blank)"
+
+[[combo]]
+nom = "st. hp, dr xx st. hp xx qcf+k xx d+p, b~f+hp"
+categorie = "Punish Counter"
+inputs = "st. hp, dr xx st. hp xx qcf+k xx d+p, b~f+hp"
+degats = 3156
+drive = 1
+super = 0
+notes = "9f+. Long Range Punish Counter"
+
+[[combo]]
+nom = "st. hp, dr xx st. hp xx qcf+k xx d+p, d~u+mk"
+categorie = "Punish Counter"
+inputs = "st. hp, dr xx st. hp xx qcf+k xx d+p, d~u+mk"
+degats = 3215
+drive = 1
+super = 0
+notes = "9f+ Punish Counter"
+
+[[combo]]
+nom = "st. hp, dr xx st. hp xx qcf+k xx d+p, dr xx st. hp xx qcb+hp"
+categorie = "Punish Counter"
+inputs = "st. hp, dr xx st. hp xx qcf+k xx d+p, dr xx st. hp xx qcb+hp"
+degats = 3523
+drive = 2
+super = 0
+notes = "9f+ Punish Counter."
+
+[[combo]]
+nom = "st. hp, dr xx st. hp xx qcf+k xx d+p, dr xx st. hp xx qcb+hp, b~f+hp"
+categorie = "Punish Counter"
+inputs = "st. hp, dr xx st. hp xx qcf+k xx d+p, dr xx st. hp xx qcb+hp, b~f+hp"
+degats = 3951
+drive = 2
+super = 0
+notes = "9f+ Punish Counter with Sumo Spirit stocked. Corner only"
+
+[[combo]]
+nom = "d~u+k, st. hk (1st) xx qcf+k xx d+p, d~u+mk"
+categorie = "Punish Counter"
+inputs = "d~u+k, st. hk (1st) xx qcf+k xx d+p, d~u+mk"
+degats = 2550
+drive = 0
+super = 0
+notes = "Punish counter from the second hit from a buttsplash."
+
+[[combo]]
+nom = "d~u+k, st. hk (1st) xx qcf+k xx d+p, dr xx st. hp xx qcb+hp (dd+k), b~f+hp"
+categorie = "Punish Counter"
+inputs = "d~u+k, st. hk (1st) xx qcf+k xx d+p, dr xx st. hp xx qcb+hp (dd+k), b~f+hp"
+degats = 3148
+drive = 1
+super = 0
+notes = "Extension using dr xx st. hp with sumo spirit stocked."
+
+[[combo]]
+nom = "DI, st. hk xx b~f+hp"
+categorie = "Après DI (crumple)"
+inputs = "DI, st. hk xx b~f+hp"
+degats = 2650
+drive = 1
+super = 0
+
+[[combo]]
+nom = "DI, st. hk (1st hit) xx qcf+k xx d+p, b~f+hp"
+categorie = "Après DI (crumple)"
+inputs = "DI, st. hk (1st hit) xx qcf+k xx d+p, b~f+hp"
+degats = 2740
+drive = 1
+super = 0
+
+[[combo]]
+nom = "DI, st. hk (1st hit) xx qcf+k xx d+p, dr xx st. hp xx qcb+hp, b~f+hp"
+categorie = "Après DI (crumple)"
+inputs = "DI, st. hk (1st hit) xx qcf+k xx d+p, dr xx st. hp xx qcb+hp, b~f+hp"
+degats = 3160
+drive = 2
+super = 0
+notes = "DR extension from sumo lift using sumo spirit."
+
+[[combo]]
+nom = "DI, st. hk xx b~f+hp (2)"
+categorie = "Après DI (wallsplat)"
+inputs = "DI, st. hk xx b~f+hp"
+degats = 1840
+drive = 1
+super = 0
+
+[[combo]]
+nom = "DI, st. hk (1st) xx qcf+k xx d+p, b~f+hp"
+categorie = "Après DI (wallsplat)"
+inputs = "DI, st. hk (1st) xx qcf+k xx d+p, b~f+hp"
+degats = 1920
+drive = 1
+super = 0
+
+[[combo]]
+nom = "DI, st. hk (1st) xx qcf+k xx d+p, dr xx st. hp xx qcb+hp, b~f+hp"
+categorie = "Après DI (wallsplat)"
+inputs = "DI, st. hk (1st) xx qcf+k xx d+p, dr xx st. hp xx qcb+hp, b~f+hp"
+degats = 2500
+drive = 2
+super = 0
+notes = "Extension using dr xx st. hp using sumo spirit."
+
+[[combo]]
+nom = "DI, dd+k, j. hk, st. hk (1st) xx qcf+k xx d+p, qcb+mp, b~f+hp"
+categorie = "Après DI (stun)"
+inputs = "DI, dd+k, j. hk, st. hk (1st) xx qcf+k xx d+p, qcb+mp, b~f+hp"
+degats = 2575
+drive = 1
+super = 0
+
+[[modern]]
+categorie = "Anti-airs"
+inputs = "H"
+notes = "Nice hitbox for an anti-air."
+
+[[modern]]
+categorie = "Anti-airs"
+inputs = "U+H"
+notes = "Honda's neutral jump heavy is excellent for dodging fireballs, controlling space, and in some cases, anti-airing"
+
+[[modern]]
+categorie = "Anti-airs"
+inputs = "B+SP"
+notes = "Requires a back charge. Air invincible."
+
+[[modern]]
+categorie = "Pokes"
+inputs = "D+H"
+notes = "Long range poke, with sumo spirit (D+M+H), can cancel into hands (SP)"
+
+[[modern]]
+categorie = "Pokes"
+inputs = "M"
+notes = "Long range normal, plus on block. Good for drive rush pressure, interrupting drive rush, and is special cancellable"
+
+[[modern]]
+categorie = "Pokes"
+inputs = "L"
+notes = "Has surprising range for a light attack."
+
+[[modern]]
+categorie = "Pokes"
+inputs = "F+H"
+notes = "Long range lunging low attack. Hard to counterpoke at ranges where you can send a headbutt."
+
+[[modern]]
+categorie = "Punitions"
+inputs = "D+L > H+[AUTO] > F+SP > L > B+SP"
+notes = "4f punish. Point blank punish counter conversion"
+
+[[modern]]
+categorie = "Punitions"
+inputs = "D+L > L > L > SP"
+notes = "4f punish. Works at any range D+L connects as a punish counter"
+
+[[modern]]
+categorie = "Punitions"
+inputs = "M > H+[AUTO] > F+SP > L > B+SP"
+notes = "10f punish. Point blank, a bit more damage than the D+L conversion"
+
+[[modern]]
+categorie = "Punitions"
+inputs = "H, DR > H+[AUTO] > F+SP > L > B+SP"
+notes = "8f punish. Uses a parry drive rush. Can be used as a whiff punish as well as an actual punish."
+
+[[modern]]
+categorie = "Combos de base"
+inputs = "L+[AUTO] > L+[AUTO] > B+SP"
+notes = "A bit more technical than the L+[AUTO] autocombo, but it gives a knockdown instead."
+
+[[modern]]
+categorie = "Combos de base"
+inputs = "D+L > D+L > D+L > B+SP"
+notes = "4f hitconfirm"
+
+[[modern]]
+categorie = "Combos de base"
+inputs = "M > L > L > SP > B+SP"
+notes = "Easy extension when Sumo Spirit is active. Any time a juggle state SP hits, you get B+SP afterwards at bare minimum."
+
+[[modern]]
+categorie = "Combos de base"
+inputs = "DR > M > H+[AUTO] > F+SP > D+L > B+SP"
+notes = "Drive rush confirm. Use the D+L conversion if DR > M is blocked."
+
+[[modern]]
+categorie = "Combos de base"
+inputs = "M > DR > M > H+[AUTO] > F+SP > D+L > B+SP"
+notes = "Drive rush cancel."

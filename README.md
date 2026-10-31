@@ -85,6 +85,19 @@ Le plus simple : l'onglet **Combos** de l'interface. Les flèches ‹ › de l'o
 aussi au combo précédent ou suivant ; `cargo run -- 5` lance
 directement le 5e. La liste numérotée s'affiche dans le terminal au lancement.
 
+### Tous les persos : la feuille communautaire
+
+En haut de l'onglet **Combos**, la liste **Liste** passe de tes combos (`combos.toml`) aux
+combos d'un des 32 persos, tirés de la feuille Google communautaire (combos, dégâts, barres
+de Drive et de super, conseils). Les fichiers sont dans `bibliotheque/`, inclus dans l'outil.
+
+- Les combos barrés sont à lire seulement : leur notation n'est pas encore suivie par le
+  trainer (supers `qcfx2`, sauts `j.`, coups chargés `b~f`, deux boutons, `360`...).
+- En bas de la liste, **Modern sans motion (NMM)** : la fiche du perso en contrôles Modern
+  sans quart de cercle (L/M/H, SP = spécial, [AUTO] = assist). À lire : le trainer suit les
+  contrôles Classic.
+- `P` ou `K` seul (`qcf+p`) accepte n'importe quelle force, et `srk` = `dp`.
+
 ## Validation d'un combo
 
 Une étape avance quand le bon coup arrive, quel que soit le moment (il n'y a plus de fenêtres

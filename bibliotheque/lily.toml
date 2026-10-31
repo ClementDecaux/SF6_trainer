@@ -1,0 +1,656 @@
+# Lily : combos de la feuille communautaire SF6 (Google Sheets), importés tels quels.
+# degats = dégâts du combo complet, drive = barres de Drive, super = barres de super.
+# [[modern]] : les mêmes infos en contrôles Modern sans motion (NMM), pour référence.
+personnage = "Lily"
+
+[[combo]]
+nom = "cr. lk, cr. lp xx srk+hp"
+categorie = "Sans jauge"
+inputs = "cr. lk, cr. lp xx srk+hp"
+degats = 1280
+drive = 0
+super = 0
+notes = "Low option"
+
+[[combo]]
+nom = "cr. lk, cr. lp, cr. lp xx qcf+lk (wind)"
+categorie = "Sans jauge"
+inputs = "cr. lk, cr. lp, cr. lp xx qcf+lk (wind)"
+degats = 1250
+drive = 0
+super = 0
+notes = "3-hit light combos are only possible with Lily when she has wind to go into condor spire."
+
+[[combo]]
+nom = "st. lk, st. lp xx srk+hp"
+categorie = "Sans jauge"
+inputs = "st. lk, st. lp xx srk+hp"
+degats = 1420
+drive = 0
+super = 0
+notes = "4f startup"
+
+[[combo]]
+nom = "st. lk, st. lp, st. lp xx qcf+lk (wind)"
+categorie = "Sans jauge"
+inputs = "st. lk, st. lp, st. lp xx qcf+lk (wind)"
+degats = 1425
+drive = 0
+super = 0
+
+[[combo]]
+nom = "st. mk xx qcf+lk"
+categorie = "Sans jauge"
+inputs = "st. mk xx qcf+lk"
+degats = 1400
+drive = 0
+super = 0
+notes = "7f startup"
+
+[[combo]]
+nom = "st. mk xx qcb+lp"
+categorie = "Sans jauge"
+inputs = "st. mk xx qcb+lp"
+degats = 1500
+drive = 0
+super = 0
+notes = "7f startup."
+
+[[combo]]
+nom = "cr. mk xx qcf+lk"
+categorie = "Sans jauge"
+inputs = "cr. mk xx qcf+lk"
+degats = 1140
+drive = 0
+super = 0
+notes = "9f startup."
+
+[[combo]]
+nom = "cr. mk xx qcb+lp"
+categorie = "Sans jauge"
+inputs = "cr. mk xx qcb+lp"
+degats = 1220
+drive = 0
+super = 0
+notes = "9f startup. Good option for fishing low without spending meter. (8/3/2026)"
+
+[[combo]]
+nom = "b+hp, st. lk xx srk+hp"
+categorie = "Sans jauge"
+inputs = "b+hp, st. lk xx srk+hp"
+degats = 1260
+drive = 0
+super = 0
+
+[[combo]]
+nom = "b+hp, st. lk, st. lp xx qcf+lk (wind)"
+categorie = "Sans jauge"
+inputs = "b+hp, st. lk, st. lp xx qcf+lk (wind)"
+degats = 1280
+drive = 0
+super = 0
+
+[[combo]]
+nom = "cr. hp xx qcb+mp"
+categorie = "Sans jauge"
+inputs = "cr. hp xx qcb+mp"
+degats = 1900
+drive = 0
+super = 0
+notes = "Lily's common grounded mix tool. cr. hp has two hits, allowing you to hitconfirm into the wind stock attack, and you can choose to go into a feint, or hold the attack to avoid a DI crumple or punish a parry/drive rush OS."
+
+[[combo]]
+nom = "cr. hp xx qcb+lp"
+categorie = "Sans jauge"
+inputs = "cr. hp xx qcb+lp"
+degats = 1400
+drive = 0
+super = 0
+notes = "Lily gains a midrange poke into a knockdown from the new qcb+lp. Truestrings on block, removing a possible DI option from the opponent. 8/3/2026"
+
+[[combo]]
+nom = "cr. lk, cr. lp xx srk+pp, ppp"
+categorie = "OD"
+inputs = "cr. lk, cr. lp xx srk+pp, ppp"
+degats = 2120
+drive = 4
+super = 0
+
+[[combo]]
+nom = "cr. lk, cr. lp, cr. lp xx qcf+kk"
+categorie = "OD"
+inputs = "cr. lk, cr. lp, cr. lp xx qcf+kk"
+degats = 1370
+drive = 2
+super = 0
+notes = "Good okizeme, 3 piece conversion. You'll often convert into this off of jump-ins"
+
+[[combo]]
+nom = "st. lk, st. lp, st. lp xx qcf+kk (wind), srk+hp (wind)"
+categorie = "OD"
+inputs = "st. lk, st. lp, st. lp xx qcf+kk (wind), srk+hp (wind)"
+degats = 2105
+drive = 2
+super = 0
+notes = "Corner only"
+
+[[combo]]
+nom = "st. lk, st. lp, st. lp xx qcf+kk (wind), qcfx2+p"
+categorie = "OD"
+inputs = "st. lk, st. lp, st. lp xx qcf+kk (wind), qcfx2+p"
+degats = 2425
+drive = 2
+super = 1
+notes = "Corner only."
+
+[[combo]]
+nom = "b+hp, st. lk xx qcf+kk (wind), srk+pp (wind), ppp (wind)"
+categorie = "OD"
+inputs = "b+hp, st. lk xx qcf+kk (wind), srk+pp (wind), ppp (wind)"
+degats = 3860
+drive = 6
+super = 0
+notes = "Corner only"
+
+[[combo]]
+nom = "cr. hp xx qcb+pp"
+categorie = "OD"
+inputs = "cr. hp xx qcb+pp"
+degats = 2200
+drive = 2
+super = 0
+notes = "Due to the startup changes, cr. hp xx qcb+pp is -5 on block, builds a wind charge, and has no gap."
+
+[[combo]]
+nom = "st. lk xx DR xx st. lp"
+categorie = "Extensions Drive Rush"
+inputs = "st. lk xx DR xx st. lp"
+drive = 3
+super = 0
+notes = "6f or less"
+
+[[combo]]
+nom = "st. lp xx DR xx st. lp"
+categorie = "Extensions Drive Rush"
+inputs = "st. lp xx DR xx st. lp"
+drive = 3
+super = 0
+notes = "6f or less"
+
+[[combo]]
+nom = "cr. lp xx DR xx st. lp"
+categorie = "Extensions Drive Rush"
+inputs = "cr. lp xx DR xx st. lp"
+drive = 3
+super = 0
+notes = "6f or less"
+
+[[combo]]
+nom = "st. mk xx DR xx cr. hp"
+categorie = "Extensions Drive Rush"
+inputs = "st. mk xx DR xx cr. hp"
+drive = 3
+super = 0
+notes = "10f or less"
+
+[[combo]]
+nom = "cr. mk xx DR xx cr. hp"
+categorie = "Extensions Drive Rush"
+inputs = "cr. mk xx DR xx cr. hp"
+drive = 3
+super = 0
+notes = "10f or less"
+
+[[combo]]
+nom = "cr. hp xx DR xx b+hp"
+categorie = "Extensions Drive Rush"
+inputs = "cr. hp xx DR xx b+hp"
+drive = 3
+super = 0
+notes = "14f or less"
+
+[[combo]]
+nom = "b+hp xx DR xx b+hp"
+categorie = "Extensions Drive Rush"
+inputs = "b+hp xx DR xx b+hp"
+drive = 3
+super = 0
+notes = "14f or less"
+
+[[combo]]
+nom = "st. lp xx DR xx st. lp, cr. hp xx srk+hp"
+categorie = "Drive Rush"
+inputs = "st. lp xx DR xx st. lp, cr. hp xx srk+hp"
+degats = 2200
+drive = 3
+super = 0
+
+[[combo]]
+nom = "st. mk xx DR xx cr. hp, st. lk xx srk+hp"
+categorie = "Drive Rush"
+inputs = "st. mk xx DR xx cr. hp, st. lk xx srk+hp"
+degats = 2362
+drive = 3
+super = 0
+
+[[combo]]
+nom = "cr. mk xx DR xx cr. hp, st. lk xx srk+hp"
+categorie = "Drive Rush"
+inputs = "cr. mk xx DR xx cr. hp, st. lk xx srk+hp"
+degats = 1969
+drive = 3
+super = 0
+
+[[combo]]
+nom = "cr. mk xx DR xx cr. hp xx qcfx2+p"
+categorie = "Drive Rush"
+inputs = "cr. mk xx DR xx cr. hp xx qcfx2+p"
+degats = 2475
+drive = 3
+super = 1
+notes = "Could technically do cr. hp, st. lk xx SA1, but that is an annoying cancel and does less damage."
+
+[[combo]]
+nom = "cr. hp xx DR xx b+hp, st. mk xx qcf+kk xx qcfx2+k"
+categorie = "Drive Rush"
+inputs = "cr. hp xx DR xx b+hp, st. mk xx qcf+kk xx qcfx2+k"
+degats = 3940
+drive = 5
+super = 2
+notes = "SA2 Conversion example"
+
+[[combo]]
+nom = "b+hp xx DR xx b+hp, st. mk xx qcbx2+p"
+categorie = "Drive Rush"
+inputs = "b+hp xx DR xx b+hp, st. mk xx qcbx2+p"
+degats = 4553
+drive = 3
+super = 3
+notes = "SA3 Conversion example off of b+hp poke."
+
+[[combo]]
+nom = "dr xx cr. hp xx qcb+mp"
+categorie = "Drive Rush"
+inputs = "dr xx cr. hp xx qcb+mp"
+degats = 1900
+drive = 1
+super = 0
+notes = "Good lunging attack due to how long cr. hp stays out there. With a drive rush, no longer has a gap, preventing an opposing DI."
+
+[[combo]]
+nom = "dr xx cr. hp, 360+p"
+categorie = "Drive Rush"
+inputs = "dr xx cr. hp, 360+p"
+drive = 1
+super = 0
+notes = "Lily is +2 on block, +4 on hit, giving her an opportunity to set up an immediate command grab vs cr. lk mix"
+
+[[combo]]
+nom = "dr xx cr. lk, cr. lp xx srk+hp"
+categorie = "Drive Rush"
+inputs = "dr xx cr. lk, cr. lp xx srk+hp"
+degats = 1280
+drive = 1
+super = 0
+
+[[combo]]
+nom = "st. lk xx qcf+lk"
+categorie = "Punish Counter"
+inputs = "st. lk xx qcf+lk"
+degats = 1000
+drive = 0
+super = 0
+notes = "4f Punish Counter. Works without wind."
+
+[[combo]]
+nom = "st. lk, cr. mk xx qcf+mk"
+categorie = "Punish Counter"
+inputs = "st. lk, cr. mk xx qcf+mk"
+degats = 1600
+drive = 0
+super = 0
+notes = "4f Punish Counter."
+
+[[combo]]
+nom = "st. lk xx qcb+pp"
+categorie = "Punish Counter"
+inputs = "st. lk xx qcb+pp"
+degats = 1320
+drive = 2
+super = 0
+notes = "4f Punish Counter. Nets Lily some wind at the same time."
+
+[[combo]]
+nom = "st. lk, cr. mk xx qcb+pp"
+categorie = "Punish Counter"
+inputs = "st. lk, cr. mk xx qcb+pp"
+degats = 1600
+drive = 2
+super = 0
+notes = "4f Punish Counter. Nets Lily some wind at the same time."
+
+[[combo]]
+nom = "360+hp"
+categorie = "Punish Counter"
+inputs = "360+hp"
+degats = 3220
+drive = 0
+super = 0
+notes = "5f Punish Counter. Point blank."
+
+[[combo]]
+nom = "st. lp, cr. hp xx srk+hp"
+categorie = "Punish Counter"
+inputs = "st. lp, cr. hp xx srk+hp"
+degats = 2060
+drive = 0
+super = 0
+notes = "6f Punish Counter. Point blank"
+
+[[combo]]
+nom = "cr. lp, cr. hp xx srk+hp"
+categorie = "Punish Counter"
+inputs = "cr. lp, cr. hp xx srk+hp"
+degats = 2000
+drive = 0
+super = 0
+notes = "6f Punish Counter. Point blank."
+
+[[combo]]
+nom = "st. lp, st. mk xx srk+hp"
+categorie = "Punish Counter"
+inputs = "st. lp, st. mk xx srk+hp"
+degats = 1740
+drive = 0
+super = 0
+notes = "6f Punish Counter. Pretty far distance."
+
+[[combo]]
+nom = "st. lp, cr. mk xx srk+hp"
+categorie = "Punish Counter"
+inputs = "st. lp, cr. mk xx srk+hp"
+degats = 1660
+drive = 0
+super = 0
+notes = "6f Punish Counter. Works from a pretty far distance."
+
+[[combo]]
+nom = "st. lp, qcbx2+p"
+categorie = "Punish Counter"
+inputs = "st. lp, qcbx2+p"
+degats = 3570
+drive = 0
+super = 3
+notes = "6f Punish Counter. Works from whatever distance you seem to operate this at, as long as it is a punish counter, and it works as a link."
+
+[[combo]]
+nom = "st. mk xx srk+lp (wind), qcfx2+p"
+categorie = "Punish Counter"
+inputs = "st. mk xx srk+lp (wind), qcfx2+p"
+degats = 2960
+drive = 0
+super = 1
+notes = "7f Neutral Confirm/Punish Counter. Only converts if the uppercut hits once against a standing opponent. Buff added in 12/1/2024 adjustments (good stuff!)"
+
+[[combo]]
+nom = "cr. hp xx srk+hp"
+categorie = "Punish Counter"
+inputs = "cr. hp xx srk+hp"
+degats = 2400
+drive = 0
+super = 0
+notes = "10f Punish."
+
+[[combo]]
+nom = "st. hp, b+hp xx srk+hp"
+categorie = "Punish Counter"
+inputs = "st. hp, b+hp xx srk+hp"
+degats = 3040
+drive = 0
+super = 0
+notes = "11f Punish Counter. Can also go into spire (more oki), H wings together (more wind) for a bit less damage"
+
+[[combo]]
+nom = "st. hp, b+hp xx qcb+mp"
+categorie = "Punish Counter"
+inputs = "st. hp, b+hp xx qcb+mp"
+degats = 2800
+drive = 0
+super = 0
+notes = "11f Punish Counter. Point blank."
+
+[[combo]]
+nom = "b+hp xx qcb+hp"
+categorie = "Punish Counter"
+inputs = "b+hp xx qcb+hp"
+degats = 2300
+drive = 0
+super = 0
+notes = "14f Punish Counter. Gain a wind stock, knocks them down a significant distance away"
+
+[[combo]]
+nom = "b+hp, st. mk xx srk+hp"
+categorie = "Punish Counter"
+inputs = "b+hp, st. mk xx srk+hp"
+degats = 2760
+drive = 0
+super = 0
+notes = "14f Punish Counter."
+
+[[combo]]
+nom = "DI, 360+hp"
+categorie = "Après DI (crumple)"
+inputs = "DI, 360+hp"
+degats = 2920
+drive = 1
+super = 0
+
+[[combo]]
+nom = "DI, cr. hp xx srk+hp"
+categorie = "Après DI (crumple)"
+inputs = "DI, cr. hp xx srk+hp"
+degats = 2600
+drive = 1
+super = 0
+
+[[combo]]
+nom = "DI, b+hp xx qcb+hp"
+categorie = "Après DI (crumple)"
+inputs = "DI, b+hp xx qcb+hp"
+degats = 2530
+drive = 1
+super = 0
+
+[[combo]]
+nom = "DI, j. hk, j. mp xx j. mp xx SA2"
+categorie = "Après DI (crumple)"
+inputs = "DI, j. hk, j. mp xx j. mp xx SA2"
+degats = 3810
+drive = 1
+super = 2
+
+[[combo]]
+nom = "DI, j. hk, dr xx b+hp xx srk+hp"
+categorie = "Après DI (crumple)"
+inputs = "DI, j. hk, dr xx b+hp xx srk+hp"
+degats = 2802
+drive = 2
+super = 0
+
+[[combo]]
+nom = "DI, j. hk, dr xx b+hp xx qcf+hk, srk+hp"
+categorie = "Après DI (crumple)"
+inputs = "DI, j. hk, dr xx b+hp xx qcf+hk, srk+hp"
+degats = 3278
+drive = 2
+super = 0
+notes = "From midscreen, drives them into the corner. Requires 2 wind stocks"
+
+[[combo]]
+nom = "DI, j. hk, dr xx b+hp xx qcf+hk, SA1"
+categorie = "Après DI (crumple)"
+inputs = "DI, j. hk, dr xx b+hp xx qcf+hk, SA1"
+degats = 3547
+drive = 2
+super = 1
+notes = "Again, the SA1 connects in the corner. You can add more b+hp xx dr to extend and push the opponent across the screen."
+
+[[combo]]
+nom = "DI, j. hk, dr xx b+hp xx qcf+hk, srk+pp xx ppp, SA1"
+categorie = "Après DI (crumple)"
+inputs = "DI, j. hk, dr xx b+hp xx qcf+hk, srk+pp xx ppp, SA1"
+degats = 4278
+drive = 6
+super = 1
+notes = "From midscreen, drives them into the corner. Requires 3 wind stocks."
+
+[[combo]]
+nom = "DI, j. hk, dr xx b+hp xx qcf+hk, srk+pp xx ppp, SA2"
+categorie = "Après DI (crumple)"
+inputs = "DI, j. hk, dr xx b+hp xx qcf+hk, srk+pp xx ppp, SA2"
+degats = 4658
+drive = 6
+super = 2
+notes = "From midscreen, drives them into the corner. Requires 3 wind stocks."
+
+[[combo]]
+nom = "DI, st. hp xx srk+hp"
+categorie = "Après DI (wallsplat)"
+inputs = "DI, st. hp xx srk+hp"
+degats = 1680
+drive = 1
+super = 0
+
+[[combo]]
+nom = "DI, b+hp xx qcf+hk, SA1"
+categorie = "Après DI (wallsplat)"
+inputs = "DI, b+hp xx qcf+hk, SA1"
+degats = 2981
+drive = 1
+super = 1
+notes = "Requires 1 wind stock"
+
+[[combo]]
+nom = "DI, b+hp xx qcf+hk, srk+hp"
+categorie = "Après DI (wallsplat)"
+inputs = "DI, b+hp xx qcf+hk, srk+hp"
+degats = 2544
+drive = 1
+super = 0
+notes = "Requires 2 wind stocks"
+
+[[combo]]
+nom = "DI, j. hk, cr. hp xx srk+hp"
+categorie = "Après DI (stun)"
+inputs = "DI, j. hk, cr. hp xx srk+hp"
+degats = 2060
+drive = 1
+super = 0
+
+[[combo]]
+nom = "DI, qcb+lp, j. hk, cr. hp xx srk+hp"
+categorie = "Après DI (stun)"
+inputs = "DI, qcb+lp, j. hk, cr. hp xx srk+hp"
+degats = 2180
+drive = 1
+super = 0
+notes = "Can spend some time gaining a wind stock before you secure a jump-in"
+
+[[combo]]
+nom = "DI, 360+hp (2)"
+categorie = "Après DI (stun)"
+inputs = "DI, 360+hp"
+degats = 1680
+drive = 1
+super = 0
+notes = "If you really must conserve your wind stocks, you can always do a command grab."
+
+[[modern]]
+categorie = "Anti-airs"
+inputs = "D+H"
+notes = "Nice arcing hitbox, can be cancelled into B+SP"
+
+[[modern]]
+categorie = "Anti-airs"
+inputs = "F+SP"
+notes = "Fully air invincible"
+
+[[modern]]
+categorie = "Anti-airs"
+inputs = "J+M > J+M"
+notes = "Juggles opponents hit in the air, can cancel into airborne SA2 (B+H+SP)"
+
+[[modern]]
+categorie = "Pokes"
+inputs = "M"
+notes = "Lily's \"stop sign\". Nonconvertible, disjointed. Good for stopping headbutts, drive rushes, and other forward advancing nonsense. Weak to DI."
+
+[[modern]]
+categorie = "Pokes"
+inputs = "D+H"
+notes = "Hits at an absurd range, hard to contest. Special cancellable."
+
+[[modern]]
+categorie = "Pokes"
+inputs = "B+H"
+notes = "Special cancellable. Retracts Lily's hitbox before it strikes. Hard to contest."
+
+[[modern]]
+categorie = "Pokes"
+inputs = "F+H"
+notes = "Forward advancing attack. Special cancellable."
+
+[[modern]]
+categorie = "Pokes"
+inputs = "D+L"
+notes = "Surprising range for a light attack."
+
+[[modern]]
+categorie = "Punitions"
+inputs = "L > L > F+SP"
+notes = "4f punish."
+
+[[modern]]
+categorie = "Punitions"
+inputs = "SP"
+notes = "5f punish. Honestly, the best 5f punish Lily gets. Does 25% damage to an opponent."
+
+[[modern]]
+categorie = "Punitions"
+inputs = "H > B+H > D+SP"
+notes = "11f punish. Good as a whiff punish, crumples opponent on hit."
+
+[[modern]]
+categorie = "Punitions"
+inputs = "D+H > D+SP"
+notes = "10f punish. Confirmable (see first hit hits, go for D+SP on second hit)"
+
+[[modern]]
+categorie = "Combos de base"
+inputs = "L > L > F+SP"
+notes = "When you have no wind stocks."
+
+[[modern]]
+categorie = "Combos de base"
+inputs = "D+H > B+SP"
+notes = "Builds wind stocks, has a gap on block that can be DI'd."
+
+[[modern]]
+categorie = "Combos de base"
+inputs = "L > L > L > D+SP"
+notes = "1 wind stock."
+
+[[modern]]
+categorie = "Combos de base"
+inputs = "L > L > F+SP+[AUTO] > SP+[AUTO]"
+notes = "2 wind stocks. Appreciable damage increase."
+
+[[modern]]
+categorie = "Combos de base"
+inputs = "DR > D+H > L > F+SP"
+notes = "Drive rush into an attack"
+
+[[modern]]
+categorie = "Combos de base"
+inputs = "D+H > DR > D+H > L > F+SP"
+notes = "D+H drive rush cancel."

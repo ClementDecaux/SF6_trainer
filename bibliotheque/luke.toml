@@ -1,0 +1,692 @@
+# Luke : combos de la feuille communautaire SF6 (Google Sheets), importés tels quels.
+# degats = dégâts du combo complet, drive = barres de Drive, super = barres de super.
+# [[modern]] : les mêmes infos en contrôles Modern sans motion (NMM), pour référence.
+personnage = "Luke"
+
+[[combo]]
+nom = "cr. lk, cr. lp, cr. lp xx qcb+lp"
+categorie = "Sans jauge"
+inputs = "cr. lk, cr. lp, cr. lp xx qcb+lp"
+degats = 1070
+drive = 0
+super = 0
+
+[[combo]]
+nom = "cr. lp, cr. lp, cr. lp xx qcb+lp"
+categorie = "Sans jauge"
+inputs = "cr. lp, cr. lp, cr. lp xx qcb+lp"
+degats = 1170
+drive = 0
+super = 0
+notes = "Beats 4f/throw mash"
+
+[[combo]]
+nom = "lp xx mp xx hp xx srk+hp"
+categorie = "Sans jauge"
+inputs = "lp xx mp xx hp xx srk+hp"
+degats = 1660
+drive = 0
+super = 0
+
+[[combo]]
+nom = "mp xx mp xx mp xx mp"
+categorie = "Sans jauge"
+inputs = "mp xx mp xx mp xx mp"
+degats = 1490
+drive = 0
+super = 0
+
+[[combo]]
+nom = "cr. mp, st. lk xx srk+hp"
+categorie = "Sans jauge"
+inputs = "cr. mp, st. lk xx srk+hp"
+degats = 1455
+drive = 0
+super = 0
+
+[[combo]]
+nom = "cr. mp, cr. lp xx qcb+lp"
+categorie = "Sans jauge"
+inputs = "cr. mp, cr. lp xx qcb+lp"
+degats = 1380
+drive = 0
+super = 0
+
+[[combo]]
+nom = "f+hp xx hp xx srk+hp"
+categorie = "Sans jauge"
+inputs = "f+hp xx hp xx srk+hp"
+degats = 1960
+drive = 0
+super = 0
+
+[[combo]]
+nom = "f+hp xx hp xx qcb+hp"
+categorie = "Sans jauge"
+inputs = "f+hp xx hp xx qcb+hp"
+degats = 2100
+drive = 0
+super = 0
+
+[[combo]]
+nom = "st. hp xx qcf+mp"
+categorie = "Sans jauge"
+inputs = "st. hp xx qcf+mp"
+degats = 1400
+drive = 0
+super = 0
+notes = "Automatically spaces Luke to be at a good range to prod with st. hp again."
+
+[[combo]]
+nom = "st. hp xx srk+hp"
+categorie = "Sans jauge"
+inputs = "st. hp xx srk+hp"
+degats = 2100
+drive = 0
+super = 0
+
+[[combo]]
+nom = "cr. hp xx qcb+lp (held), qcb+mp"
+categorie = "Sans jauge"
+inputs = "cr. hp xx qcb+lp (held), qcb+mp"
+degats = 2190
+drive = 0
+super = 0
+notes = "Works everywhere. Full send the qcb+lp"
+
+[[combo]]
+nom = "cr. hp xx qcb+lp (held), qcf+lp, srk+lp"
+categorie = "Sans jauge"
+inputs = "cr. hp xx qcb+lp (held), qcf+lp, srk+lp"
+degats = 2580
+drive = 0
+super = 0
+notes = "Corner only."
+
+[[combo]]
+nom = "cr. hp xx qcb+lp (held), j. mp xx qcb+p (held)"
+categorie = "Sans jauge"
+inputs = "cr. hp xx qcb+lp (held), j. mp xx qcb+p (held)"
+degats = 2650
+drive = 0
+super = 0
+notes = "No longer requires a partial charge, perfect knuckle gets 100 more damage in this instance. (8/3/2026) Corner Only."
+
+[[combo]]
+nom = "cr. hp xx qcb+lp (held), j. mp xx qcb+p (held) (2)"
+categorie = "Sans jauge"
+inputs = "cr. hp xx qcb+lp (held), j. mp xx qcb+p (held)"
+degats = 2750
+drive = 0
+super = 0
+notes = "Requires a partial charge of the lp knuckle to get the perfect variation."
+
+[[combo]]
+nom = "cr. hp xx qcb+lp (held), qcf+hp, srk+hp"
+categorie = "Sans jauge"
+inputs = "cr. hp xx qcb+lp (held), qcf+hp, srk+hp"
+degats = 2860
+drive = 0
+super = 0
+notes = "Corner only. Requires the partial charge of the lp knuckle to get the perfect variation. Corner only."
+
+[[combo]]
+nom = "cr. hp xx qcb+mp (held), qcb+lp (held), qcf+lp"
+categorie = "Sans jauge"
+inputs = "cr. hp xx qcb+mp (held), qcb+lp (held), qcf+lp"
+degats = 2600
+drive = 0
+super = 0
+notes = "Doesn't require any perfect charges for flash knuckles for this combo. Easier to perform, less damage+okizeme. Midscreen only."
+
+[[combo]]
+nom = "cr. hp xx qcb+mp (held), qcb+lp (held), qcb+hp"
+categorie = "Sans jauge"
+inputs = "cr. hp xx qcb+mp (held), qcb+lp (held), qcb+hp"
+degats = 3200
+drive = 0
+super = 0
+notes = "Requires a partial charge of the mp knuckle to combo. Requires you to be midscreen (opponent flies over your head in the opposite direction if you perform this too close to the wall). Works if only one of the performed lp/mp knuckles are \"perfect\""
+
+[[combo]]
+nom = "cr. hp xx qcb+mp (held), j. mp xx qcb+p (held)"
+categorie = "Sans jauge"
+inputs = "cr. hp xx qcb+mp (held), j. mp xx qcb+p (held)"
+degats = 2850
+drive = 0
+super = 0
+notes = "When your opponent is closer to the wall (about 2.5 large squares in training mode) you can perform this variation of the mp knuckle combo. Does not require a perfect charge knuckle"
+
+[[combo]]
+nom = "st. hk, cr. lp xx qcb+lp"
+categorie = "Sans jauge"
+inputs = "st. hk, cr. lp xx qcb+lp"
+degats = 1760
+drive = 0
+super = 0
+notes = "Luke can land st. hk during the later active frames, making him plus on block and offering a combo on hit."
+
+[[combo]]
+nom = "cr. lk, cr. lp xx qcb+pp xx pp"
+categorie = "OD"
+inputs = "cr. lk, cr. lp xx qcb+pp xx pp"
+degats = 2220
+drive = 3
+super = 0
+
+[[combo]]
+nom = "cr. lp, cr. lp xx qcb+pp, j. mp xx qcb+mp, srk+lp"
+categorie = "OD"
+inputs = "cr. lp, cr. lp xx qcb+pp, j. mp xx qcb+mp, srk+lp"
+degats = 2270
+drive = 2
+super = 0
+notes = "Corner only."
+
+[[combo]]
+nom = "cr. mk xx qcb+pp, qcb+mp"
+categorie = "OD"
+inputs = "cr. mk xx qcb+pp, qcb+mp"
+degats = 1770
+drive = 2
+super = 0
+
+[[combo]]
+nom = "cr. hp xx qcb+lp (held), qcb+pp, qcf+k > p"
+categorie = "OD"
+inputs = "cr. hp xx qcb+lp (held), qcb+pp, qcf+k > p"
+degats = 2660
+drive = 2
+super = 0
+
+[[combo]]
+nom = "cr. lp xx DR xx cr. lp"
+categorie = "Extensions Drive Rush"
+inputs = "cr. lp xx DR xx cr. lp"
+drive = 3
+notes = "4f or less"
+
+[[combo]]
+nom = "st. lk xx DR xx st. lk"
+categorie = "Extensions Drive Rush"
+inputs = "st. lk xx DR xx st. lk"
+drive = 3
+notes = "5f or less"
+
+[[combo]]
+nom = "cr. mk xx DR xx cr. mk"
+categorie = "Extensions Drive Rush"
+inputs = "cr. mk xx DR xx cr. mk"
+drive = 3
+notes = "8f or less"
+
+[[combo]]
+nom = "cr. mp xx DR xx cr. hk"
+categorie = "Extensions Drive Rush"
+inputs = "cr. mp xx DR xx cr. hk"
+drive = 3
+notes = "10f or less"
+
+[[combo]]
+nom = "st. hp xx DR xx b+hk"
+categorie = "Extensions Drive Rush"
+inputs = "st. hp xx DR xx b+hk"
+drive = 3
+notes = "12f or less"
+
+[[combo]]
+nom = "cr. hp xx DR xx b+hp"
+categorie = "Extensions Drive Rush"
+inputs = "cr. hp xx DR xx b+hp"
+drive = 3
+notes = "16f or less"
+
+[[combo]]
+nom = "b+hp xx DR xx b+hp"
+categorie = "Extensions Drive Rush"
+inputs = "b+hp xx DR xx b+hp"
+drive = 3
+notes = "16f or less"
+
+[[combo]]
+nom = "cr. lp xx DR xx cr. lp, cr. hp xx qcb+lp (held), qcb+mp"
+categorie = "Drive Rush"
+inputs = "cr. lp xx DR xx cr. lp, cr. hp xx qcb+lp (held), qcb+mp"
+degats = 1589
+drive = 3
+super = 0
+
+[[combo]]
+nom = "st. lk xx DR xx cr. lp, cr. hp xx qcb+mp (held), qcb+lp (held), qcb+hp"
+categorie = "Drive Rush"
+inputs = "st. lk xx DR xx cr. lp, cr. hp xx qcb+mp (held), qcb+lp (held), qcb+hp"
+degats = 2016
+drive = 3
+super = 0
+notes = "Requires a partial (perfect) charge of the mp and lp knuckles to combo. Requires you to be midscreen (opponent flies over your head in the opposite direction if you perform this too close to the wall)"
+
+[[combo]]
+nom = "cr. mk xx DR xx cr. mp, cr. hp xx qcb+mp (perfect), qcb+lp (perfect), qcb+hp"
+categorie = "Drive Rush"
+inputs = "cr. mk xx DR xx cr. mp, cr. hp xx qcb+mp (perfect), qcb+lp (perfect), qcb+hp"
+degats = 2420
+drive = 3
+super = 0
+
+[[combo]]
+nom = "st. hp xx DR xx b+hp, cr. hp xx qcb+lp (held), dr xx cr. hp xx qcb+hp"
+categorie = "Drive Rush"
+inputs = "st. hp xx DR xx b+hp, cr. hp xx qcb+lp (held), dr xx cr. hp xx qcb+hp"
+degats = 3000
+drive = 4
+super = 0
+
+[[combo]]
+nom = "cr. lk, cr. lp xx DR xx cr. lp, cr. hp xx qcb+lp (held), qcfx2+p"
+categorie = "Drive Rush"
+inputs = "cr. lk, cr. lp xx DR xx cr. lp, cr. hp xx qcb+lp (held), qcfx2+p"
+degats = 1821
+drive = 3
+super = 1
+
+[[combo]]
+nom = "st. hp xx qcb+lp (held), dr xx cr. hp xx qcb+hp"
+categorie = "Drive Rush"
+inputs = "st. hp xx qcb+lp (held), dr xx cr. hp xx qcb+hp"
+degats = 2492
+drive = 1
+super = 0
+notes = "Simple bar spend to get reasonable okizeme after charged lp flash knuckle"
+
+[[combo]]
+nom = "st. lk xx DR xx cr. lp, cr. hp xx qcb+lp (held), dr xx cr. hp xx qcbx2+p"
+categorie = "Drive Rush"
+inputs = "st. lk xx DR xx cr. lp, cr. hp xx qcb+lp (held), dr xx cr. hp xx qcbx2+p"
+degats = 2760
+drive = 4
+super = 2
+notes = "SA2 conversion example"
+
+[[combo]]
+nom = "b+hp xx DR xx b+hk, cr. hp xx qcb+mp (held), qcb+lp (held), qcb+hp xx qcfx2+k"
+categorie = "Drive Rush"
+inputs = "b+hp xx DR xx b+hk, cr. hp xx qcb+mp (held), qcb+lp (held), qcb+hp xx qcfx2+k"
+degats = 5486
+drive = 3
+super = 3
+notes = "SA3 conversion example"
+
+[[combo]]
+nom = "st. hp xx dr xx b+hp, cr. hp xx dr xx b+hp, cr. hp xx qcb+hp xx qcfx2+k"
+categorie = "Drive Rush"
+inputs = "st. hp xx dr xx b+hp, cr. hp xx dr xx b+hp, cr. hp xx qcb+hp xx qcfx2+k"
+degats = 5172
+drive = 6
+super = 3
+notes = "SA3 conversion with drive rush loop"
+
+[[combo]]
+nom = "dr xx cr. mp, cr. mp xx qcb+lp"
+categorie = "Drive Rush"
+inputs = "dr xx cr. mp, cr. mp xx qcb+lp"
+degats = 1635
+drive = 1
+super = 0
+
+[[combo]]
+nom = "dr xx st. mp, cr. lp xx qcb+lp"
+categorie = "Drive Rush"
+inputs = "dr xx st. mp, cr. lp xx qcb+lp"
+degats = 1460
+drive = 1
+super = 0
+
+[[combo]]
+nom = "cr. lp, cr. hp xx qcb+lp (held), qcb+mp"
+categorie = "Punish Counter"
+inputs = "cr. lp, cr. hp xx qcb+lp (held), qcb+mp"
+degats = 1905
+drive = 0
+super = 0
+notes = "4f Punish Counter. Simple, Point blank."
+
+[[combo]]
+nom = "cr. lp, cr. hp xx qcb+mp (held), qcb+lp (held), qcb+hp"
+categorie = "Punish Counter"
+inputs = "cr. lp, cr. hp xx qcb+mp (held), qcb+lp (held), qcb+hp"
+degats = 2539
+drive = 0
+super = 0
+notes = "4f Punish Counter. Complicated. Point blank. Listen for \"PERFECT!\""
+
+[[combo]]
+nom = "cr. lp, cr. mk xx qcb+lp"
+categorie = "Punish Counter"
+inputs = "cr. lp, cr. mk xx qcb+lp"
+degats = 1250
+drive = 0
+super = 0
+notes = "4f Punish Counter. Simple, works at tip range for cr. lp."
+
+[[combo]]
+nom = "cr. lp, st. lp xx mp xx hp xx qcb+hp"
+categorie = "Punish Counter"
+inputs = "cr. lp, st. lp xx mp xx hp xx qcb+hp"
+degats = 1860
+drive = 0
+super = 0
+notes = "4f Punish Counter. Simple, works at tip range for cr. lp."
+
+[[combo]]
+nom = "st. lk, st. lp xx mp xx hp xx qcb+hp"
+categorie = "Punish Counter"
+inputs = "st. lk, st. lp xx mp xx hp xx qcb+hp"
+degats = 1860
+drive = 0
+super = 0
+notes = "5f Punish Counter. Simple. Works if st. lp is in range."
+
+[[combo]]
+nom = "cr. mp, cr. hp xx qcb+lp (held), qcb+mp"
+categorie = "Punish Counter"
+inputs = "cr. mp, cr. hp xx qcb+lp (held), qcb+mp"
+degats = 2390
+drive = 0
+super = 0
+notes = "6f Punish Counter. Simple, Point Blank."
+
+[[combo]]
+nom = "cr. mp, cr. hp xx qcb+mp (held), qcb+lp (held), qcb+hp"
+categorie = "Punish Counter"
+inputs = "cr. mp, cr. hp xx qcb+mp (held), qcb+lp (held), qcb+hp"
+degats = 3090
+drive = 0
+super = 0
+notes = "6f Punish Counter. Complicated. Point Blank."
+
+[[combo]]
+nom = "cr. mp, st. mp xx mp xx mp xx mp"
+categorie = "Punish Counter"
+inputs = "cr. mp, st. mp xx mp xx mp xx mp"
+degats = 1925
+drive = 0
+super = 0
+notes = "6f Punish Counter. Works at tip range."
+
+[[combo]]
+nom = "cr. hp xx qcb+mp (held), qcb+lp (held), qcb+hp (2)"
+categorie = "Punish Counter"
+inputs = "cr. hp xx qcb+mp (held), qcb+lp (held), qcb+hp"
+degats = 3360
+drive = 0
+super = 0
+notes = "7f Punish Counter. Doesn't require perfect knuckle timing with PC for qcb+mp"
+
+[[combo]]
+nom = "st. mp, cr. mp xx srk+hp"
+categorie = "Punish Counter"
+inputs = "st. mp, cr. mp xx srk+hp"
+degats = 2360
+drive = 0
+super = 0
+notes = "9f Punish Counter. Forward advancing."
+
+[[combo]]
+nom = "mp > mp > mp > mp, srk+hp"
+categorie = "Punish Counter"
+inputs = "mp > mp > mp > mp, srk+hp"
+degats = 2390
+drive = 0
+super = 0
+notes = "9f Punish Counter. Corner only (8/3/2026)"
+
+[[combo]]
+nom = "mp > mp > mp > mp, SA1"
+categorie = "Punish Counter"
+inputs = "mp > mp > mp > mp, SA1"
+degats = 2810
+drive = 0
+super = 1
+notes = "9f Punish Counter. Good for whiff punishes (8/3/2026)"
+
+[[combo]]
+nom = "st. hk, srk+hp"
+categorie = "Punish Counter"
+inputs = "st. hk, srk+hp"
+degats = 2280
+drive = 0
+super = 0
+notes = "10f Punish Counter. Easy hitconfirm, forward advancing"
+
+[[combo]]
+nom = "st. hk, qcb+pp, qcb+mp"
+categorie = "Punish Counter"
+inputs = "st. hk, qcb+pp, qcb+mp"
+degats = 2600
+drive = 2
+super = 0
+notes = "10f Punish Counter. Easy hitconfirm, forward advancing"
+
+[[combo]]
+nom = "b+hk, dr xx cr. mp xx qcb+hp"
+categorie = "Punish Counter"
+inputs = "b+hk, dr xx cr. mp xx qcb+hp"
+degats = 2390
+drive = 1
+super = 0
+notes = "12f Punish Counter."
+
+[[combo]]
+nom = "f+hp, cr. hp xx qcb+lp (held), qcb+mp"
+categorie = "Punish Counter"
+inputs = "f+hp, cr. hp xx qcb+lp (held), qcb+mp"
+degats = 2835
+drive = 0
+super = 0
+notes = "16f Punish Counter. Simple. Forward advancing."
+
+[[combo]]
+nom = "f+hp, cr. hp xx qcb+mp (held), qcb+lp (held), qcb+hp"
+categorie = "Punish Counter"
+inputs = "f+hp, cr. hp xx qcb+mp (held), qcb+lp (held), qcb+hp"
+degats = 3599
+drive = 0
+super = 0
+notes = "16f Punish Counter. Complex. Forward advancing"
+
+[[combo]]
+nom = "b+hp, cr. hp xx qcb+lp (held), qcb+mp"
+categorie = "Punish Counter"
+inputs = "b+hp, cr. hp xx qcb+lp (held), qcb+mp"
+degats = 2835
+drive = 0
+super = 0
+notes = "16f Punish Counter. Simple. Throw bait."
+
+[[combo]]
+nom = "b+hp, cr. hp xx qcb+mp (held), qcb+lp (held), qcb+hp"
+categorie = "Punish Counter"
+inputs = "b+hp, cr. hp xx qcb+mp (held), qcb+lp (held), qcb+hp"
+degats = 3599
+drive = 0
+super = 0
+notes = "16f Punish Counter. Complex. Throw bait."
+
+[[combo]]
+nom = "dr xx b+hk, dr xx st. hk, cr. mp xx dr xx cr. mp, cr. hp xx qcb+lp (held), dr xx cr. hp xx qcb+hp xx qcfx2+k"
+categorie = "Punish Counter"
+inputs = "dr xx b+hk, dr xx st. hk, cr. mp xx dr xx cr. mp, cr. hp xx qcb+lp (held), dr xx cr. hp xx qcb+hp xx qcfx2+k"
+degats = 5669
+drive = 5
+super = 3
+notes = "23f Punish Counter into SA3 conversion."
+
+[[combo]]
+nom = "DI, cr. hp xx qcb+lp (held), qcb+mp"
+categorie = "Après DI (crumple)"
+inputs = "DI, cr. hp xx qcb+lp (held), qcb+mp"
+degats = 2505
+drive = 1
+super = 0
+notes = "Simple."
+
+[[combo]]
+nom = "DI, n.j hk, dr xx st. hp xx qcf+k xx k"
+categorie = "Après DI (crumple)"
+inputs = "DI, n.j hk, dr xx st. hp xx qcf+k xx k"
+degats = 2684
+drive = 2
+super = 0
+notes = "Simple."
+
+[[combo]]
+nom = "DI, cr. hp xx qcb+mp (held), qcb+lp (held), qcb+hp"
+categorie = "Après DI (crumple)"
+inputs = "DI, cr. hp xx qcb+mp (held), qcb+lp (held), qcb+hp"
+degats = 3139
+drive = 1
+super = 0
+notes = "Complex."
+
+[[combo]]
+nom = "DI, f+hp xx hp xx qcb+hp"
+categorie = "Après DI (wallsplat)"
+inputs = "DI, f+hp xx hp xx qcb+hp"
+degats = 1680
+drive = 1
+super = 0
+
+[[combo]]
+nom = "DI, b+hp xx qcb+lp (held), qcf+lp, srk+lp"
+categorie = "Après DI (wallsplat)"
+inputs = "DI, b+hp xx qcb+lp (held), qcf+lp, srk+lp"
+degats = 2064
+drive = 1
+super = 0
+notes = "Simple."
+
+[[combo]]
+nom = "DI, b+hp xx qcb+lp (perfect), qcf+hp, srk+hp"
+categorie = "Après DI (wallsplat)"
+inputs = "DI, b+hp xx qcb+lp (perfect), qcf+hp, srk+hp"
+degats = 2288
+drive = 1
+super = 0
+notes = "Complex."
+
+[[combo]]
+nom = "DI, b+hp xx qcb+lp (perfect), j. mp xx qcb+p, SA1"
+categorie = "Après DI (wallsplat)"
+inputs = "DI, b+hp xx qcb+lp (perfect), j. mp xx qcb+p, SA1"
+degats = 2856
+drive = 1
+super = 1
+notes = "Complex."
+
+[[combo]]
+nom = "DI, n.j hk, cr. hp xx qcb+lp (held), qcf+lp, srk+lp"
+categorie = "Après DI (stun)"
+inputs = "DI, n.j hk, cr. hp xx qcb+lp (held), qcf+lp, srk+lp"
+degats = 2280
+drive = 1
+super = 0
+notes = "Simple."
+
+[[combo]]
+nom = "DI, j. hk, cr. hp xx qcb+lp (perfect), qcf+hp, srk+hp"
+categorie = "Après DI (stun)"
+inputs = "DI, j. hk, cr. hp xx qcb+lp (perfect), qcf+hp, srk+hp"
+degats = 2410
+drive = 1
+super = 0
+notes = "Complex"
+
+[[modern]]
+categorie = "Anti-airs"
+inputs = "D+H"
+notes = "Good disjointed hitbox. Can stop a lot of forward advancing attacks as well."
+
+[[modern]]
+categorie = "Anti-airs"
+inputs = "F+SP"
+notes = "Luke's uppercut. Very strong anti-air, fully air invincible."
+
+[[modern]]
+categorie = "Anti-airs"
+inputs = "U+L"
+notes = "Jump back L is a good option against close range crossups"
+
+[[modern]]
+categorie = "Pokes"
+inputs = "D+M"
+notes = "Luke's D+M moves him forward and is special cancellable. Strong option to start offense and pressure."
+
+[[modern]]
+categorie = "Pokes"
+inputs = "M+[AUTO]"
+notes = "Strong disjointed button, good for catching extended hitboxes. Special cancellable. Short overall duration, hard to whiff punish."
+
+[[modern]]
+categorie = "Pokes"
+inputs = "M"
+notes = "Long range, safe on block. Good to catch whiffed attacks."
+
+[[modern]]
+categorie = "Pokes"
+inputs = "H+[AUTO]"
+notes = "Long range, special cancellable. Excellent spacing trap tool as well as whiff punish option"
+
+[[modern]]
+categorie = "Pokes"
+inputs = "H"
+notes = "Another fantastic forward advancing normal. Catches whiffed normals."
+
+[[modern]]
+categorie = "Punitions"
+inputs = "D+L > D+H > F+SP"
+notes = "4f punish."
+
+[[modern]]
+categorie = "Punitions"
+inputs = "M+[AUTO] > D+H > F+SP"
+notes = "6f punish."
+
+[[modern]]
+categorie = "Punitions"
+inputs = "M > M+[AUTO] > F+SP"
+notes = "9f punish. Operates from long range."
+
+[[modern]]
+categorie = "Punitions"
+inputs = "B+H > D+H > F+SP"
+notes = "16f punish. Point blank."
+
+[[modern]]
+categorie = "Combos de base"
+inputs = "D+L > D+L > D+L > F+SP"
+notes = "Quick all-light combo."
+
+[[modern]]
+categorie = "Combos de base"
+inputs = "M+[AUTO] > D+L > F+SP"
+notes = "Utilizes Luke's plus frames off of M+[AUTO]"
+
+[[modern]]
+categorie = "Combos de base"
+inputs = "D+H > B+SP (perf) > F+SP"
+notes = "Midscreen combo."
+
+[[modern]]
+categorie = "Combos de base"
+inputs = "DR > M > D+L > D+L > F+SP"
+notes = "Lunging drive rush attack."
+
+[[modern]]
+categorie = "Combos de base"
+inputs = "D+M > DR > M+[AUTO] > D+H > F+SP"
+notes = "Example drive rush from D+M."
+
+[[modern]]
+categorie = "Combos de base"
+inputs = "D+H > DR > B+H > D+H > DR > B+H > D+H > F+SP"
+notes = "Example meter dump loop with Drive Rush."
