@@ -5,8 +5,9 @@
 //! audio à fournir. Il est joué par Windows (`PlaySoundW`), sans bloquer la lecture de la manette.
 //! `son = false` dans `overlay.toml` pour le couper.
 
-use std::sync::OnceLock;
 use std::sync::atomic::{AtomicBool, Ordering};
+use std::sync::{Mutex, OnceLock};
+use std::time::{Duration, Instant};
 
 /// Fréquence d'échantillonnage : 44 100 valeurs par seconde, comme un CD.
 const ECHANTILLONS_PAR_SECONDE: u32 = 44_100;
@@ -16,6 +17,18 @@ const VOLUME: f32 = 0.35;
 const NOTES: [(f32, f32); 2] = [(1046.5, 0.09), (1568.0, 0.22)];
 
 static ACTIF: AtomicBool = AtomicBool::new(true);
+
+/// Quand le carillon « réussi » a été lancé. Windows ne joue qu'un son à la fois : un « tic »
+/// d'étape le couperait si on enchaîne tout de suite un nouvel essai.
+static CARILLON: Mutex<Option<Instant>> = Mutex::new(None);
+
+/// Le carillon est-il encore en train de sonner ?
+fn carillon_en_cours() -> bool {
+    let duree: f32 = NOTES.iter().map(|(_, d)| d).sum();
+    CARILLON.lock().ok().and_then(|c| *c).is_some_and(|quand| {
+        quand.elapsed() < Duration::from_secs_f32(duree) + Duration::from_millis(50)
+    })
+}
 
 pub fn activer(oui: bool) {
     ACTIF.store(oui, Ordering::Relaxed);
@@ -30,7 +43,7 @@ const NOTES_ETAPES: usize = 16;
 
 /// Joue le « tic » de l'étape `numero` (1 = première) : un ton plus haut à chaque étape.
 pub fn etape(numero: usize) {
-    if !actif() {
+    if !actif() || carillon_en_cours() {
         return;
     }
     static WAVS: OnceLock<Vec<Vec<u8>>> = OnceLock::new();
@@ -55,6 +68,9 @@ pub fn reussi() {
     // Le son doit rester en mémoire pendant qu'il est joué : on le garde pour toujours.
     static WAV: OnceLock<Vec<u8>> = OnceLock::new();
     let wav = WAV.get_or_init(|| fabriquer_wav(&NOTES));
+    if let Ok(mut c) = CARILLON.lock() {
+        *c = Some(Instant::now());
+    }
     jouer(wav);
 }
 

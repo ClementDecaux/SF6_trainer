@@ -240,6 +240,18 @@ impl Partage {
         }
     }
 
+    /// Efface le message du dernier essai, sauf un « COMBO RÉUSSI » encore récent : en
+    /// enchaînant tout de suite un nouvel essai, on doit quand même le voir.
+    pub fn effacer_message(&mut self) {
+        if !self
+            .message
+            .as_ref()
+            .is_some_and(|m| m.reussi && m.quand.elapsed() < Duration::from_millis(2000))
+        {
+            self.message = None;
+        }
+    }
+
     pub fn message(&mut self, texte: String, reussi: bool) {
         self.message = Some(Message {
             texte,

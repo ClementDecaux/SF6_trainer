@@ -742,7 +742,7 @@ fn resultat_trial(
             p.etape_a_venir = Some(trial.index);
             // Nouvel essai : on efface le raté d'avant.
             if trial.index == 1 {
-                p.message = None;
+                p.effacer_message();
             }
             println!("{}", affichage::trial(trial));
         }
@@ -772,7 +772,7 @@ fn resultat_trial(
             p.etape_cassee = Some(attendue);
             if trial.reprise.is_some() {
                 // Pas un vrai raté à montrer : le combo a été recommencé.
-                p.message = None;
+                p.effacer_message();
                 p.etape_cassee = None;
                 p.ligne_cassee_a_venir = false;
                 println!(
