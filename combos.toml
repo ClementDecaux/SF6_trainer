@@ -124,6 +124,7 @@ inputs = "cr. lp (pc), b+mk xx hcb+mp"
 nom = "Punition 4f : cr.lp, b+mp, Yoga Blast"
 categorie = "Punitions"
 inputs = "cr. lp (pc), b+mp xx hcb+hk"
+degats = 1760
 
 [[combo]]
 nom = "Punition 7f : b+mk, b+mk, Yoga Flame"
@@ -134,6 +135,7 @@ inputs = "b+mk, b+mk xx hcb+mp"
 nom = "Punition 9f : st.lk DR d/b+hp, Yoga Flame HP"
 categorie = "Punitions"
 inputs = "st. lk xx DR xx d/b+hp xx hcb+hp"
+degats = 1612
 
 [[combo]]
 nom = "Punition 10f : d/b+hp, DI"
@@ -169,6 +171,7 @@ inputs = "st. hk xx DR xx cr. hk"
 nom = "Punition 17f : st.hk, DR d/b+hp, Yoga Flame HP"
 categorie = "Punitions"
 inputs = "st. hk, dr xx d/b+hp xx hcb+hp"
+degats = 2456
 
 # --- Après un Drive Impact ---
 
@@ -241,3 +244,233 @@ inputs = "b+mp xx DR xx d/b+hp"
 nom = "d/b+hp DR cr.hk"
 categorie = "Drive Rush courts"
 inputs = "d/b+hp xx DR xx cr. hk"
+
+# ======================================================================
+# Ajouts tirés du guide « Playing With Fire SF6 » (dégâts donnés par le guide).
+# Les combos avec super, saut, float, téléport ou Yoga Mummy n'y sont pas :
+# l'outil ne lit pas encore ces coups.
+# ======================================================================
+
+# --- Sans jauge (suite) ---
+
+[[combo]]
+nom = "st.lp, cr.lp, Yoga Blast MK (adversaire debout)"
+categorie = "Sans jauge"
+inputs = "st. lp, cr. lp xx hcb+mk"
+degats = 1380
+
+[[combo]]
+nom = "cr.lp, cr.lp, Yoga Blast MK (adversaire debout)"
+categorie = "Sans jauge"
+inputs = "cr. lp, cr. lp xx hcb+mk"
+degats = 1380
+
+[[combo]]
+nom = "d/b+lk, cr.lp, Yoga Blast MK (adversaire debout)"
+categorie = "Sans jauge"
+inputs = "d/b+lk, cr. lp xx hcb+mk"
+degats = 1280
+
+[[combo]]
+nom = "d/b+mk, Yoga Flame LP"
+categorie = "Sans jauge"
+inputs = "d/b+mk xx hcb+lp"
+degats = 1610
+
+# --- OD (suite) ---
+
+[[combo]]
+nom = "st.lp, cr.lp, Yoga Fire OD"
+categorie = "OD"
+inputs = "st. lp, cr. lp xx qcf+pp"
+degats = 1240
+
+[[combo]]
+nom = "cr.lp, cr.lp, Yoga Fire OD"
+categorie = "OD"
+inputs = "cr. lp, cr. lp xx qcf+pp"
+degats = 1240
+
+# --- Drive Rush (suite) ---
+
+[[combo]]
+nom = "cr.lp x2 DR, Yoga Blast MK"
+categorie = "Drive Rush"
+inputs = "cr. lp, cr. lp xx DR xx cr. lp, b+mp xx hcb+mk"
+degats = 1578
+
+[[combo]]
+nom = "d/b+lk, cr.lp DR, Yoga Blast MK"
+categorie = "Drive Rush"
+inputs = "d/b+lk, cr. lp xx DR xx st. lp, b+mp xx hcb+mk"
+degats = 1478
+
+[[combo]]
+nom = "cr.mp DR b+mk, b+mk, Yoga Flame"
+categorie = "Drive Rush"
+inputs = "cr. mp xx DR xx b+mk, b+mk xx hcb+mp"
+degats = 2048
+
+# --- Punitions (suite, en Punish Counter) ---
+
+[[combo]]
+nom = "Punition 4f : st.lp, b+mp, Yoga Blast MK"
+categorie = "Punitions"
+inputs = "st. lp (pc), b+mp xx hcb+mk"
+degats = 1680
+
+[[combo]]
+nom = "Punition 4f : st.lp, b+mk, Yoga Blast HK, st.mp"
+categorie = "Punitions"
+inputs = "st. lp (pc), b+mk xx hcb+hk, st. mp"
+degats = 2030
+
+[[combo]]
+nom = "Punition 9f : st.lk DR d/b+hp, b+mk, Yoga Flame"
+categorie = "Punitions"
+inputs = "st. lk (pc) xx DR xx d/b+hp, b+mk xx hcb+mp"
+degats = 1716
+
+[[combo]]
+nom = "Punition 9f : st.lk DR d/b+hp, b+mk, Yoga Blast HK (adversaire debout)"
+categorie = "Punitions"
+inputs = "st. lk (pc) xx DR xx d/b+hp, b+mk xx hcb+hk"
+degats = 2108
+
+[[combo]]
+nom = "Punition 10f : d/b+hp, Yoga Flame HP"
+categorie = "Punitions"
+inputs = "d/b+hp (pc) xx hcb+hp"
+degats = 2160
+
+[[combo]]
+nom = "Punition 17f : st.hk, st.hp (portée max)"
+categorie = "Punitions"
+inputs = "st. hk (pc), st. hp"
+degats = 1960
+
+[[combo]]
+nom = "Punition 17f : st.hk DR (retardé) d/b+hp, Yoga Flame HP (portée max)"
+categorie = "Punitions"
+inputs = "st. hk (pc) xx DR (retardé) xx d/b+hp xx hcb+hp"
+degats = 2456
+
+[[combo]]
+nom = "Punition 17f : st.hk, DR cr.hk"
+categorie = "Punitions"
+inputs = "st. hk (pc), DR xx cr. hk"
+degats = 1725
+
+[[combo]]
+nom = "Punition 17f : st.hk, Yoga Fire HP, st.hp"
+categorie = "Punitions"
+inputs = "st. hk (pc) xx qcf+hp, st. hp"
+degats = 2360
+
+[[combo]]
+nom = "Punition 17f : st.hk, cr.mk, b+mk, Yoga Blast HK"
+categorie = "Punitions"
+inputs = "st. hk (pc), cr. mk, b+mk xx hcb+hk"
+degats = 2780
+
+[[combo]]
+nom = "Punition 17f : st.hk DR d/b+hp, b+mk, Yoga Blast HK"
+categorie = "Punitions"
+inputs = "st. hk (pc) xx DR xx d/b+hp, b+mk xx hcb+hk"
+degats = 2756
+
+[[combo]]
+nom = "Punition 17f : st.hk, DR d/b+hp, b+mk, Yoga Blast HK"
+categorie = "Punitions"
+inputs = "st. hk (pc), DR xx d/b+hp, b+mk xx hcb+hk"
+degats = 2756
+
+[[combo]]
+nom = "Punition 17f : st.hk, b+hp, Yoga Flame HP (collé)"
+categorie = "Punitions"
+inputs = "st. hk (pc), b+hp xx hcb+hp"
+degats = 2820
+
+[[combo]]
+nom = "Punition 17f : st.hk, b+hp, Yoga Blast HK, st.mp (collé)"
+categorie = "Punitions"
+inputs = "st. hk (pc), b+hp xx hcb+hk, st. mp"
+degats = 3240
+
+# --- Contres (Counter Hit, ex. sur un Drive Rush adverse) ---
+
+[[combo]]
+nom = "Contre : st.lp, cr.lp, Yoga Blast MK"
+categorie = "Contres"
+inputs = "st. lp (ch), cr. lp xx hcb+mk"
+degats = 1440
+
+[[combo]]
+nom = "Contre : b+mk, Yoga Blast HK"
+categorie = "Contres"
+inputs = "b+mk (ch) xx hcb+hk"
+degats = 1920
+
+[[combo]]
+nom = "Contre : b+mk DR d/b+hp, b+mk, Yoga Blast HK"
+categorie = "Contres"
+inputs = "b+mk (ch) xx DR xx d/b+hp, b+mk xx hcb+hk"
+degats = 2516
+
+# --- Anti-airs ---
+
+[[combo]]
+nom = "Anti-air contre : b+hp, Yoga Flame HP"
+categorie = "Anti-airs"
+inputs = "b+hp (ch) xx hcb+hp"
+degats = 2040
+
+[[combo]]
+nom = "Anti-air : b+mp, Yoga Blast HK, cr.hk"
+categorie = "Anti-airs"
+inputs = "b+mp xx hcb+hk, cr. hk"
+degats = 2670
+
+[[combo]]
+nom = "Anti-air (sol) : st.lp, Yoga Blast HK, cr.hk"
+categorie = "Anti-airs"
+inputs = "st. lp (pc) xx hcb+hk, cr. hk"
+degats = 1860
+
+# --- Après un Drive Impact (suite) ---
+
+[[combo]]
+nom = "DI (crumple), b+hp, DI"
+categorie = "Après un Drive Impact"
+inputs = "DI, b+hp xx DI"
+degats = 2240
+
+[[combo]]
+nom = "DI (crumple), b+hp, Yoga Blast MK"
+categorie = "Après un Drive Impact"
+inputs = "DI, b+hp xx hcb+mk"
+degats = 2520
+
+[[combo]]
+nom = "DI (crumple), b+hp, Yoga Blast HK (retardé), cr.hk"
+categorie = "Après un Drive Impact"
+inputs = "DI, b+hp xx hcb+hk (retardé), cr. hk"
+degats = 2970
+
+[[combo]]
+nom = "DI (rebond au mur), b+hp, Yoga Blast MK"
+categorie = "Après un Drive Impact"
+inputs = "DI, b+hp xx hcb+mk"
+degats = 2280
+
+[[combo]]
+nom = "DI (rebond au mur), b+hp, Yoga Blast MK, d/b+hk"
+categorie = "Après un Drive Impact"
+inputs = "DI, b+hp xx hcb+mk, d/b+hk"
+degats = 2900
+
+[[combo]]
+nom = "DI (mur), d/b+hp, Yoga Blast MK, d/b+hk"
+categorie = "Après un Drive Impact"
+inputs = "DI, d/b+hp xx hcb+mk, d/b+hk"
+degats = 2176
