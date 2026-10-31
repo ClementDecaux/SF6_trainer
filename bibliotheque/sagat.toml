@@ -1,6 +1,7 @@
 # Sagat : combos de la feuille communautaire SF6 (Google Sheets), importés tels quels.
 # degats = dégâts du combo complet, drive = barres de Drive, super = barres de super.
 # [[modern]] : les mêmes infos en contrôles Modern sans motion (NMM), pour référence.
+# [[frames]] : startup, frames actives et récupération des coups normaux (onglet Frame Data).
 personnage = "Sagat"
 
 [[combo]]
@@ -577,3 +578,93 @@ inputs = "M > M"
 [[modern]]
 categorie = "Combos de base"
 inputs = "H > H"
+
+[[frames]]
+coup = "st. lp"
+startup = 5
+actif = 3
+recuperation = 11
+
+[[frames]]
+coup = "st. mp"
+startup = 6
+actif = 4
+recuperation = 15
+
+[[frames]]
+coup = "st. hp"
+startup = 15
+actif = 4
+recuperation = 22
+
+[[frames]]
+coup = "st. lk"
+startup = 7
+actif = 2
+recuperation = 15
+
+[[frames]]
+coup = "st. mk"
+startup = 11
+actif = 4
+recuperation = 19
+
+[[frames]]
+coup = "st. hk"
+startup = 10
+actif = 6
+recuperation = 21
+
+[[frames]]
+coup = "cr. lp"
+startup = 4
+actif = 2
+recuperation = 10
+
+[[frames]]
+coup = "cr. mp"
+startup = 7
+actif = 3
+recuperation = 19
+
+[[frames]]
+coup = "cr. hp"
+startup = 11
+actif = 4
+recuperation = 21
+
+[[frames]]
+coup = "cr. lk"
+startup = 5
+actif = 3
+recuperation = 12
+
+[[frames]]
+coup = "cr. mk"
+startup = 9
+actif = 3
+recuperation = 18
+
+[[frames]]
+coup = "cr. hk"
+startup = 11
+actif = 3
+recuperation = 26
+
+[[frames]]
+coup = "f+mp"
+startup = 22
+actif = 3
+recuperation = 19
+
+[[frames]]
+coup = "f+lk"
+startup = 17
+actif = 3
+recuperation = 18
+
+[[frames]]
+coup = "f+hk"
+startup = 16
+actif = 4
+recuperation = 21

@@ -1,6 +1,7 @@
 # Dhalsim : combos de la feuille communautaire SF6 (Google Sheets), importés tels quels.
 # degats = dégâts du combo complet, drive = barres de Drive, super = barres de super.
 # [[modern]] : les mêmes infos en contrôles Modern sans motion (NMM), pour référence.
+# [[frames]] : startup, frames actives et récupération des coups normaux (onglet Frame Data).
 personnage = "Dhalsim"
 
 [[combo]]
@@ -493,3 +494,123 @@ notes = "Drive rush extension from mediums."
 categorie = "Combos de base"
 inputs = "D/B+H > DR > D/B+H > M+[AUTO] > B+SP"
 notes = "Drive rush extension from heavies."
+
+[[frames]]
+coup = "st. lp"
+startup = 4
+actif = 3
+recuperation = 8
+
+[[frames]]
+coup = "st. mp"
+startup = 14
+actif = 3
+recuperation = 19
+
+[[frames]]
+coup = "st. hp"
+startup = 16
+actif = 4
+recuperation = 27
+
+[[frames]]
+coup = "st. lk"
+startup = 9
+actif = 4
+recuperation = 11
+
+[[frames]]
+coup = "st. mk"
+startup = 12
+actif = 3
+recuperation = 18
+
+[[frames]]
+coup = "st. hk"
+startup = 17
+actif = 3
+recuperation = 20
+
+[[frames]]
+coup = "cr. lp"
+startup = 5
+actif = 3
+recuperation = 9
+
+[[frames]]
+coup = "cr. mp"
+startup = 12
+actif = 3
+recuperation = 16
+
+[[frames]]
+coup = "cr. hp"
+startup = 19
+actif = 4
+recuperation = 24
+
+[[frames]]
+coup = "cr. lk"
+startup = 4
+actif = 7
+recuperation = 16
+
+[[frames]]
+coup = "cr. mk"
+startup = 10
+actif = 13
+recuperation = 14
+
+[[frames]]
+coup = "cr. hk"
+startup = 12
+actif = 16
+recuperation = 20
+
+[[frames]]
+coup = "b+mp"
+startup = 8
+actif = 6
+recuperation = 16
+
+[[frames]]
+coup = "b+hp"
+startup = 14
+actif = 7
+recuperation = 29
+
+[[frames]]
+coup = "d/b+hp"
+startup = 10
+actif = 4
+recuperation = 20
+
+[[frames]]
+coup = "d/b+lk"
+startup = 5
+actif = 3
+recuperation = 10
+
+[[frames]]
+coup = "b+mk"
+startup = 7
+actif = 4
+recuperation = 17
+
+[[frames]]
+coup = "d/b+mk"
+startup = 8
+actif = 3
+recuperation = 20
+
+[[frames]]
+coup = "b+hk"
+startup = 14
+actif = 6
+recuperation = 20
+
+[[frames]]
+coup = "d/b+hk"
+startup = 9
+actif = 3
+recuperation = 22

@@ -1,6 +1,7 @@
 # Ed : combos de la feuille communautaire SF6 (Google Sheets), importés tels quels.
 # degats = dégâts du combo complet, drive = barres de Drive, super = barres de super.
 # [[modern]] : les mêmes infos en contrôles Modern sans motion (NMM), pour référence.
+# [[frames]] : startup, frames actives et récupération des coups normaux (onglet Frame Data).
 personnage = "Ed"
 
 [[combo]]
@@ -790,3 +791,63 @@ inputs = "M+[AUTO] > M+[AUTO] > F+SP"
 categorie = "Combos de base"
 inputs = "H > M+[AUTO] > H+[AUTO] > F+SP"
 notes = "Standing only."
+
+[[frames]]
+coup = "st. lp"
+startup = 4
+actif = 3
+recuperation = 7
+
+[[frames]]
+coup = "st. mp"
+startup = 7
+actif = 3
+recuperation = 15
+
+[[frames]]
+coup = "st. hp"
+startup = 10
+actif = 4
+recuperation = 18
+
+[[frames]]
+coup = "st. lk"
+startup = 6
+actif = 2
+recuperation = 13
+
+[[frames]]
+coup = "st. hk"
+startup = 10
+actif = 3
+recuperation = 12
+
+[[frames]]
+coup = "cr. lp"
+startup = 4
+actif = 3
+recuperation = 10
+
+[[frames]]
+coup = "cr. mp"
+startup = 8
+actif = 3
+recuperation = 29
+
+[[frames]]
+coup = "cr. hp"
+startup = 10
+actif = 4
+recuperation = 24
+
+[[frames]]
+coup = "cr. lk"
+startup = 5
+actif = 2
+recuperation = 12
+
+[[frames]]
+coup = "f+hp"
+startup = 17
+actif = 3
+recuperation = 21

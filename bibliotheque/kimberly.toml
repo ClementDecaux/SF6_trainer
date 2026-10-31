@@ -1,6 +1,7 @@
 # Kimberly : combos de la feuille communautaire SF6 (Google Sheets), importés tels quels.
 # degats = dégâts du combo complet, drive = barres de Drive, super = barres de super.
 # [[modern]] : les mêmes infos en contrôles Modern sans motion (NMM), pour référence.
+# [[frames]] : startup, frames actives et récupération des coups normaux (onglet Frame Data).
 personnage = "Kimberly"
 
 [[combo]]
@@ -684,3 +685,93 @@ notes = "Conversion off of M drive rush."
 categorie = "Combos de base"
 inputs = "M+[AUTO] > DR > D+H > F+SP > B+L > M > M > F+SP (tackle) > D+L"
 notes = "Conversion off of M+[AUTO] drive rush."
+
+[[frames]]
+coup = "st. lp"
+startup = 5
+actif = 2
+recuperation = 14
+
+[[frames]]
+coup = "st. mp"
+startup = 6
+actif = 3
+recuperation = 18
+
+[[frames]]
+coup = "st. hp"
+startup = 9
+actif = 3
+recuperation = 20
+
+[[frames]]
+coup = "st. lk"
+startup = 5
+actif = 3
+recuperation = 11
+
+[[frames]]
+coup = "st. mk"
+startup = 8
+actif = 3
+recuperation = 18
+
+[[frames]]
+coup = "st. hk"
+startup = 12
+actif = 4
+recuperation = 17
+
+[[frames]]
+coup = "cr. lp"
+startup = 4
+actif = 3
+recuperation = 7
+
+[[frames]]
+coup = "cr. mp"
+startup = 6
+actif = 3
+recuperation = 15
+
+[[frames]]
+coup = "cr. hp"
+startup = 8
+actif = 6
+recuperation = 17
+
+[[frames]]
+coup = "cr. lk"
+startup = 5
+actif = 3
+recuperation = 7
+
+[[frames]]
+coup = "cr. mk"
+startup = 7
+actif = 3
+recuperation = 16
+
+[[frames]]
+coup = "cr. hk"
+startup = 8
+actif = 3
+recuperation = 24
+
+[[frames]]
+coup = "d/f+mk"
+startup = 10
+actif = 10
+recuperation = 16
+
+[[frames]]
+coup = "b+hk"
+startup = 22
+actif = 2
+recuperation = 19
+
+[[frames]]
+coup = "f+hk"
+startup = 26
+actif = 3
+recuperation = 21

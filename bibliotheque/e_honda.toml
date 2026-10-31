@@ -1,6 +1,7 @@
 # E. Honda : combos de la feuille communautaire SF6 (Google Sheets), importés tels quels.
 # degats = dégâts du combo complet, drive = barres de Drive, super = barres de super.
 # [[modern]] : les mêmes infos en contrôles Modern sans motion (NMM), pour référence.
+# [[frames]] : startup, frames actives et récupération des coups normaux (onglet Frame Data).
 personnage = "E. Honda"
 
 [[combo]]
@@ -763,3 +764,75 @@ notes = "Drive rush confirm. Use the D+L conversion if DR > M is blocked."
 categorie = "Combos de base"
 inputs = "M > DR > M > H+[AUTO] > F+SP > D+L > B+SP"
 notes = "Drive rush cancel."
+
+[[frames]]
+coup = "st. lp"
+startup = 5
+actif = 3
+recuperation = 10
+
+[[frames]]
+coup = "st. mp"
+startup = 10
+actif = 4
+recuperation = 17
+
+[[frames]]
+coup = "st. hp"
+startup = 8
+actif = 7
+recuperation = 20
+
+[[frames]]
+coup = "st. lk"
+startup = 4
+actif = 2
+recuperation = 9
+
+[[frames]]
+coup = "st. mk"
+startup = 10
+actif = 4
+recuperation = 16
+
+[[frames]]
+coup = "cr. lp"
+startup = 4
+actif = 3
+recuperation = 10
+
+[[frames]]
+coup = "cr. mp"
+startup = 8
+actif = 4
+recuperation = 16
+
+[[frames]]
+coup = "cr. hp"
+startup = 11
+actif = 4
+recuperation = 17
+
+[[frames]]
+coup = "cr. lk"
+startup = 5
+actif = 2
+recuperation = 9
+
+[[frames]]
+coup = "cr. mk"
+startup = 9
+actif = 3
+recuperation = 17
+
+[[frames]]
+coup = "f+hk"
+startup = 14
+actif = 3
+recuperation = 21
+
+[[frames]]
+coup = "d/f+hk"
+startup = 22
+actif = 6
+recuperation = 18

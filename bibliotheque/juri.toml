@@ -1,6 +1,7 @@
 # Juri : combos de la feuille communautaire SF6 (Google Sheets), importés tels quels.
 # degats = dégâts du combo complet, drive = barres de Drive, super = barres de super.
 # [[modern]] : les mêmes infos en contrôles Modern sans motion (NMM), pour référence.
+# [[frames]] : startup, frames actives et récupération des coups normaux (onglet Frame Data).
 personnage = "Juri"
 
 [[combo]]
@@ -831,3 +832,81 @@ inputs = "DR > M > M+[AUTO] > B+SP"
 [[modern]]
 categorie = "Combos de base"
 inputs = "D+M > DR > M > D+H > B+SP"
+
+[[frames]]
+coup = "st. lp"
+startup = 4
+actif = 4
+recuperation = 7
+
+[[frames]]
+coup = "st. mp"
+startup = 6
+actif = 4
+recuperation = 12
+
+[[frames]]
+coup = "st. hp"
+startup = 10
+actif = 3
+recuperation = 24
+
+[[frames]]
+coup = "st. lk"
+startup = 5
+actif = 3
+recuperation = 9
+
+[[frames]]
+coup = "st. hk"
+startup = 17
+actif = 4
+recuperation = 19
+
+[[frames]]
+coup = "cr. lp"
+startup = 4
+actif = 3
+recuperation = 8
+
+[[frames]]
+coup = "cr. mp"
+startup = 6
+actif = 4
+recuperation = 15
+
+[[frames]]
+coup = "cr. hp"
+startup = 8
+actif = 4
+recuperation = 23
+
+[[frames]]
+coup = "cr. lk"
+startup = 5
+actif = 3
+recuperation = 8
+
+[[frames]]
+coup = "cr. mk"
+startup = 8
+actif = 3
+recuperation = 19
+
+[[frames]]
+coup = "cr. hk"
+startup = 10
+actif = 3
+recuperation = 23
+
+[[frames]]
+coup = "f+mk"
+startup = 21
+actif = 2
+recuperation = 23
+
+[[frames]]
+coup = "f+mp"
+startup = 8
+actif = 3
+recuperation = 17

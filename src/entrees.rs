@@ -430,7 +430,8 @@ pub fn boucle(
                     timings = t;
                 }
                 match crate::combo::creer_trial(choisi, &timings) {
-                    Ok(nouveau) => {
+                    Ok(mut nouveau) => {
+                        nouveau.durees = crate::combo::durees(&capture.personnage);
                         trial = nouveau;
                         capture.changer_combo(&trial.nom, &choisi.inputs);
                         juge.oublier_essai();

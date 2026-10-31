@@ -1,6 +1,7 @@
 # Yasmine : combos de la feuille communautaire SF6 (Google Sheets), importés tels quels.
 # degats = dégâts du combo complet, drive = barres de Drive, super = barres de super.
 # [[modern]] : les mêmes infos en contrôles Modern sans motion (NMM), pour référence.
+# [[frames]] : startup, frames actives et récupération des coups normaux (onglet Frame Data).
 personnage = "Yasmine"
 
 [[combo]]
@@ -692,3 +693,75 @@ notes = "Drive rush into low example"
 categorie = "Combos de base"
 inputs = "DR > H+[AUTO] > M+[AUTO] > SP > F+SP"
 notes = "Drive rush into st. hp example"
+
+[[frames]]
+coup = "st. lp"
+startup = 5
+actif = 3
+recuperation = 8
+
+[[frames]]
+coup = "st. lk"
+startup = 5
+actif = 2
+recuperation = 12
+
+[[frames]]
+coup = "st. mk"
+startup = 10
+actif = 3
+recuperation = 19
+
+[[frames]]
+coup = "st. hk"
+startup = 14
+actif = 3
+recuperation = 20
+
+[[frames]]
+coup = "cr. lp"
+startup = 4
+actif = 3
+recuperation = 8
+
+[[frames]]
+coup = "cr. mp"
+startup = 6
+actif = 3
+recuperation = 16
+
+[[frames]]
+coup = "cr. hp"
+startup = 8
+actif = 6
+recuperation = 23
+
+[[frames]]
+coup = "cr. lk"
+startup = 5
+actif = 3
+recuperation = 10
+
+[[frames]]
+coup = "cr. mk"
+startup = 8
+actif = 3
+recuperation = 19
+
+[[frames]]
+coup = "cr. hk"
+startup = 10
+actif = 3
+recuperation = 25
+
+[[frames]]
+coup = "f+mp"
+startup = 22
+actif = 3
+recuperation = 18
+
+[[frames]]
+coup = "b+hk"
+startup = 22
+actif = 2
+recuperation = 25

@@ -11,6 +11,7 @@
 //! pour la comparer aux coups reconnus par l'outil.
 
 use serde::Deserialize;
+use std::collections::HashMap;
 
 /// Comment une étape s'enchaîne avec la précédente.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -65,6 +66,15 @@ pub struct Modern {
     pub notes: String,
 }
 
+/// Les frames d'un coup normal (onglet Frame Data de la feuille).
+#[derive(Debug, Clone, Deserialize)]
+pub struct Frames {
+    pub coup: String,
+    pub startup: u32,
+    pub actif: u32,
+    pub recuperation: u32,
+}
+
 #[derive(Debug, Clone, Deserialize)]
 pub struct Fichier {
     pub personnage: String,
@@ -72,6 +82,8 @@ pub struct Fichier {
     pub combo: Vec<ComboFichier>,
     #[serde(default)]
     pub modern: Vec<Modern>,
+    #[serde(default)]
+    pub frames: Vec<Frames>,
 }
 
 /// Les combos de tous les personnages (feuille communautaire), inclus dans l'outil.
@@ -138,6 +150,23 @@ pub fn fusionner(mut fichier: Fichier) -> Fichier {
         fichier.modern = feuille.modern;
     }
     fichier
+}
+
+/// Durée totale (en frames) de chaque coup normal du personnage, par notation (« 2HP ») :
+/// du premier frame au dernier frame de récupération.
+pub fn durees(personnage: &str) -> HashMap<String, u64> {
+    let Some(fichier) = bibliotheque(personnage) else {
+        return HashMap::new();
+    };
+    let mut durees = HashMap::new();
+    for f in fichier.frames {
+        if let Ok(notation) = normaliser(&f.coup) {
+            durees
+                .entry(notation)
+                .or_insert((f.startup + f.actif + f.recuperation).saturating_sub(1) as u64);
+        }
+    }
+    durees
 }
 
 /// Les combos d'un personnage de la bibliothèque.
@@ -304,6 +333,12 @@ pub fn normaliser(etape: &str) -> Result<String, String> {
     Ok(format!("{mouvement}{bouton}"))
 }
 
+/// Frames de course d'un Drive Rush avant de pouvoir attaquer (au plus tôt).
+const DRIVE_RUSH_MIN: u64 = 11;
+
+/// Frames pendant lesquelles le jeu garde un appui pour le sortir dès que possible.
+const BUFFER: u64 = 4;
+
 /// Au-delà de ce nombre de frames (5 s) sans étape validée, l'essai est considéré comme
 /// abandonné et le trial recommence. Ce n'est pas un timing à respecter : seuls les coups
 /// lus dans le jeu et ses hits valident le combo.
@@ -364,6 +399,9 @@ pub struct Trial {
     /// Après un raté : l'essai a été recalé sur un nouveau départ pris parmi les appuis de
     /// l'essai raté (le numéro du premier appui gardé). Voir [`Trial::coup`].
     pub reprise: Option<usize>,
+    /// Durée de chaque coup normal du perso (Frame Data) : un appui fait avant que le coup
+    /// d'avant soit fini est avalé par le jeu (voir [`Trial::ecart_min`]).
+    pub durees: HashMap<String, u64>,
 }
 
 /// Le côté de l'écran du joueur. À droite, « avant » est vers la gauche : un 236 fait au
@@ -420,6 +458,7 @@ impl Trial {
             degats_fixe: false,
             appuis: Vec::new(),
             reprise: None,
+            durees: HashMap::new(),
         }
     }
 
@@ -430,6 +469,7 @@ impl Trial {
         t.hits_fixe = self.hits_fixe;
         t.degats = self.degats;
         t.degats_fixe = self.degats_fixe;
+        t.durees = self.durees.clone();
         t.cote = self.cote;
         t
     }
@@ -451,6 +491,25 @@ impl Trial {
                     && retournes.iter().any(|c| self.accepte(c, attendu))
             }
         };
+    }
+
+    /// Écart minimum (frames) entre l'appui de l'étape d'avant et celui de l'étape attendue
+    /// pour que le coup puisse sortir. Une borne basse : le temps d'arrêt sur un coup qui
+    /// touche (hitstop) allonge encore le vrai délai, on n'avale donc jamais un appui valable.
+    /// - Après un Drive Rush : le perso n'attaque pas avant la fin de la course minimale.
+    /// - Un link (« , ») : il faut que le coup d'avant ait fini sa récupération (Frame Data).
+    ///
+    /// On retire les frames où le jeu garde un appui en mémoire (buffer).
+    fn ecart_min(&self) -> u64 {
+        let avant = &self.etapes[self.index - 1].notation;
+        let duree = if avant == "DR" {
+            DRIVE_RUSH_MIN
+        } else if self.etapes[self.index].liaison == Liaison::Link {
+            self.durees.get(avant).copied().unwrap_or(0)
+        } else {
+            0
+        };
+        duree.saturating_sub(BUFFER)
     }
 
     pub fn attendu(&self) -> &str {
@@ -558,7 +617,15 @@ impl Trial {
         }
         let candidats: &[String] = if self.miroir { &retournes } else { candidats };
 
-        if candidats.iter().any(|c| self.accepte(c, self.attendu())) {
+        let bon = candidats.iter().any(|c| self.accepte(c, self.attendu()));
+        // Le bon coup, mais trop tôt : le perso ne peut pas encore agir, le jeu l'avale
+        // (on spamme souvent pendant un Drive Rush). C'est un appui d'après qui sortira.
+        if bon && self.index > 0 && ecart < self.ecart_min() {
+            self.intercales += 1;
+            self.dernier_appui = frame;
+            return Resultat::Ignore;
+        }
+        if bon {
             if self.index == 0 {
                 self.nouvel_essai();
             } else {
@@ -750,6 +817,28 @@ mod tests {
         assert!(!f.modern.is_empty());
         let mut noms = std::collections::HashSet::new();
         assert!(f.combo.iter().all(|c| noms.insert(&c.nom)));
+    }
+
+    #[test]
+    fn appui_avale_pendant_le_drive_rush() {
+        let mut t = Trial::new("t", parser("2mp xx DR xx 1hp").unwrap());
+        assert_eq!(t.coup(&c("2MP"), 0), Resultat::Avance);
+        assert_eq!(t.coup(&c("DR"), 10), Resultat::Avance);
+        // Spam de 1HP : les premiers sont avalés pendant la course.
+        assert_eq!(t.coup(&c("1HP"), 12), Resultat::Ignore);
+        assert_eq!(t.coup(&c("1HP"), 15), Resultat::Ignore);
+        assert_eq!(t.coup(&c("1HP"), 18), Resultat::Reussi);
+    }
+
+    #[test]
+    fn link_trop_tot_avale() {
+        let mut t = Trial::new("t", parser("4mk, 4mk").unwrap());
+        t.durees = durees("Dhalsim");
+        // b+mk : 7 + 4 + 17 - 1 = 27 frames, moins 4 de buffer.
+        assert_eq!(t.durees.get("4MK"), Some(&27));
+        assert_eq!(t.coup(&c("4MK"), 0), Resultat::Avance);
+        assert_eq!(t.coup(&c("4MK"), 10), Resultat::Ignore);
+        assert_eq!(t.coup(&c("4MK"), 24), Resultat::Reussi);
     }
 
     #[test]

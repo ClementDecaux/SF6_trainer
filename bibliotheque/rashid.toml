@@ -1,6 +1,7 @@
 # Rashid : combos de la feuille communautaire SF6 (Google Sheets), importés tels quels.
 # degats = dégâts du combo complet, drive = barres de Drive, super = barres de super.
 # [[modern]] : les mêmes infos en contrôles Modern sans motion (NMM), pour référence.
+# [[frames]] : startup, frames actives et récupération des coups normaux (onglet Frame Data).
 personnage = "Rashid"
 
 [[combo]]
@@ -732,3 +733,81 @@ notes = "Forward lunging drive rush attack."
 categorie = "Combos de base"
 inputs = "D+M > DR > M > H+[AUTO] > B+SP"
 notes = "Drive rush off of D+M"
+
+[[frames]]
+coup = "st. lp"
+startup = 4
+actif = 2
+recuperation = 9
+
+[[frames]]
+coup = "st. mp"
+startup = 6
+actif = 3
+recuperation = 14
+
+[[frames]]
+coup = "st. hp"
+startup = 9
+actif = 3
+recuperation = 21
+
+[[frames]]
+coup = "st. lk"
+startup = 4
+actif = 3
+recuperation = 10
+
+[[frames]]
+coup = "st. mk"
+startup = 8
+actif = 3
+recuperation = 17
+
+[[frames]]
+coup = "st. hk"
+startup = 13
+actif = 8
+recuperation = 18
+
+[[frames]]
+coup = "cr. lp"
+startup = 5
+actif = 3
+recuperation = 7
+
+[[frames]]
+coup = "cr. mp"
+startup = 6
+actif = 4
+recuperation = 13
+
+[[frames]]
+coup = "cr. lk"
+startup = 5
+actif = 3
+recuperation = 8
+
+[[frames]]
+coup = "cr. mk"
+startup = 7
+actif = 3
+recuperation = 18
+
+[[frames]]
+coup = "cr. hk"
+startup = 9
+actif = 3
+recuperation = 24
+
+[[frames]]
+coup = "f+hp"
+startup = 22
+actif = 3
+recuperation = 21
+
+[[frames]]
+coup = "f+hk"
+startup = 16
+actif = 4
+recuperation = 20

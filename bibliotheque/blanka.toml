@@ -1,6 +1,7 @@
 # Blanka : combos de la feuille communautaire SF6 (Google Sheets), importés tels quels.
 # degats = dégâts du combo complet, drive = barres de Drive, super = barres de super.
 # [[modern]] : les mêmes infos en contrôles Modern sans motion (NMM), pour référence.
+# [[frames]] : startup, frames actives et récupération des coups normaux (onglet Frame Data).
 personnage = "Blanka"
 
 [[combo]]
@@ -704,3 +705,99 @@ notes = "Strong advancing attack with good payoff"
 categorie = "Combos de base"
 inputs = "M > DR > H > H+[AUTO] > D+M+H > L > D+F+H"
 notes = "Easy conversion off of a good long-range poke"
+
+[[frames]]
+coup = "st. lp"
+startup = 5
+actif = 3
+recuperation = 10
+
+[[frames]]
+coup = "st. mp"
+startup = 9
+actif = 3
+recuperation = 15
+
+[[frames]]
+coup = "st. hp"
+startup = 10
+actif = 7
+recuperation = 17
+
+[[frames]]
+coup = "st. lk"
+startup = 4
+actif = 4
+recuperation = 7
+
+[[frames]]
+coup = "st. mk"
+startup = 7
+actif = 3
+recuperation = 17
+
+[[frames]]
+coup = "st. hk"
+startup = 7
+actif = 9
+recuperation = 18
+
+[[frames]]
+coup = "cr. lp"
+startup = 6
+actif = 3
+recuperation = 8
+
+[[frames]]
+coup = "cr. mp"
+startup = 9
+actif = 5
+recuperation = 16
+
+[[frames]]
+coup = "cr. hp"
+startup = 15
+actif = 6
+recuperation = 20
+
+[[frames]]
+coup = "cr. lk"
+startup = 5
+actif = 2
+recuperation = 10
+
+[[frames]]
+coup = "cr. mk"
+startup = 8
+actif = 3
+recuperation = 18
+
+[[frames]]
+coup = "cr. hk"
+startup = 11
+actif = 4
+recuperation = 23
+
+[[frames]]
+coup = "f+mp"
+startup = 20
+actif = 3
+recuperation = 20
+
+[[frames]]
+coup = "b+mk"
+startup = 9
+actif = 6
+recuperation = 16
+
+[[frames]]
+coup = "f+hp"
+startup = 18
+actif = 4
+recuperation = 31
+
+[[frames]]
+coup = "d/f+hp"
+startup = 14
+actif = 10
+recuperation = 22

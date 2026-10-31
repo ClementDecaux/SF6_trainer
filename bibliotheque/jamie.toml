@@ -1,6 +1,7 @@
 # Jamie : combos de la feuille communautaire SF6 (Google Sheets), importés tels quels.
 # degats = dégâts du combo complet, drive = barres de Drive, super = barres de super.
 # [[modern]] : les mêmes infos en contrôles Modern sans motion (NMM), pour référence.
+# [[frames]] : startup, frames actives et récupération des coups normaux (onglet Frame Data).
 personnage = "Jamie"
 
 [[combo]]
@@ -766,3 +767,81 @@ notes = "Drive rush combo off of cr. mk. At level 0, you can opt for an uppercut
 categorie = "Combos de base"
 inputs = "D+M > DR > M > D+H > D+SP"
 notes = "Drive rush combo off of cr. mk. Sets up rekkas at level 0/1, breakdance at level 2+."
+
+[[frames]]
+coup = "st. lp"
+startup = 5
+actif = 2
+recuperation = 7
+
+[[frames]]
+coup = "st. mp"
+startup = 8
+actif = 4
+recuperation = 14
+
+[[frames]]
+coup = "st. lk"
+startup = 5
+actif = 2
+recuperation = 11
+
+[[frames]]
+coup = "st. mk"
+startup = 9
+actif = 3
+recuperation = 18
+
+[[frames]]
+coup = "st. hk"
+startup = 15
+actif = 3
+recuperation = 21
+
+[[frames]]
+coup = "cr. lp"
+startup = 4
+actif = 2
+recuperation = 9
+
+[[frames]]
+coup = "cr. mp"
+startup = 6
+actif = 3
+recuperation = 15
+
+[[frames]]
+coup = "cr. hp"
+startup = 8
+actif = 5
+recuperation = 23
+
+[[frames]]
+coup = "cr. lk"
+startup = 5
+actif = 2
+recuperation = 11
+
+[[frames]]
+coup = "cr. mk"
+startup = 7
+actif = 3
+recuperation = 18
+
+[[frames]]
+coup = "f+mk"
+startup = 22
+actif = 5
+recuperation = 20
+
+[[frames]]
+coup = "b+hp"
+startup = 18
+actif = 4
+recuperation = 20
+
+[[frames]]
+coup = "f+hk"
+startup = 16
+actif = 3
+recuperation = 20

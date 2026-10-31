@@ -1,6 +1,7 @@
 # Lily : combos de la feuille communautaire SF6 (Google Sheets), importés tels quels.
 # degats = dégâts du combo complet, drive = barres de Drive, super = barres de super.
 # [[modern]] : les mêmes infos en contrôles Modern sans motion (NMM), pour référence.
+# [[frames]] : startup, frames actives et récupération des coups normaux (onglet Frame Data).
 personnage = "Lily"
 
 [[combo]]
@@ -654,3 +655,87 @@ notes = "Drive rush into an attack"
 categorie = "Combos de base"
 inputs = "D+H > DR > D+H > L > F+SP"
 notes = "D+H drive rush cancel."
+
+[[frames]]
+coup = "st. lp"
+startup = 5
+actif = 3
+recuperation = 8
+
+[[frames]]
+coup = "st. mp"
+startup = 9
+actif = 4
+recuperation = 17
+
+[[frames]]
+coup = "st. hp"
+startup = 10
+actif = 3
+recuperation = 22
+
+[[frames]]
+coup = "st. lk"
+startup = 4
+actif = 3
+recuperation = 8
+
+[[frames]]
+coup = "st. mk"
+startup = 7
+actif = 3
+recuperation = 15
+
+[[frames]]
+coup = "st. hk"
+startup = 14
+actif = 4
+recuperation = 21
+
+[[frames]]
+coup = "cr. lp"
+startup = 6
+actif = 3
+recuperation = 8
+
+[[frames]]
+coup = "cr. mp"
+startup = 8
+actif = 3
+recuperation = 18
+
+[[frames]]
+coup = "cr. hp"
+startup = 10
+actif = 7
+recuperation = 22
+
+[[frames]]
+coup = "cr. lk"
+startup = 5
+actif = 2
+recuperation = 12
+
+[[frames]]
+coup = "cr. mk"
+startup = 9
+actif = 3
+recuperation = 18
+
+[[frames]]
+coup = "d/f+hp"
+startup = 25
+actif = 3
+recuperation = 18
+
+[[frames]]
+coup = "b+hp"
+startup = 14
+actif = 4
+recuperation = 18
+
+[[frames]]
+coup = "f+hp"
+startup = 16
+actif = 2
+recuperation = 24

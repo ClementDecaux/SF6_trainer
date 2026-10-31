@@ -50,7 +50,8 @@ fn lancer() -> Result<(), String> {
     let controles = controles::charger()?;
     let (personnage, combos, modern, choisi) = choisir_combo()?;
     let timings = timings::charger()?;
-    let trial = combo::creer_trial(&combos[choisi], &timings)?;
+    let mut trial = combo::creer_trial(&combos[choisi], &timings)?;
+    trial.durees = combo::durees(&personnage);
     let inputs = combos[choisi].inputs.clone();
     let config = overlay::charger()?;
     son::activer(config.son);
@@ -97,6 +98,7 @@ fn lancer() -> Result<(), String> {
                 personnage: personnage.clone(),
                 combo: combos.clone(),
                 modern: modern.clone(),
+                frames: Vec::new(),
             };
             std::thread::spawn(move || {
                 entrees::boucle(

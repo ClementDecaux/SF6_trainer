@@ -99,6 +99,11 @@ déjà dans `combos.toml` n'est pas en double, il gagne juste les infos qui lui 
   sans quart de cercle (L/M/H, SP = spécial, [AUTO] = assist). À lire : le trainer suit les
   contrôles Classic.
 - `P` ou `K` seul (`qcf+p`) accepte n'importe quelle force, et `srk` = `dp`.
+- **Spam** : un appui fait avant que le perso puisse agir est avalé par le jeu, le trainer
+  l'ignore aussi. Après un Drive Rush, rien ne sort avant 11 frames de course ; dans un link
+  (`,`), pas avant la fin du coup d'avant (startup, actives et récupération de l'onglet
+  Frame Data, dans `[[frames]]`). On compte 4 frames de buffer. Pas de Frame Data pour Ryu
+  (onglet illisible) : pour lui, seule la règle du Drive Rush s'applique.
 
 ## Validation d'un combo
 
