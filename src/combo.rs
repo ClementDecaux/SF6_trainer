@@ -110,6 +110,36 @@ pub const BIBLIOTHEQUE: &[(&str, &str)] = &[
     ("Zangief", include_str!("../bibliotheque/zangief.toml")),
 ];
 
+/// Ajoute à `combos.toml` les combos de la feuille communautaire de son personnage :
+/// ceux qu'il a déjà (mêmes inputs) gagnent les infos qui leur manquent, les autres
+/// viennent à la suite.
+pub fn fusionner(mut fichier: Fichier) -> Fichier {
+    let Some(feuille) = bibliotheque(&fichier.personnage) else {
+        return fichier;
+    };
+    let cle = |inputs: &str| inputs.to_lowercase().replace(char::is_whitespace, "");
+    for c in feuille.combo {
+        if let Some(mien) = fichier
+            .combo
+            .iter_mut()
+            .find(|m| cle(&m.inputs) == cle(&c.inputs))
+        {
+            mien.degats = mien.degats.or(c.degats);
+            mien.drive = mien.drive.or(c.drive);
+            mien.super_ = mien.super_.or(c.super_);
+            if mien.notes.is_empty() {
+                mien.notes = c.notes;
+            }
+        } else if !fichier.combo.iter().any(|m| m.nom == c.nom) {
+            fichier.combo.push(c);
+        }
+    }
+    if fichier.modern.is_empty() {
+        fichier.modern = feuille.modern;
+    }
+    fichier
+}
+
 /// Les combos d'un personnage de la bibliothèque.
 pub fn bibliotheque(personnage: &str) -> Option<Fichier> {
     let (_, texte) = BIBLIOTHEQUE.iter().find(|(p, _)| *p == personnage)?;
@@ -709,6 +739,17 @@ mod tests {
         }
         println!("{jouables}/{total} combos suivis par le trainer");
         assert!(jouables * 2 > total);
+    }
+
+    #[test]
+    fn fusion_sans_doublon() {
+        let mes: Fichier = toml::from_str(COMBOS_PAR_DEFAUT).unwrap();
+        let n = mes.combo.len();
+        let f = fusionner(mes);
+        assert!(f.combo.len() > n);
+        assert!(!f.modern.is_empty());
+        let mut noms = std::collections::HashSet::new();
+        assert!(f.combo.iter().all(|c| noms.insert(&c.nom)));
     }
 
     #[test]

@@ -73,10 +73,10 @@ pub struct Interface {
     jouables: Vec<bool>,
     /// La fiche Modern sans motion (NMM) du personnage affiché.
     modern: Vec<Modern>,
-    /// `combos.toml` (« Mes combos »).
+    /// `combos.toml`, avec les combos de la feuille communautaire de son personnage.
     mes_combos: Fichier,
-    /// Personnage de la bibliothèque affiché (aucun : `combos.toml`).
-    bibliotheque: Option<String>,
+    /// Le personnage affiché.
+    personnage: String,
     onglet: Onglet,
     recherche: String,
     /// Combo choisi dans la liste (pas forcément celui en cours dans l'overlay).
@@ -123,8 +123,8 @@ impl Interface {
             jouables: jouables(&mes_combos.combo),
             combos: mes_combos.combo.clone(),
             modern: mes_combos.modern.clone(),
+            personnage: mes_combos.personnage.clone(),
             mes_combos,
-            bibliotheque: None,
             onglet: Onglet::Combos,
             recherche: String::new(),
             choisi,
@@ -641,44 +641,39 @@ fn jouables(combos: &[ComboFichier]) -> Vec<bool> {
 }
 
 impl Interface {
-    /// Le choix de la liste : `combos.toml`, ou un personnage de la feuille communautaire.
+    /// Le choix du personnage : ses combos (ceux de `combos.toml` et de la feuille
+    /// communautaire, mélangés).
     fn choix_personnage(&mut self, ui: &mut egui::Ui) {
-        let mes_combos = format!("Mes combos ({})", self.mes_combos.personnage);
-        let actuel = self.bibliotheque.clone();
+        let actuel = self.personnage.clone();
         let mut choix = actuel.clone();
+        let mut persos: Vec<&str> = crate::combo::BIBLIOTHEQUE.iter().map(|(p, _)| *p).collect();
+        if !persos.contains(&self.mes_combos.personnage.as_str()) {
+            persos.insert(0, &self.mes_combos.personnage);
+        }
         ui.horizontal(|ui| {
-            ui.label("Liste");
+            ui.label("Personnage");
             egui::ComboBox::from_id_salt("personnage")
-                .width(220.0)
-                .selected_text(match &actuel {
-                    Some(p) => format!("{p} (feuille communautaire)"),
-                    None => mes_combos.clone(),
-                })
+                .width(200.0)
+                .selected_text(&actuel)
                 .height(500.0)
                 .show_ui(ui, |ui| {
-                    ui.selectable_value(&mut choix, None, &mes_combos);
-                    ui.separator();
-                    for (p, _) in crate::combo::BIBLIOTHEQUE {
-                        ui.selectable_value(&mut choix, Some(p.to_string()), *p);
+                    for p in persos {
+                        ui.selectable_value(&mut choix, p.to_string(), p);
                     }
                 });
-        })
-        .response
-        .on_hover_text(
-            "Feuille communautaire : les combos de tous les persos (dégâts, Drive, super, \
-             conseils) et la fiche Modern sans motion (NMM)",
-        );
+        });
         if choix == actuel {
             return;
         }
-        let fichier = match &choix {
-            Some(p) => match crate::combo::bibliotheque(p) {
+        let fichier = if choix == self.mes_combos.personnage {
+            self.mes_combos.clone()
+        } else {
+            match crate::combo::bibliotheque(&choix) {
                 Some(f) => f,
                 None => return,
-            },
-            None => self.mes_combos.clone(),
+            }
         };
-        self.bibliotheque = choix;
+        self.personnage = choix;
         self.jouables = jouables(&fichier.combo);
         self.combos = fichier.combo;
         self.modern = fichier.modern;

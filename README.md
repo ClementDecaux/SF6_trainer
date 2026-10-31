@@ -87,9 +87,11 @@ directement le 5e. La liste numérotée s'affiche dans le terminal au lancement.
 
 ### Tous les persos : la feuille communautaire
 
-En haut de l'onglet **Combos**, la liste **Liste** passe de tes combos (`combos.toml`) aux
-combos d'un des 32 persos, tirés de la feuille Google communautaire (combos, dégâts, barres
-de Drive et de super, conseils). Les fichiers sont dans `bibliotheque/`, inclus dans l'outil.
+En haut de l'onglet **Combos**, le menu **Personnage** affiche les combos d'un des 32 persos,
+tirés de la feuille Google communautaire (combos, dégâts, barres de Drive et de super,
+conseils). Les fichiers sont dans `bibliotheque/`, inclus dans l'outil. Pour le perso de
+`combos.toml`, ses combos et ceux de la feuille sont mélangés dans une seule liste (un combo
+déjà dans `combos.toml` n'est pas en double, il gagne juste les infos qui lui manquent).
 
 - Les combos barrés sont à lire seulement : leur notation n'est pas encore suivie par le
   trainer (supers `qcfx2`, sauts `j.`, coups chargés `b~f`, deux boutons, `360`...).

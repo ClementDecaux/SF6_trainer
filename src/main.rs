@@ -128,7 +128,8 @@ fn lancer() -> Result<(), String> {
 type Choix = (String, Vec<combo::ComboFichier>, Vec<combo::Modern>, usize);
 
 fn choisir_combo() -> Result<Choix, String> {
-    let fichier = combo::charger()?;
+    // Les combos de la feuille communautaire du personnage s'ajoutent aux siens.
+    let fichier = combo::fusionner(combo::charger()?);
     let numero: usize = match std::env::args().nth(1) {
         Some(arg) => arg
             .parse()
