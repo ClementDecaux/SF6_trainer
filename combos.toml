@@ -271,12 +271,6 @@ categorie = "Sans jauge"
 inputs = "d/b+lk, cr. lp xx hcb+mk"
 degats = 1280
 
-[[combo]]
-nom = "d/b+mk, Yoga Flame LP"
-categorie = "Sans jauge"
-inputs = "d/b+mk xx hcb+lp"
-degats = 1610
-
 # --- OD (suite) ---
 
 [[combo]]
@@ -474,3 +468,188 @@ nom = "DI (mur), d/b+hp, Yoga Blast MK, d/b+hk"
 categorie = "Après un Drive Impact"
 inputs = "DI, d/b+hp xx hcb+mk, d/b+hk"
 degats = 2176
+
+# ======================================================================
+# Ajouts tirés du wiki SuperCombo (page Combos de Dhalsim, dégâts du wiki).
+# Mêmes limites : pas de super, saut, float, téléport, ni Yoga Fire MP+HP.
+# ======================================================================
+
+# --- Sans jauge (wiki) ---
+
+[[combo]]
+nom = "st.lk, Yoga Flame LP"
+categorie = "Sans jauge"
+inputs = "st. lk xx hcb+lp"
+degats = 940
+
+[[combo]]
+nom = "cr.mp, Yoga Fire HP"
+categorie = "Sans jauge"
+inputs = "cr. mp xx qcf+hp"
+degats = 1200
+
+[[combo]]
+nom = "cr.mp, Yoga Flame LP"
+categorie = "Sans jauge"
+inputs = "cr. mp xx hcb+lp"
+degats = 1400
+
+[[combo]]
+nom = "b+mk, Yoga Blast HK (adversaire debout)"
+categorie = "Sans jauge"
+inputs = "b+mk xx hcb+hk"
+degats = 1800
+
+[[combo]]
+nom = "d/b+mk, Yoga Flame LP"
+categorie = "Sans jauge"
+inputs = "d/b+mk xx hcb+lp"
+degats = 1140
+
+[[combo]]
+nom = "d/b+mk, Yoga Blast HK (adversaire debout)"
+categorie = "Sans jauge"
+inputs = "d/b+mk xx hcb+hk"
+degats = 1460
+
+[[combo]]
+nom = "d/b+hp, Yoga Flame MP (de loin)"
+categorie = "Sans jauge"
+inputs = "d/b+hp xx hcb+mp"
+degats = 1700
+
+# --- Drive Rush (wiki) ---
+
+[[combo]]
+nom = "DR b+mk, Yoga Flame HP"
+categorie = "Drive Rush"
+inputs = "DR xx b+mk xx hcb+hp"
+degats = 1800
+
+[[combo]]
+nom = "DR d/b+hp (portée max), Yoga Flame HP"
+categorie = "Drive Rush"
+inputs = "DR xx d/b+hp xx hcb+hp"
+degats = 2000
+
+[[combo]]
+nom = "st.hk DR st.mk"
+categorie = "Drive Rush"
+inputs = "st. hk xx DR xx st. mk"
+degats = 1310
+
+[[combo]]
+nom = "b+mk DR b+hk, st.lp, cr.lp, Yoga Blast HK"
+categorie = "Drive Rush"
+inputs = "b+mk xx DR xx b+hk, st. lp, cr. lp xx hcb+hk"
+degats = 2443
+
+[[combo]]
+nom = "d/b+hp DR b+hk, st.lp, cr.lp, Yoga Blast HK"
+categorie = "Drive Rush"
+inputs = "d/b+hp xx DR xx b+hk, st. lp, cr. lp xx hcb+hk"
+degats = 2643
+
+# --- Contres (wiki) ---
+
+[[combo]]
+nom = "Contre : st.lp, Yoga Flame LP"
+categorie = "Contres"
+inputs = "st. lp (ch) xx hcb+lp"
+degats = 1000
+
+[[combo]]
+nom = "Contre : cr.lp, Yoga Flame LP"
+categorie = "Contres"
+inputs = "cr. lp (ch) xx hcb+lp"
+degats = 1000
+
+[[combo]]
+nom = "Contre : d/b+mk, Yoga Flame MP"
+categorie = "Contres"
+inputs = "d/b+mk (ch) xx hcb+mp"
+degats = 1320
+
+[[combo]]
+nom = "Contre : b+mk, cr.lp, Yoga Blast HK (collé)"
+categorie = "Contres"
+inputs = "b+mk (ch), cr. lp xx hcb+hk"
+degats = 1980
+
+[[combo]]
+nom = "Contre : d/b+hp, cr.lp, Yoga Blast HK (collé)"
+categorie = "Contres"
+inputs = "d/b+hp (ch), cr. lp xx hcb+hk"
+degats = 2220
+
+[[combo]]
+nom = "Contre : st.hk DR b+hk, st.lp, cr.lp, Yoga Blast HK"
+categorie = "Contres"
+inputs = "st. hk (ch) xx DR xx b+hk, st. lp, cr. lp xx hcb+hk"
+degats = 2803
+
+# --- Punitions (wiki, en Punish Counter) ---
+
+[[combo]]
+nom = "Punition 5f : st.lk, Yoga Flame MP"
+categorie = "Punitions"
+inputs = "st. lk (pc) xx hcb+mp"
+degats = 1080
+
+[[combo]]
+nom = "Punition 7f : b+mk, Yoga Flame HP"
+categorie = "Punitions"
+inputs = "b+mk (pc) xx hcb+hp"
+degats = 1920
+
+[[combo]]
+nom = "Punition 17f : st.hk, cr.hk (de loin)"
+categorie = "Punitions"
+inputs = "st. hk (pc), cr. hk"
+degats = 1860
+
+# --- Anti-airs (wiki) ---
+
+[[combo]]
+nom = "Anti-air : Yoga Blast HK, st.mp"
+categorie = "Anti-airs"
+inputs = "hcb+hk, st. mp"
+degats = 1900
+
+[[combo]]
+nom = "Anti-air : Yoga Blast HK, st.hk"
+categorie = "Anti-airs"
+inputs = "hcb+hk, st. hk"
+degats = 2000
+
+[[combo]]
+nom = "Anti-air : Yoga Blast HK, cr.hk"
+categorie = "Anti-airs"
+inputs = "hcb+hk, cr. hk"
+degats = 2100
+
+[[combo]]
+nom = "Anti-air : Yoga Blast HK, st.hp"
+categorie = "Anti-airs"
+inputs = "hcb+hk, st. hp"
+degats = 2200
+
+# --- Après un Drive Impact (wiki, en Punish Counter) ---
+
+[[combo]]
+nom = "DI (crumple), b+hp, Yoga Flame MP (de loin)"
+categorie = "Après un Drive Impact"
+inputs = "DI, b+hp xx hcb+mp"
+degats = 2310
+
+[[combo]]
+nom = "DI (crumple), b+hp, Yoga Blast HK"
+categorie = "Après un Drive Impact"
+inputs = "DI, b+hp xx hcb+hk"
+degats = 2520
+
+[[combo]]
+nom = "DI (crumple), b+hp DR b+hk, st.lp, cr.lp, Yoga Blast HK"
+categorie = "Après un Drive Impact"
+inputs = "DI, b+hp xx DR xx b+hk, st. lp, cr. lp xx hcb+hk"
+degats = 2957
