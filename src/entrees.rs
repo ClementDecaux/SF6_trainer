@@ -565,11 +565,9 @@ fn jouer(
     }
     // On affiche la lecture attendue par le trial si elle y est, sinon la première.
     // Le bouton Drive Parry utilisé pour un Drive Rush attendu s'affiche « DR ».
-    let coup = match candidats.iter().find(|c| trial.accepte(c, trial.attendu())) {
-        Some(c) if c == "DP" && trial.attendu() == "DR" => "DR".to_string(),
-        Some(c) => c.clone(),
-        None => candidats[0].clone(),
-    };
+    let coup = lecture_affichee(candidats, trial.attendu(), |c| {
+        trial.accepte(c, trial.attendu())
+    });
     // Un nouvel essai commence : le verdict du précédent ne peut plus attendre.
     let nouvel_essai = trial.index == 0
         && candidats
@@ -593,6 +591,26 @@ fn jouer(
             .map(|fin| conclure(trial, capture, fin, frame, partage));
     }
     coup
+}
+
+/// La lecture d'un coup montrée au joueur : celle que le trial attend si elle y est
+/// (le bouton Drive Parry utilisé pour un Drive Rush s'affiche « DR »). Sinon, deux boutons
+/// ensemble (Drive Impact, Drive Parry, chope) plutôt qu'un seul des deux : HP+HK s'affiche
+/// « DI », pas « HP ».
+fn lecture_affichee(
+    candidats: &[String],
+    attendu: &str,
+    accepte: impl Fn(&String) -> bool,
+) -> String {
+    match candidats.iter().find(|c| accepte(c)) {
+        Some(c) if c == "DP" && attendu == "DR" => "DR".to_string(),
+        Some(c) => c.clone(),
+        None => candidats
+            .iter()
+            .find(|c| matches!(c.as_str(), "DI" | "DP" | "Throw"))
+            .unwrap_or(&candidats[0])
+            .clone(),
+    }
 }
 
 /// Un coup lu dans l'historique du jeu.
@@ -1726,6 +1744,18 @@ fn changer_direction(dirs: &mut Directions, bouton: &str, pressed: bool) -> bool
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn deux_boutons_ensemble_s_affichent_comme_tels() {
+        let c = |v: &[&str]| v.iter().map(|s| s.to_string()).collect::<Vec<_>>();
+        // HP+HK alors qu'un DR est attendu : « DI », pas « HP ».
+        let jeu = c(&["5HP", "5HK", "DI"]);
+        assert_eq!(lecture_affichee(&jeu, "DR", |_| false), "DI");
+        // Le bouton Drive Parry pour un DR attendu.
+        let jeu = c(&["5MP", "5MK", "DP"]);
+        assert_eq!(lecture_affichee(&jeu, "DR", |c| c == "DP"), "DR");
+        assert_eq!(lecture_affichee(&c(&["2HP"]), "5HP", |_| false), "2HP");
+    }
 
     #[test]
     fn combo_complet_par_les_hits_ou_les_degats() {
